@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(superpowers:brainstorming)",
+      "Bash(move \"00-GAME_OVERVIEW.md\" \"_archive\"\" && move \"01-PLAYER_EXPERIENCE.md\" \"_archive\"\")",
+      "Bash(move \"CONTENT_JSON_STRUCTURE.md\" \"_archive\"\" && move \"DESIGN_DECISIONS.md\" \"_archive\"\")",
+      "Bash(move \"DESIGN_MONETIZATION_ANALYSIS.md\" \"_archive\"\" && move \"FOCUS_PRIORITIES.md\" \"_archive\"\")",
+      "Bash(move \"MONETIZATION.md\" \"_archive\"\" && move \"README.md\" \"_archive\"\")",
+      "Bash(move \"TONE_AND_WRITING.md\" \"_archive\"\" && move \"manifesto.md\" \"_archive\"\")",
+      "Bash(move \"SYSTEM_DEPENDENCIES.md\" \"_archive\"\" && move \"TECH_STACK.md\" \"_archive\"\")",
+      "Skill(superpowers:writing-plans)"
+    ]
+  }
+}
