@@ -1,10 +1,35 @@
 # Dungeon Farmers - Phase 1 Implementation Plan
 
 > **For Claude:** Use `superpowers:executing-plans` to implement this plan task-by-task.
+> 
+> ⚠️ **IMPORTANT:** Read `docs/plans/BEST_PRACTICES_REVIEW.md` before implementing.
 
 **Date:** 2024-12-14
 **Goal:** Build MVP core loop - heroes, expeditions, equipment, progression
-**Tech Stack:** Nuxt 3, Vue 3, TypeScript, Tailwind CSS, Pinia, Supabase
+**Tech Stack:** Nuxt 4, Vue 3, TypeScript, Tailwind CSS, Pinia, Supabase
+
+---
+
+## Directory Structure (Nuxt 4)
+
+```
+app/                    # Client-side code (srcDir)
+├── components/
+├── composables/
+├── layouts/
+├── pages/
+├── plugins/
+├── stores/
+├── utils/
+├── data/               # Static game data
+└── app.vue
+server/                 # Server-side code (at root)
+├── api/
+├── middleware/
+└── utils/
+types/                  # Shared TypeScript types (at root)
+public/                 # Static assets (at root)
+```
 
 ---
 
@@ -363,35 +388,35 @@ Index exports all types. Schema from `phase1-hero-system-update.md` Task 16, ext
 ## Phase 1.1: Hero System
 
 ### Task 13: Create Name Data
-**Files:** `data/names.ts`
+**Files:** `app/data/names.ts`
 
 Copy from `phase1-hero-system-update.md` Task 17.
 
 ### Task 14: Create Gameplay Trait Data
-**Files:** `data/gameplayTraits.ts`
+**Files:** `app/data/gameplayTraits.ts`
 
 Copy from `phase1-hero-system-update.md` Task 18.
 
 ### Task 15: Create Story Trait Data
-**Files:** `data/storyTraits.ts`
+**Files:** `app/data/storyTraits.ts`
 
 Copy from `phase1-hero-system-update.md` Task 19.
 
 ### Task 16: Create Culture Data
-**Files:** `data/cultures.ts`
+**Files:** `app/data/cultures.ts`
 
 Copy from `phase1-hero-system-update.md` Task 20.
 
 ### Task 17: Create Hero Generator
-**Files:** `utils/heroGenerator.ts`, `tests/utils/heroGenerator.test.ts`
+**Files:** `app/utils/heroGenerator.ts`, `tests/utils/heroGenerator.test.ts`
 
 Copy from `phase1-hero-system-update.md` Task 21.
 
 ### Task 18: Create Power Calculator
-**Files:** `utils/powerCalculator.ts`, `tests/utils/powerCalculator.test.ts`
+**Files:** `app/utils/powerCalculator.ts`, `tests/utils/powerCalculator.test.ts`
 
 ```typescript
-import type { Hero, Equipment, Stats } from '~/types'
+import type { Hero, Equipment, Stats } from '~~/types'
 import { getGameplayTraitById } from '~/data/gameplayTraits'
 
 export interface PowerBreakdown {
@@ -440,11 +465,13 @@ export function calculateHeroPower(
 ```
 
 ### Task 19: Create Hero Store (Pinia)
-**Files:** `stores/heroes.ts`
+**Files:** `app/stores/heroes.ts`
+
+> ⚠️ **Note:** Use `$fetch` in store actions, NOT `useFetch`. `useFetch` only works in setup context.
 
 ```typescript
 import { defineStore } from 'pinia'
-import type { Hero } from '~/types'
+import type { Hero } from '~~/types'
 
 export const useHeroStore = defineStore('heroes', {
   state: () => ({
@@ -467,38 +494,40 @@ export const useHeroStore = defineStore('heroes', {
   actions: {
     async fetchHeroes() {
       this.loading = true
+      this.error = null
       try {
-        const { data } = await useFetch('/api/heroes')
-        this.heroes = data.value || []
+        // ✅ Use $fetch in store actions (NOT useFetch)
+        this.heroes = await $fetch<Hero[]>('/api/heroes')
+      } catch (e) {
+        this.error = e instanceof Error ? e.message : 'Failed to fetch heroes'
       } finally {
         this.loading = false
       }
     },
 
     async recruitHero(tavernHeroId: string) {
-      const { data } = await useFetch('/api/heroes/recruit', {
+      // ✅ $fetch works in store actions
+      const hero = await $fetch<Hero>('/api/heroes/recruit', {
         method: 'POST',
         body: { tavernHeroId }
       })
-      if (data.value) {
-        this.heroes.push(data.value)
-      }
-      return data.value
+      this.heroes.push(hero)
+      return hero
     },
 
     async updateHero(hero: Partial<Hero> & { id: string }) {
-      const { data } = await useFetch(`/api/heroes/${hero.id}`, {
+      const updated = await $fetch<Hero>(`/api/heroes/${hero.id}`, {
         method: 'PATCH',
         body: hero
       })
       const index = this.heroes.findIndex(h => h.id === hero.id)
-      if (index !== -1 && data.value) {
-        this.heroes[index] = data.value
+      if (index !== -1) {
+        this.heroes[index] = updated
       }
     },
 
     async retireHero(heroId: string, transferTraitTo?: string) {
-      await useFetch(`/api/heroes/${heroId}/retire`, {
+      await $fetch(`/api/heroes/${heroId}/retire`, {
         method: 'POST',
         body: { transferTraitTo }
       })
@@ -509,11 +538,19 @@ export const useHeroStore = defineStore('heroes', {
 ```
 
 ### Task 20: Create Tavern Store
-**Files:** `stores/tavern.ts`
+**Files:** `app/stores/tavern.ts`
 
 ```typescript
 import { defineStore } from 'pinia'
-import type { TavernHero, TavernState } from '~/types'
+import type { TavernHero } from '~~/types'
+
+interface TavernResponse {
+  slots: TavernHero[]
+  lockSlots: number
+  usedLockSlots: number
+  lastRefresh: string
+  nextRefresh: string
+}
 
 export const useTavernStore = defineStore('tavern', {
   state: () => ({
@@ -523,6 +560,7 @@ export const useTavernStore = defineStore('tavern', {
     lastRefresh: '',
     nextRefresh: '',
     loading: false,
+    error: null as string | null,
   }),
 
   getters: {
@@ -536,37 +574,37 @@ export const useTavernStore = defineStore('tavern', {
   actions: {
     async fetchTavern() {
       this.loading = true
+      this.error = null
       try {
-        const { data } = await useFetch('/api/tavern')
-        if (data.value) {
-          this.slots = data.value.slots
-          this.lockSlots = data.value.lockSlots
-          this.usedLockSlots = data.value.usedLockSlots
-          this.lastRefresh = data.value.lastRefresh
-          this.nextRefresh = data.value.nextRefresh
-        }
+        // ✅ Use $fetch in store actions
+        const data = await $fetch<TavernResponse>('/api/tavern')
+        this.slots = data.slots
+        this.lockSlots = data.lockSlots
+        this.usedLockSlots = data.usedLockSlots
+        this.lastRefresh = data.lastRefresh
+        this.nextRefresh = data.nextRefresh
+      } catch (e) {
+        this.error = e instanceof Error ? e.message : 'Failed to fetch tavern'
       } finally {
         this.loading = false
       }
     },
 
     async refreshTavern() {
-      const { data } = await useFetch('/api/tavern/refresh', { method: 'POST' })
-      if (data.value) {
-        this.slots = data.value.slots
-        this.lastRefresh = data.value.lastRefresh
-        this.nextRefresh = data.value.nextRefresh
-      }
+      const data = await $fetch<TavernResponse>('/api/tavern/refresh', { method: 'POST' })
+      this.slots = data.slots
+      this.lastRefresh = data.lastRefresh
+      this.nextRefresh = data.nextRefresh
     },
 
     async lockHero(slotIndex: number) {
-      await useFetch(`/api/tavern/lock/${slotIndex}`, { method: 'POST' })
+      await $fetch(`/api/tavern/lock/${slotIndex}`, { method: 'POST' })
       this.slots[slotIndex].isLocked = true
       this.usedLockSlots++
     },
 
     async unlockHero(slotIndex: number) {
-      await useFetch(`/api/tavern/unlock/${slotIndex}`, { method: 'POST' })
+      await $fetch(`/api/tavern/unlock/${slotIndex}`, { method: 'POST' })
       this.slots[slotIndex].isLocked = false
       this.usedLockSlots--
     }
@@ -580,17 +618,17 @@ export const useTavernStore = defineStore('tavern', {
 Implement CRUD operations using Supabase client.
 
 ### Task 22: Create HeroCard Component
-**Files:** `components/hero/HeroCard.vue`
+**Files:** `app/components/hero/HeroCard.vue`
 
 Display hero with name, rarity border, archetype icon, stats, tags, traits summary.
 
 ### Task 23: Create HeroDetail Component
-**Files:** `components/hero/HeroDetail.vue`
+**Files:** `app/components/hero/HeroDetail.vue`
 
 Full hero profile: all stats, traits with descriptions, equipment slots, prestige info.
 
 ### Task 24: Create TavernSlot Component
-**Files:** `components/tavern/TavernSlot.vue`
+**Files:** `app/components/tavern/TavernSlot.vue`
 
 Show tavern hero with recruit button, lock button, cost.
 
@@ -599,10 +637,10 @@ Show tavern hero with recruit button, lock button, cost.
 ## Phase 1.2: Zone & Expedition
 
 ### Task 25: Create Zone Data
-**Files:** `data/zones.ts`
+**Files:** `app/data/zones.ts`
 
 ```typescript
-import type { Zone, Subzone } from '~/types'
+import type { Zone, Subzone } from '~~/types'
 
 export const ZONES: Zone[] = [
   {
@@ -672,10 +710,10 @@ export function getUnlockedZones(): Zone[] {
 ```
 
 ### Task 26: Create Expedition Engine
-**Files:** `utils/expeditionEngine.ts`
+**Files:** `app/utils/expeditionEngine.ts`
 
 ```typescript
-import type { Hero, Zone, Subzone, Expedition, ExpeditionRewards } from '~/types'
+import type { Hero, Zone, Subzone, Expedition, ExpeditionRewards } from '~~/types'
 import { calculateHeroPower } from './powerCalculator'
 import { calculateEfficiency } from './efficiencyCalculator'
 import { generateExpeditionEvents } from './eventGenerator'
@@ -750,12 +788,12 @@ function calculateRewards(
 ```
 
 ### Task 27: Create Efficiency Calculator
-**Files:** `utils/efficiencyCalculator.ts`
+**Files:** `app/utils/efficiencyCalculator.ts`
 
 ```typescript
-import type { Hero, Zone, Subzone } from '~/types'
-import { THREATS, SEVERITY_BASE_PENALTY } from '~/types/threats'
-import { DIFFICULTY_MULTIPLIERS } from '~/types/base'
+import type { Hero, Zone, Subzone } from '~~/types'
+import { THREATS, SEVERITY_BASE_PENALTY } from '~~/types/threats'
+import { DIFFICULTY_MULTIPLIERS } from '~~/types/base'
 
 export function calculateEfficiency(
   heroes: Hero[],
@@ -801,39 +839,41 @@ function getRequiredPower(subzone: Subzone): number {
 ```
 
 ### Task 28: Create Event Generator
-**Files:** `utils/eventGenerator.ts`
+**Files:** `app/utils/eventGenerator.ts`
 
 Generate flavor (50%), skill checks (25%), choices (20%), rare (5%) events.
 
 ### Task 29: Create Log Generator
-**Files:** `utils/logGenerator.ts`
+**Files:** `app/utils/logGenerator.ts`
 
 Compose expedition narrative from events, trait reactions, combat results.
 
 ### Task 30: Create Expedition Store
-**Files:** `stores/expeditions.ts`
+**Files:** `app/stores/expeditions.ts`
+
+> ⚠️ Remember: Use `$fetch` in store actions, NOT `useFetch`.
 
 ### Task 31: Create Zone Store
-**Files:** `stores/zones.ts`
+**Files:** `app/stores/zones.ts`
 
 ### Task 32: Create Expedition API Routes
 **Files:** `server/api/expeditions/*`
 
 ### Task 33: Create Timer Service
-**Files:** `utils/timerService.ts`, `composables/useExpeditionTimer.ts`
+**Files:** `app/utils/timerService.ts`, `app/composables/useExpeditionTimer.ts`
 
 Client-side countdown + server validation.
 
 ### Task 34: Create ZoneCard Component
-**Files:** `components/zone/ZoneCard.vue`
+**Files:** `app/components/zone/ZoneCard.vue`
 
 ### Task 35: Create ExpeditionSetup Component
-**Files:** `components/expedition/ExpeditionSetup.vue`
+**Files:** `app/components/expedition/ExpeditionSetup.vue`
 
 Hero selection, threat preview, estimated rewards.
 
 ### Task 36: Create ExpeditionActive Component
-**Files:** `components/expedition/ExpeditionActive.vue`
+**Files:** `app/components/expedition/ExpeditionActive.vue`
 
 Timer, progress bar, team display.
 
@@ -842,36 +882,38 @@ Timer, progress bar, team display.
 ## Phase 1.3: Equipment & Loot
 
 ### Task 37: Create Equipment Data
-**Files:** `data/equipment.ts`
+**Files:** `app/data/equipment.ts`
 
 Equipment templates for each slot and rarity.
 
 ### Task 38: Create Equipment Trait Data
-**Files:** `data/equipmentTraits.ts`
+**Files:** `app/data/equipmentTraits.ts`
 
 Traits that can roll on equipment.
 
 ### Task 39: Create Set Data
-**Files:** `data/sets.ts`
+**Files:** `app/data/sets.ts`
 
 Equipment sets with 2/4/6 piece bonuses.
 
 ### Task 40: Create Loot Table Data
-**Files:** `data/lootTables.ts`
+**Files:** `app/data/lootTables.ts`
 
 Loot tables per zone/subzone.
 
 ### Task 41: Create Equipment Generator
-**Files:** `utils/equipmentGenerator.ts`
+**Files:** `app/utils/equipmentGenerator.ts`
 
 ### Task 42: Create Inventory Store
-**Files:** `stores/inventory.ts`
+**Files:** `app/stores/inventory.ts`
+
+> ⚠️ Remember: Use `$fetch` in store actions, NOT `useFetch`.
 
 ### Task 43: Create Equipment API Routes
 **Files:** `server/api/equipment/*`
 
 ### Task 44: Create Equipment UI
-**Files:** `components/equipment/*.vue`
+**Files:** `app/components/equipment/*.vue`
 
 EquipmentCard, EquipmentSlot, InventoryGrid.
 
@@ -880,22 +922,22 @@ EquipmentCard, EquipmentSlot, InventoryGrid.
 ## Phase 1.4: Progression
 
 ### Task 45: Create XP Service
-**Files:** `utils/xpService.ts`
+**Files:** `app/utils/xpService.ts`
 
 Tiered linear XP curve from comprehensive plan.
 
 ### Task 46: Create Level Up Handler
-**Files:** `utils/levelUpHandler.ts`
+**Files:** `app/utils/levelUpHandler.ts`
 
 Apply level-ups, check for prestige availability.
 
 ### Task 47: Create Prestige Service
-**Files:** `utils/prestigeService.ts`
+**Files:** `app/utils/prestigeService.ts`
 
 Handle prestige: reset level, apply bonuses, trait upgrade chance.
 
 ### Task 48: Create Morale Service
-**Files:** `utils/moraleService.ts`
+**Files:** `app/utils/moraleService.ts`
 
 Track morale changes, recovery over time.
 
@@ -903,48 +945,48 @@ Track morale changes, recovery over time.
 **Files:** `server/api/heroes/*`
 
 ### Task 50: Create ProgressBar Component
-**Files:** `components/ui/ProgressBar.vue`
+**Files:** `app/components/ui/ProgressBar.vue`
 
 ### Task 51: Create LevelUpModal Component
-**Files:** `components/hero/LevelUpModal.vue`
+**Files:** `app/components/hero/LevelUpModal.vue`
 
 ### Task 52: Create PrestigeModal Component
-**Files:** `components/hero/PrestigeModal.vue`
+**Files:** `app/components/hero/PrestigeModal.vue`
 
 ---
 
 ## Phase 1.5: Polish
 
 ### Task 53: Create Expedition Log Display
-**Files:** `components/expedition/ExpeditionLog.vue`
+**Files:** `app/components/expedition/ExpeditionLog.vue`
 
 Render narrative log with trait reactions.
 
 ### Task 54: Create Event Choice UI
-**Files:** `components/expedition/EventChoice.vue`
+**Files:** `app/components/expedition/EventChoice.vue`
 
 ### Task 55: Implement Offline Progress
-**Files:** `utils/offlineProgress.ts`, `server/api/sync.post.ts`
+**Files:** `app/utils/offlineProgress.ts`, `server/api/sync.post.ts`
 
 Process completed expeditions on reconnect.
 
 ### Task 56: Create Auto-Repeat Logic
-**Files:** `utils/autoRepeat.ts`
+**Files:** `app/utils/autoRepeat.ts`
 
 Per-expedition repeat settings.
 
 ### Task 57: Create Notification Service
-**Files:** `utils/notificationService.ts`
+**Files:** `app/utils/notificationService.ts`
 
 In-app notifications for expedition complete, level up, etc.
 
 ### Task 58: Create Dashboard Page
-**Files:** `pages/index.vue`
+**Files:** `app/pages/index.vue`
 
 Main hub: active expeditions, hero summary, quick actions.
 
 ### Task 59: Create Full Page Routes
-**Files:** `pages/heroes.vue`, `pages/expeditions.vue`, `pages/tavern.vue`, `pages/inventory.vue`
+**Files:** `app/pages/heroes.vue`, `app/pages/expeditions.vue`, `app/pages/tavern.vue`, `app/pages/inventory.vue`
 
 ### Task 60: Integration Testing
 **Files:** `tests/integration/*.test.ts`
@@ -968,9 +1010,9 @@ Full flow tests: recruit → expedition → loot → level up.
 
 ---
 
-## Files Summary
+## Files Summary (Nuxt 4 Directory Structure)
 
-### Types (12 files)
+### Types (at root - shared between client/server)
 ```
 types/
 ├── base.ts
@@ -982,107 +1024,98 @@ types/
 ├── zones.ts
 ├── expedition.ts
 ├── equipment.ts
-├── index.ts
+└── index.ts
 ```
 
-### Data (10 files)
+### App Directory (client-side, in app/)
 ```
-data/
-├── names.ts
-├── gameplayTraits.ts
-├── storyTraits.ts
-├── cultures.ts
-├── zones.ts
-├── equipment.ts
-├── equipmentTraits.ts
-├── sets.ts
-├── lootTables.ts
-```
-
-### Utils (12 files)
-```
-utils/
-├── heroGenerator.ts
-├── powerCalculator.ts
-├── efficiencyCalculator.ts
-├── expeditionEngine.ts
-├── eventGenerator.ts
-├── logGenerator.ts
-├── equipmentGenerator.ts
-├── xpService.ts
-├── levelUpHandler.ts
-├── prestigeService.ts
-├── moraleService.ts
-├── offlineProgress.ts
-```
-
-### Stores (5 files)
-```
-stores/
-├── game.ts
-├── heroes.ts
-├── tavern.ts
-├── expeditions.ts
-├── zones.ts
-├── inventory.ts
-```
-
-### Components (~20 files)
-```
-components/
-├── hero/
-│   ├── HeroCard.vue
-│   ├── HeroDetail.vue
-│   ├── LevelUpModal.vue
-│   └── PrestigeModal.vue
-├── tavern/
-│   └── TavernSlot.vue
-├── zone/
-│   └── ZoneCard.vue
-├── expedition/
-│   ├── ExpeditionSetup.vue
-│   ├── ExpeditionActive.vue
-│   ├── ExpeditionLog.vue
-│   └── EventChoice.vue
-├── equipment/
-│   ├── EquipmentCard.vue
-│   ├── EquipmentSlot.vue
-│   └── InventoryGrid.vue
-├── ui/
-│   └── ProgressBar.vue
+app/
+├── data/                    # Static game data
+│   ├── names.ts
+│   ├── gameplayTraits.ts
+│   ├── storyTraits.ts
+│   ├── cultures.ts
+│   ├── zones.ts
+│   ├── equipment.ts
+│   ├── equipmentTraits.ts
+│   ├── sets.ts
+│   └── lootTables.ts
+├── utils/                   # Client utilities
+│   ├── heroGenerator.ts
+│   ├── powerCalculator.ts
+│   ├── efficiencyCalculator.ts
+│   ├── expeditionEngine.ts
+│   ├── eventGenerator.ts
+│   ├── logGenerator.ts
+│   ├── equipmentGenerator.ts
+│   ├── xpService.ts
+│   ├── levelUpHandler.ts
+│   ├── prestigeService.ts
+│   ├── moraleService.ts
+│   └── offlineProgress.ts
+├── stores/                  # Pinia stores (use $fetch, NOT useFetch)
+│   ├── game.ts
+│   ├── heroes.ts
+│   ├── tavern.ts
+│   ├── expeditions.ts
+│   ├── zones.ts
+│   └── inventory.ts
+├── composables/             # Vue composables
+│   └── useExpeditionTimer.ts
+├── components/
+│   ├── hero/
+│   │   ├── HeroCard.vue
+│   │   ├── HeroDetail.vue
+│   │   ├── LevelUpModal.vue
+│   │   └── PrestigeModal.vue
+│   ├── tavern/
+│   │   └── TavernSlot.vue
+│   ├── zone/
+│   │   └── ZoneCard.vue
+│   ├── expedition/
+│   │   ├── ExpeditionSetup.vue
+│   │   ├── ExpeditionActive.vue
+│   │   ├── ExpeditionLog.vue
+│   │   └── EventChoice.vue
+│   ├── equipment/
+│   │   ├── EquipmentCard.vue
+│   │   ├── EquipmentSlot.vue
+│   │   └── InventoryGrid.vue
+│   └── ui/
+│       └── ProgressBar.vue
+├── pages/
+│   ├── index.vue
+│   ├── heroes.vue
+│   ├── expeditions.vue
+│   ├── tavern.vue
+│   └── inventory.vue
+└── app.vue
 ```
 
-### Pages (5 files)
+### Server Directory (at root)
 ```
-pages/
-├── index.vue
-├── heroes.vue
-├── expeditions.vue
-├── tavern.vue
-└── inventory.vue
-```
-
-### API Routes (~15 files)
-```
-server/api/
-├── heroes/
-│   ├── index.get.ts
-│   ├── [id].get.ts
-│   ├── [id].patch.ts
-│   ├── recruit.post.ts
-│   └── [id]/retire.post.ts
-├── tavern/
-│   ├── index.get.ts
-│   ├── refresh.post.ts
-│   ├── lock/[index].post.ts
-│   └── unlock/[index].post.ts
-├── expeditions/
-│   ├── index.get.ts
-│   ├── start.post.ts
-│   ├── [id].get.ts
-│   └── [id]/complete.post.ts
-├── equipment/
-│   ├── index.get.ts
-│   └── equip.post.ts
-└── sync.post.ts
+server/
+├── api/
+│   ├── heroes/
+│   │   ├── index.get.ts
+│   │   ├── [id].get.ts
+│   │   ├── [id].patch.ts
+│   │   ├── recruit.post.ts
+│   │   └── [id]/retire.post.ts
+│   ├── tavern/
+│   │   ├── index.get.ts
+│   │   ├── refresh.post.ts
+│   │   ├── lock/[index].post.ts
+│   │   └── unlock/[index].post.ts
+│   ├── expeditions/
+│   │   ├── index.get.ts
+│   │   ├── start.post.ts
+│   │   ├── [id].get.ts
+│   │   └── [id]/complete.post.ts
+│   ├── equipment/
+│   │   ├── index.get.ts
+│   │   └── equip.post.ts
+│   └── sync.post.ts
+└── utils/
+    └── db.ts                # Supabase client
 ```

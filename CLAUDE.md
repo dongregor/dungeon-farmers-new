@@ -1,8 +1,9 @@
 # Dungeon Farmers - Claude Context
 
-**Last Updated:** 2025-12-13
+**Last Updated:** 2024-12-14
 **Status:** Design v2 complete, ready for implementation
 **Design Doc:** [design/GAME_DESIGN_V2.md](design/GAME_DESIGN_V2.md)
+**Tech Stack:** [docs/tech-stack-recommendation.md](docs/tech-stack-recommendation.md)
 
 ---
 
@@ -30,6 +31,9 @@
 
 **Active:**
 - `design/GAME_DESIGN_V2.md` - Complete game design (START HERE)
+- `docs/tech-stack-recommendation.md` - Tech stack recommendations and architecture
+- `docs/plans/` - Implementation plans and system designs (✅ Updated for Nuxt 4)
+- `docs/plans/BEST_PRACTICES_REVIEW.md` - Best practices reference (fixes applied)
 
 **Archived:**
 - `design/_archive/` - Legacy documentation (reference only)
@@ -70,12 +74,104 @@
 
 ---
 
-## Tech Stack (Planned)
+## Tech Stack
 
-- **Frontend:** Nuxt 3 + Vue 3 + TypeScript + Tailwind
-- **Backend:** Nuxt Server Routes (MVP) → Supabase (scale)
-- **Database:** PostgreSQL
-- **Hosting:** Vercel + Supabase
+**Current Setup:** ✅
+- **Frontend:** Nuxt 4 + Vue 3 + TypeScript + Tailwind CSS + Pinia
+- **Testing:** Vitest
+
+**Recommended Additions:**
+- **Backend:** Nuxt Server Routes (MVP) → Supabase (Production)
+- **Database:** PostgreSQL (via Supabase)
+- **Auth:** Supabase Auth
+- **Real-time:** Server-Sent Events (MVP) → Supabase Realtime (Production)
+- **Payments:** Stripe
+- **Hosting:** Vercel (Frontend) + Supabase (Database/Auth)
+- **E2E Testing:** Playwright
+
+**Why This Stack:**
+- ✅ Matches current setup (Nuxt 4, Vue 3, Pinia, Tailwind)
+- ✅ Rapid development for solo dev
+- ✅ Cost-effective (free tiers sufficient for MVP)
+- ✅ Scales to production without major rewrites
+- ✅ Supports all game requirements (timers, offline progress, real-time)
+
+**Full Details:** See [docs/tech-stack-recommendation.md](docs/tech-stack-recommendation.md)
+
+---
+
+## Implementation Notes (Nuxt 4)
+
+### Directory Structure
+
+```
+app/                    # Client-side (srcDir)
+├── components/         # Auto-imported Vue components
+├── composables/        # Auto-imported Vue composables (use*)
+├── stores/             # Pinia stores (use*Store)
+├── utils/              # Auto-imported utility functions
+├── pages/              # File-based routing
+├── layouts/            # Page layouts
+└── app.vue             # Root component
+server/                 # Server-side (at root)
+├── api/                # API routes (/api/*)
+├── routes/             # Non-API routes
+└── utils/              # Server utilities (auto-imported in server/)
+types/                  # Shared TypeScript types (at root)
+shared/                 # Shared client+server code
+├── utils/              # Auto-imported everywhere
+└── types/              # Auto-imported everywhere
+```
+
+### Auto-Imports (No `import` needed)
+
+| Directory | What's Auto-Imported |
+|-----------|---------------------|
+| `app/components/` | Vue components (in templates) |
+| `app/composables/` | Composables (`.vue`, `.ts`, `.js`) |
+| `app/utils/` | Utility functions (`.vue`, `.ts`, `.js`) |
+| `server/utils/` | Server utilities (in `server/` only) |
+| `shared/utils/` | Shared utilities (everywhere) |
+
+**Note:** Only top-level files are scanned. Nested files must be re-exported from `index.ts`.
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Composables | `use*` prefix | `useHero.ts` → `useHero()` |
+| Stores | `use*Store` | `useHeroStore` in `stores/heroes.ts` |
+| Components | PascalCase, path-based | `hero/Card.vue` → `<HeroCard />` |
+| Server routes | `[method].ts` suffix | `index.get.ts`, `[id].patch.ts` |
+
+### Key Rules
+
+1. **Pinia Stores:** Use `$fetch` in actions (NOT `useFetch`)
+   ```typescript
+   const heroes = await $fetch<Hero[]>('/api/heroes')
+   ```
+
+2. **Type Imports:** Use `~~/types` for root-level types
+   ```typescript
+   import type { Hero } from '~~/types'
+   ```
+
+3. **Composable Context:** Call Nuxt composables INSIDE functions
+   ```typescript
+   // ✅ Correct
+   export const useMyThing = () => {
+     const config = useRuntimeConfig()
+   }
+   ```
+
+4. **Store Destructuring:** Use `storeToRefs()` for state
+   ```typescript
+   const store = useHeroStore()
+   const { heroes } = storeToRefs(store)  // Reactive
+   const { fetchHeroes } = store          // Actions ok to destructure
+   ```
+
+**Full Reference:** See [docs/plans/BEST_PRACTICES_REVIEW.md](docs/plans/BEST_PRACTICES_REVIEW.md)
 
 ---
 

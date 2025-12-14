@@ -1,12 +1,35 @@
 # Phase 1: MVP Core Loop Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+>
+> ⚠️ **IMPORTANT:** Read `docs/plans/BEST_PRACTICES_REVIEW.md` before implementing.
 
 **Goal:** Build a playable idle RPG with hero recruitment, zone expeditions, equipment drops, leveling, and expedition logs with trait-flavored reactions.
 
-**Architecture:** Nuxt 3 full-stack app with Vue 3 frontend, server API routes, and PostgreSQL database via Supabase. State management with Pinia. Real-time updates via polling (MVP) or SSE. Mobile-first responsive UI with Tailwind CSS.
+**Architecture:** Nuxt 4 full-stack app with Vue 3 frontend, server API routes, and PostgreSQL database via Supabase. State management with Pinia. Real-time updates via polling (MVP) or SSE. Mobile-first responsive UI with Tailwind CSS.
 
-**Tech Stack:** Nuxt 3, Vue 3, TypeScript, Tailwind CSS, Pinia, Supabase (PostgreSQL + Auth), Vitest, Playwright
+**Tech Stack:** Nuxt 4, Vue 3, TypeScript, Tailwind CSS, Pinia, Supabase (PostgreSQL + Auth), Vitest, Playwright
+
+---
+
+## Directory Structure (Nuxt 4)
+
+Client-side code goes in `app/`, server code in `server/`, shared types in `types/`.
+
+```
+app/                    # srcDir (client-side)
+├── components/
+├── composables/
+├── layouts/
+├── pages/
+├── stores/
+├── utils/
+└── app.vue
+server/                 # Server-side (at root)
+├── api/
+└── utils/
+types/                  # Shared types (at root)
+```
 
 ---
 
@@ -99,14 +122,15 @@ git commit -m "chore: configure strict TypeScript"
 
 **Files:**
 - Create: `tailwind.config.js`
-- Create: `assets/css/main.css`
+- Create: `app/assets/css/main.css`
 - Modify: `nuxt.config.ts`
 
-**Step 1: Install Tailwind**
+> ✅ Using `@nuxtjs/tailwindcss` module (already installed) simplifies configuration.
+
+**Step 1: Install Tailwind module (if not already installed)**
 
 ```bash
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init
+npm install -D @nuxtjs/tailwindcss
 ```
 
 **Step 2: Create tailwind.config.js**
@@ -114,13 +138,7 @@ npx tailwindcss init
 ```javascript
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./components/**/*.{js,vue,ts}",
-    "./layouts/**/*.vue",
-    "./pages/**/*.vue",
-    "./plugins/**/*.{js,ts}",
-    "./app.vue",
-  ],
+  // Content paths auto-configured by @nuxtjs/tailwindcss
   theme: {
     extend: {
       colors: {
@@ -143,7 +161,7 @@ module.exports = {
 }
 ```
 
-**Step 3: Create assets/css/main.css**
+**Step 3: Create app/assets/css/main.css**
 
 ```css
 @tailwind base;
@@ -160,21 +178,18 @@ module.exports = {
 **Step 4: Update nuxt.config.ts**
 
 ```typescript
+// ✅ Simpler config - @nuxtjs/tailwindcss handles postcss automatically
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
+  // No manual postcss config needed!
 })
 ```
 
 **Step 5: Verify Tailwind works**
 
-Update `app.vue`:
+Update `app/app.vue`:
 ```vue
 <template>
   <div class="min-h-screen flex items-center justify-center">
@@ -275,7 +290,7 @@ git commit -m "chore: add Vitest testing framework"
 
 **Files:**
 - Modify: `nuxt.config.ts`
-- Create: `stores/game.ts`
+- Create: `app/stores/game.ts`
 
 **Step 1: Install Pinia**
 
@@ -286,20 +301,15 @@ npm install pinia @pinia/nuxt
 **Step 2: Update nuxt.config.ts**
 
 ```typescript
+// ✅ Clean config with modules
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
-  modules: ['@pinia/nuxt'],
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
 })
 ```
 
-**Step 3: Create stores/game.ts**
+**Step 3: Create app/stores/game.ts**
 
 ```typescript
 import { defineStore } from 'pinia'
@@ -331,7 +341,7 @@ export const useGameStore = defineStore('game', {
 
 **Step 4: Verify Pinia works**
 
-Update `app.vue`:
+Update `app/app.vue`:
 ```vue
 <script setup lang="ts">
 const gameStore = useGameStore()
@@ -421,11 +431,11 @@ git commit -m "chore: add Supabase client"
 ### Task 7: Create Base Layout
 
 **Files:**
-- Create: `layouts/default.vue`
-- Create: `components/AppHeader.vue`
-- Create: `components/AppNav.vue`
+- Create: `app/layouts/default.vue`
+- Create: `app/components/AppHeader.vue`
+- Create: `app/components/AppNav.vue`
 
-**Step 1: Create layouts/default.vue**
+**Step 1: Create app/layouts/default.vue**
 
 ```vue
 <template>
@@ -439,7 +449,7 @@ git commit -m "chore: add Supabase client"
 </template>
 ```
 
-**Step 2: Create components/AppHeader.vue**
+**Step 2: Create app/components/AppHeader.vue**
 
 ```vue
 <script setup lang="ts">
@@ -460,7 +470,7 @@ const gameStore = useGameStore()
 </template>
 ```
 
-**Step 3: Create components/AppNav.vue**
+**Step 3: Create app/components/AppNav.vue**
 
 ```vue
 <template>
@@ -495,7 +505,7 @@ const gameStore = useGameStore()
 </template>
 ```
 
-**Step 4: Update app.vue to use layout**
+**Step 4: Update app/app.vue to use layout**
 
 ```vue
 <template>
@@ -533,8 +543,8 @@ git commit -m "feat: add base layout with header and navigation"
 ### Task 8: Create Placeholder Pages
 
 **Files:**
-- Create: `pages/expeditions.vue`
-- Create: `pages/inventory.vue`
+- Create: `app/pages/expeditions.vue`
+- Create: `app/pages/inventory.vue`
 
 **Step 1: Create pages/expeditions.vue**
 
@@ -577,7 +587,7 @@ git commit -m "feat: add placeholder pages for expeditions and inventory"
 ### Task 9: Define Core TypeScript Types
 
 **Files:**
-- Create: `types/game.ts`
+- Create: `types/game.ts`  (at root, shared types)
 
 **Step 1: Create types/game.ts**
 
@@ -777,7 +787,7 @@ git commit -m "feat: add core TypeScript type definitions"
 ### Task 10: Create Trait Data
 
 **Files:**
-- Create: `data/traits.ts`
+- Create: `app/data/traits.ts`
 - Create: `tests/data/traits.test.ts`
 
 **Step 1: Write test for trait data**
@@ -850,7 +860,7 @@ Expected: FAIL - module not found
 **Step 3: Create data/traits.ts**
 
 ```typescript
-import type { Trait, TraitType } from '~/types/game'
+import type { Trait, TraitType } from '~~/types/game'
 
 export const TRAITS: Record<string, Trait> = {
   // === FLAT BONUS TRAITS ===
@@ -1121,7 +1131,7 @@ git commit -m "feat: add trait definitions with reactions"
 ### Task 11: Create Zone Data
 
 **Files:**
-- Create: `data/zones.ts`
+- Create: `app/data/zones.ts`
 - Create: `tests/data/zones.test.ts`
 
 **Step 1: Write test for zone data**
@@ -1179,7 +1189,7 @@ Expected: FAIL - module not found
 **Step 3: Create data/zones.ts**
 
 ```typescript
-import type { Zone } from '~/types/game'
+import type { Zone } from '~~/types/game'
 
 export const ZONES: Record<string, Zone> = {
   verdant_woods: {
@@ -1334,7 +1344,7 @@ git commit -m "feat: add zone definitions"
 ### Task 12: Create Equipment Template Data
 
 **Files:**
-- Create: `data/equipment.ts`
+- Create: `app/data/equipment.ts`
 - Create: `tests/data/equipment.test.ts`
 
 **Step 1: Write test for equipment data**
@@ -1384,7 +1394,7 @@ Expected: FAIL - module not found
 **Step 3: Create data/equipment.ts**
 
 ```typescript
-import type { Equipment, EquipmentSlot, EquipmentRarity } from '~/types/game'
+import type { Equipment, EquipmentSlot, EquipmentRarity } from '~~/types/game'
 
 export interface EquipmentTemplate {
   id: string
@@ -1611,7 +1621,7 @@ git commit -m "feat: add equipment templates and generation"
 ### Task 13: Create Hero Name Generator
 
 **Files:**
-- Create: `utils/heroGenerator.ts`
+- Create: `app/utils/heroGenerator.ts`
 - Create: `tests/utils/heroGenerator.test.ts`
 
 **Step 1: Write test for hero generator**
@@ -1692,7 +1702,7 @@ Expected: FAIL - module not found
 **Step 3: Create utils/heroGenerator.ts**
 
 ```typescript
-import type { Hero, Rarity } from '~/types/game'
+import type { Hero, Rarity } from '~~/types/game'
 import { getRandomTraits } from '~/data/traits'
 
 // Fantasy-parody name parts
@@ -2038,7 +2048,7 @@ git commit -m "feat: add initial database schema"
 ### Task 15: Create Hero Pinia Store
 
 **Files:**
-- Create: `stores/heroes.ts`
+- Create: `app/stores/heroes.ts`
 - Create: `tests/stores/heroes.test.ts`
 
 **Step 1: Write test for hero store**
@@ -2049,7 +2059,7 @@ Create `tests/stores/heroes.test.ts`:
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useHeroStore } from '~/stores/heroes'
-import type { Hero } from '~/types/game'
+import type { Hero } from '~~/types/game'
 
 const mockHero: Hero = {
   id: 'test-hero-1',
@@ -2129,7 +2139,7 @@ Expected: FAIL - module not found
 
 ```typescript
 import { defineStore } from 'pinia'
-import type { Hero } from '~/types/game'
+import type { Hero } from '~~/types/game'
 
 interface HeroState {
   heroes: Hero[]
@@ -2490,7 +2500,7 @@ git commit -m "feat: add player API routes"
 ### Task 18: Create Game Store with Player Data
 
 **Files:**
-- Modify: `stores/game.ts`
+- Modify: `app/stores/game.ts`
 
 **Step 1: Update stores/game.ts**
 
@@ -2596,14 +2606,14 @@ git commit -m "feat: enhance game store with player data"
 ### Task 19: Create Composable for Hero Actions
 
 **Files:**
-- Create: `composables/useHeroes.ts`
+- Create: `app/composables/useHeroes.ts`
 
 **Step 1: Create composables/useHeroes.ts**
 
 ```typescript
 import { useHeroStore } from '~/stores/heroes'
 import { useGameStore } from '~/stores/game'
-import type { Hero } from '~/types/game'
+import type { Hero } from '~~/types/game'
 
 export function useHeroes() {
   const heroStore = useHeroStore()
@@ -2712,14 +2722,14 @@ git commit -m "feat: add useHeroes composable"
 ### Task 20: Create Hero Card Component
 
 **Files:**
-- Create: `components/HeroCard.vue`
-- Create: `components/RarityBadge.vue`
+- Create: `app/components/hero/HeroCard.vue`
+- Create: `app/components/ui/RarityBadge.vue`
 
 **Step 1: Create components/RarityBadge.vue**
 
 ```vue
 <script setup lang="ts">
-import type { Rarity } from '~/types/game'
+import type { Rarity } from '~~/types/game'
 
 const props = defineProps<{
   rarity: Rarity
@@ -2756,7 +2766,7 @@ const rarityLabels: Record<Rarity, string> = {
 
 ```vue
 <script setup lang="ts">
-import type { Hero } from '~/types/game'
+import type { Hero } from '~~/types/game'
 import { getTraitById } from '~/data/traits'
 
 const props = defineProps<{
@@ -2873,13 +2883,13 @@ git commit -m "feat: add HeroCard and RarityBadge components"
 ### Task 21: Create Equipment Pinia Store
 
 **Files:**
-- Create: `stores/equipment.ts`
+- Create: `app/stores/equipment.ts`
 
 **Step 1: Create stores/equipment.ts**
 
 ```typescript
 import { defineStore } from 'pinia'
-import type { Equipment, EquipmentSlot } from '~/types/game'
+import type { Equipment, EquipmentSlot } from '~~/types/game'
 
 interface EquipmentState {
   inventory: Equipment[]
@@ -3138,13 +3148,13 @@ git commit -m "feat: add equipment API routes"
 ### Task 23: Create Equipment Card Component
 
 **Files:**
-- Create: `components/EquipmentCard.vue`
+- Create: `app/components/equipment/EquipmentCard.vue`
 
 **Step 1: Create components/EquipmentCard.vue**
 
 ```vue
 <script setup lang="ts">
-import type { Equipment, EquipmentRarity } from '~/types/game'
+import type { Equipment, EquipmentRarity } from '~~/types/game'
 
 const props = defineProps<{
   equipment: Equipment
@@ -3243,13 +3253,13 @@ git commit -m "feat: add EquipmentCard component"
 ### Task 27: Create Expedition Pinia Store
 
 **Files:**
-- Create: `stores/expeditions.ts`
+- Create: `app/stores/expeditions.ts`
 
 **Step 1: Create stores/expeditions.ts**
 
 ```typescript
 import { defineStore } from 'pinia'
-import type { Expedition } from '~/types/game'
+import type { Expedition } from '~~/types/game'
 
 interface ExpeditionState {
   activeExpeditions: Expedition[]
@@ -3333,7 +3343,7 @@ git commit -m "feat: add expedition Pinia store"
 ### Task 29: Create Expedition Calculator Utility
 
 **Files:**
-- Create: `utils/expeditionCalculator.ts`
+- Create: `app/utils/expeditionCalculator.ts`
 - Create: `tests/utils/expeditionCalculator.test.ts`
 
 **Step 1: Write test**
@@ -3373,7 +3383,7 @@ describe('Expedition Calculator', () => {
 **Step 2: Create utils/expeditionCalculator.ts**
 
 ```typescript
-import type { Hero, Zone, ExpeditionLogEntry } from '~/types/game'
+import type { Hero, Zone, ExpeditionLogEntry } from '~~/types/game'
 import { getTraitById } from '~/data/traits'
 
 export function calculateTeamPower(heroes: Hero[], zone: Zone): number {
@@ -3545,11 +3555,11 @@ git commit -m "feat: add expedition calculation utilities"
 ### Task 35: Create Expedition Log Component
 
 **Files:**
-- Create: `components/ExpeditionLog.vue`
+- Create: `app/components/expedition/ExpeditionLog.vue`
 
 ```vue
 <script setup lang="ts">
-import type { ExpeditionLogEntry } from '~/types/game'
+import type { ExpeditionLogEntry } from '~~/types/game'
 
 const props = defineProps<{
   log: ExpeditionLogEntry[]
@@ -3591,7 +3601,7 @@ const typeColors: Record<string, string> = {
 ### Task 39: Create Heroes Page
 
 **Files:**
-- Modify: `pages/index.vue`
+- Modify: `app/pages/index.vue`
 
 ```vue
 <script setup lang="ts">

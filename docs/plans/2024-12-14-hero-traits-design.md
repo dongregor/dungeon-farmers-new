@@ -4,6 +4,8 @@
 **Status:** Brainstormed, ready for implementation
 **Related:** GAME_DESIGN_V2.md (Phase 1 MVP)
 
+> ⚠️ **When implementing:** Follow patterns in `docs/plans/BEST_PRACTICES_REVIEW.md`
+
 ---
 
 ## Overview

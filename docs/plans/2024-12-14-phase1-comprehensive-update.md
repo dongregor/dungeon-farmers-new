@@ -3,8 +3,17 @@
 > **Updates:** All previous Phase 1 planning documents
 > **Based on:** Gap analysis and brainstorming session
 > **Date:** 2024-12-14
+>
+> ⚠️ **IMPORTANT:** Read `docs/plans/BEST_PRACTICES_REVIEW.md` before implementing.
 
 This document consolidates all design updates from the gap-fixing session.
+
+**Nuxt 4 Implementation Notes:**
+- Client code goes in `app/` directory
+- Server code goes in `server/` at root
+- Shared types go in `types/` at root
+- Use `$fetch` in Pinia store actions (NOT `useFetch`)
+- Import types with `~~/types` (rootDir alias)
 
 ---
 

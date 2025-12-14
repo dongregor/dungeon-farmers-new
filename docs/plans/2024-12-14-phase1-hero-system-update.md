@@ -2,8 +2,16 @@
 
 > **Replaces:** Sections 2-3 of `2024-12-14-phase1-mvp-core-loop.md`
 > **Based on:** `2024-12-14-hero-traits-design.md` brainstorming results
+>
+> ⚠️ **IMPORTANT:** Read `docs/plans/BEST_PRACTICES_REVIEW.md` before implementing.
 
 This document updates the Phase 1 implementation plan with the new hero and traits system design.
+
+**Nuxt 4 Notes:**
+- Types go in `types/` at project root (shared between client/server)
+- Client utils go in `app/utils/`
+- Stores go in `app/stores/` and use `$fetch` (NOT `useFetch`)
+- Import types with `~~/types` (double tilde = rootDir)
 
 ---
 
@@ -1105,12 +1113,12 @@ git commit -m "feat: add initial database schema"
 ### Task 17: Create Name Data
 
 **Files:**
-- Create: `data/names.ts`
+- Create: `app/data/names.ts`
 
 **Step 1: Create data/names.ts**
 
 ```typescript
-import type { Gender, Culture } from '~/types'
+import type { Gender, Culture } from '~~/types'
 
 // Name pools by gender
 export const FIRST_NAMES: Record<Gender, string[]> = {
@@ -1191,12 +1199,12 @@ git commit -m "feat: add hero name data with culture preferences"
 ### Task 18: Create Gameplay Trait Data
 
 **Files:**
-- Create: `data/gameplayTraits.ts`
+- Create: `app/data/gameplayTraits.ts`
 
 **Step 1: Create data/gameplayTraits.ts**
 
 ```typescript
-import type { GameplayTrait } from '~/types'
+import type { GameplayTrait } from '~~/types'
 
 export const GAMEPLAY_TRAITS: Record<string, GameplayTrait> = {
   // === STAT BONUSES ===
@@ -1533,12 +1541,12 @@ git commit -m "feat: add gameplay trait data with effects and reactions"
 ### Task 19: Create Story Trait Data
 
 **Files:**
-- Create: `data/storyTraits.ts`
+- Create: `app/data/storyTraits.ts`
 
 **Step 1: Create data/storyTraits.ts**
 
 ```typescript
-import type { StoryTrait, ZoneType } from '~/types'
+import type { StoryTrait, ZoneType } from '~~/types'
 
 export const STORY_TRAITS: Record<string, StoryTrait> = {
   // === PERSONALITY QUIRKS ===
@@ -1820,12 +1828,12 @@ git commit -m "feat: add story trait data with reactions and titles"
 ### Task 20: Create Culture Data
 
 **Files:**
-- Create: `data/cultures.ts`
+- Create: `app/data/cultures.ts`
 
 **Step 1: Create data/cultures.ts**
 
 ```typescript
-import type { Culture } from '~/types'
+import type { Culture } from '~~/types'
 
 export interface CultureInfo {
   id: Culture
@@ -1933,7 +1941,7 @@ git commit -m "feat: add culture data with flavor texts"
 ### Task 21: Create Hero Generator
 
 **Files:**
-- Create: `utils/heroGenerator.ts`
+- Create: `app/utils/heroGenerator.ts`
 - Create: `tests/utils/heroGenerator.test.ts`
 
 **Step 1: Write test**
@@ -2019,16 +2027,16 @@ import type {
   HeroGameplayTrait,
   TraitQuality,
   HeroGenerationOptions,
-} from '~/types'
+} from '~~/types'
 import {
   RARITY_WEIGHTS,
   STAT_POINTS_BY_RARITY,
   ARCHETYPE_STAT_WEIGHTS,
   QUALITY_MULTIPLIERS,
-} from '~/types/base'
-import { ARCHETYPE_TAG_POOLS, TAG_COUNT_BY_RARITY } from '~/types/archetypes'
-import { GAMEPLAY_TRAIT_COUNT, STORY_TRAIT_STARTING_COUNT } from '~/types/traits'
-import { RECRUITMENT_COSTS, TAVERN_REFRESH_HOURS } from '~/types/recruitment'
+} from '~~/types/base'
+import { ARCHETYPE_TAG_POOLS, TAG_COUNT_BY_RARITY } from '~~/types/archetypes'
+import { GAMEPLAY_TRAIT_COUNT, STORY_TRAIT_STARTING_COUNT } from '~~/types/traits'
+import { RECRUITMENT_COSTS, TAVERN_REFRESH_HOURS } from '~~/types/recruitment'
 import { getRandomName } from '~/data/names'
 import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gameplayTraits'
 import { getGenerationStoryTraits } from '~/data/storyTraits'
