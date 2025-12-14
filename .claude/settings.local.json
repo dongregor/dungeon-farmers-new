@@ -8,7 +8,9 @@
       "Bash(move \"MONETIZATION.md\" \"_archive\"\" && move \"README.md\" \"_archive\"\")",
       "Bash(move \"TONE_AND_WRITING.md\" \"_archive\"\" && move \"manifesto.md\" \"_archive\"\")",
       "Bash(move \"SYSTEM_DEPENDENCIES.md\" \"_archive\"\" && move \"TECH_STACK.md\" \"_archive\"\")",
-      "Skill(superpowers:writing-plans)"
+      "Skill(superpowers:writing-plans)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
