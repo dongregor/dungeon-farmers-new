@@ -1,12 +1,27 @@
 # Dungeon Farmers - Phase 1 Implementation Plan
 
 > **For Claude:** Use `superpowers:executing-plans` to implement this plan task-by-task.
-> 
+>
 > ⚠️ **IMPORTANT:** Read `docs/plans/BEST_PRACTICES_REVIEW.md` before implementing.
 
 **Date:** 2024-12-14
 **Goal:** Build MVP core loop - heroes, expeditions, equipment, progression
 **Tech Stack:** Nuxt 4, Vue 3, TypeScript, Tailwind CSS, Pinia, Supabase
+
+---
+
+## Related Documents
+
+This plan references detailed designs from these supporting documents:
+
+| Document | Purpose | Key Sections |
+|----------|---------|--------------|
+| `BEST_PRACTICES_REVIEW.md` | Nuxt 4 patterns, Pinia, directory structure | **Read before implementing** |
+| `phase1-hero-system-update.md` | Hero/trait types, data files, generator | Tasks 4-8, 13-17 |
+| `phase1-comprehensive-update.md` | Zones, equipment, formulas, UI specs | Tasks 25, 37-44, formulas |
+| `systems-technical-design.md` | Log generation, timers, API routes | Tasks 29, 33, API specs |
+| `hero-traits-design.md` | Original trait brainstorming | Reference for trait design |
+| `phase1.5-systems-design.md` | Post-MVP features | **Not in Phase 1** |
 
 ---
 
@@ -41,36 +56,40 @@ Phase 1.0: Foundation (Tasks 1-12)
     ├── TypeScript types
     └── Database schema
 
-Phase 1.1: Hero System (Tasks 13-24)
+Phase 1.1: Hero System (Tasks 13-26)
     ├── Data files (names, traits, cultures)
     ├── Hero generator
     ├── Recruitment/Tavern
+    ├── Party presets
     └── Hero UI components
 
-Phase 1.2: Zone & Expedition (Tasks 25-36)
+Phase 1.2: Zone & Expedition (Tasks 27-40)
     ├── Zone data
     ├── Expedition engine
-    ├── Timer system
+    ├── Timer system (see systems-technical-design.md)
     └── Expedition UI
 
-Phase 1.3: Equipment & Loot (Tasks 37-44)
+Phase 1.3: Equipment & Loot (Tasks 41-48)
     ├── Equipment data
     ├── Loot tables
     ├── Inventory system
     └── Equipment UI
 
-Phase 1.4: Progression (Tasks 45-52)
+Phase 1.4: Progression (Tasks 49-58)
     ├── XP & Leveling
     ├── Power calculation
-    ├── Efficiency calculation
-    └── Prestige system
+    ├── Title system
+    ├── Prestige system
+    └── Morale system
 
-Phase 1.5: Polish (Tasks 53-60)
-    ├── Expedition logs
+Phase 1.5: Polish (Tasks 59-68)
+    ├── Expedition logs (see systems-technical-design.md)
     ├── Offline progress
-    ├── Morale system
+    ├── Notifications
     └── Final integration
 ```
+
+**Total Tasks:** 68
 
 ---
 
