@@ -79,62 +79,62 @@ Each archetype has a pool of 6 tags. Heroes roll tags from their archetype's poo
 **TANK**
 | Tag | Counters |
 |-----|----------|
-| `Taunt` | Boss Focus, Split Damage |
+| `Taunt` | Boss Focus, AoE Damage |
 | `Heavy Armor` | Physical Burst, Piercing |
-| `Magic Resist` | Spell Barrages, Elemental |
+| `Magic Resist` | Spell Barrages, Enemy Buffs |
 | `Shield Wall` | AoE Damage, Swarms |
-| `Intercept` | Sneak Attacks, Assassins |
-| `Endurance` | Attrition, Marathon fights |
+| `Intercept` | Ambush, Spike Damage |
+| `Endurance` | Attrition, Time Pressure |
 
 **HEALER**
 | Tag | Counters |
 |-----|----------|
-| `Burst Heals` | Spike Damage, Executes |
-| `Regen` | Attrition, Long Expeditions |
-| `Decurse` | Curses, Hexes |
+| `Burst Heals` | Spike Damage, Bosses |
+| `Regen` | Attrition, Poison |
+| `Decurse` | Curses, Enemy Buffs |
 | `Cleanse` | Poison, Disease |
-| `Shields` | Predictable Damage, Traps |
-| `Immunity` | Instant Death, Stuns |
+| `Shields` | Physical Burst, Piercing |
+| `Immunity` | Stuns, Disease |
 
 **DEBUFFER**
 | Tag | Counters |
 |-----|----------|
-| `Dispel` | Enemy Buffs, Shields |
-| `Weaken` | Enraged, Berserkers |
+| `Dispel` | Enemy Buffs, Enraged |
+| `Weaken` | Enraged, Enemy Buffs |
 | `Slow` | Fast Enemies, Fleeing |
-| `Blind` | Accurate Enemies, Crits |
-| `Silence` | Casters, Summoners |
-| `Expose` | Armored, Resistant |
+| `Blind` | Evasive, Fast Enemies |
+| `Silence` | Summoners, Spell Barrages |
+| `Expose` | Armored, Enemy Buffs |
 
 **MELEE DPS**
 | Tag | Counters |
 |-----|----------|
-| `Cleave` | Swarms, Grouped Enemies |
-| `Execute` | Bosses, High HP |
-| `Armor Break` | Armored, Fortified |
-| `Charge` | Ranged Enemies, Fleeing |
-| `Parry` | Duelist, Counter-attackers |
-| `Frenzy` | Time Pressure, DPS Checks |
+| `Cleave` | Swarms, AoE Damage |
+| `Execute` | Bosses, Regenerators |
+| `Armor Break` | Armored, Enemy Buffs |
+| `Charge` | Fleeing, Ambush |
+| `Parry` | Bosses, Physical Burst |
+| `Frenzy` | Time Pressure, Bosses |
 
 **RANGED DPS**
 | Tag | Counters |
 |-----|----------|
-| `Snipe` | Flying, Elevated |
-| `Volley` | Swarms, Spread Out |
-| `Kite` | Melee-only, Slow |
-| `Precision` | Evasive, Small Targets |
-| `Traps` | Ambushers, Flankers |
-| `Scout` | Hidden Enemies, Ambush |
+| `Snipe` | Flying, Summoners |
+| `Volley` | Swarms, Flying |
+| `Kite` | Fast Enemies, Ambush |
+| `Precision` | Evasive, Flying |
+| `Traps` | Ambush, Fleeing |
+| `Scout` | Ambush, Summoners |
 
 **CASTER**
 | Tag | Counters |
 |-----|----------|
-| `Fire` | Ice Enemies, Regenerators |
-| `Ice` | Fast Enemies, Fire Enemies |
-| `Lightning` | Armored, Constructs |
-| `Arcane` | Magic Resist, Anti-Physical |
-| `AoE Blast` | Swarms, Clusters |
-| `Channel` | Single Target, Bosses |
+| `Fire` | Regenerators, Armored |
+| `Ice` | Fast Enemies, Regenerators |
+| `Lightning` | Armored, Swarms |
+| `Arcane` | Enemy Buffs, Armored |
+| `AoE Blast` | Swarms, Evasive |
+| `Channel` | Bosses, Time Pressure |
 
 ---
 
@@ -142,16 +142,17 @@ Each archetype has a pool of 6 tags. Heroes roll tags from their archetype's poo
 
 ### Threat Categories (24 Total)
 
-**DAMAGE THREATS**
+**DAMAGE THREATS (6)**
 | Threat | Description | Countered By |
 |--------|-------------|--------------|
 | `Physical Burst` | High single-target physical damage | `Heavy Armor`, `Shields` |
+| `Piercing` | Armor-ignoring physical attacks | `Heavy Armor`, `Shields` |
 | `Spike Damage` | Sudden HP drops | `Burst Heals`, `Intercept` |
 | `AoE Damage` | Party-wide attacks | `Shield Wall`, `Regen` |
 | `Attrition` | Slow constant damage | `Endurance`, `Regen` |
 | `Spell Barrages` | Magic damage waves | `Magic Resist`, `Immunity` |
 
-**ENEMY TYPE THREATS**
+**ENEMY TYPE THREATS (6)**
 | Threat | Description | Countered By |
 |--------|-------------|--------------|
 | `Swarms` | Many weak enemies | `Cleave`, `Volley`, `AoE Blast` |
@@ -161,7 +162,7 @@ Each archetype has a pool of 6 tags. Heroes roll tags from their archetype's poo
 | `Fast Enemies` | Quick attackers | `Ice`, `Slow` |
 | `Bosses` | High HP single target | `Execute`, `Channel` |
 
-**STATUS THREATS**
+**STATUS THREATS (6)**
 | Threat | Description | Countered By |
 |--------|-------------|--------------|
 | `Poison` | Damage over time | `Cleanse`, `Regen` |
@@ -171,7 +172,7 @@ Each archetype has a pool of 6 tags. Heroes roll tags from their archetype's poo
 | `Enraged` | Buffed enemies | `Weaken`, `Dispel` |
 | `Enemy Buffs` | Shields, damage boosts | `Dispel`, `Silence` |
 
-**MECHANIC THREATS**
+**MECHANIC THREATS (6)**
 | Threat | Description | Countered By |
 |--------|-------------|--------------|
 | `Boss Focus` | Boss targets one hero | `Taunt`, `Intercept` |
@@ -273,7 +274,6 @@ Mechanical impact on expeditions and stats.
 
 **Trade-offs** (risk vs reward)
 - `Reckless`: +15% Combat, -10% Survival
-- `Glass Cannon`: +25% damage, -20% HP
 
 **Severity Tiers**
 - Mild: Small penalty, almost ignorable

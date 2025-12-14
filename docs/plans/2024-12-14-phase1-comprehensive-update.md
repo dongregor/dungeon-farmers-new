@@ -20,6 +20,7 @@ This document consolidates all design updates from the gap-fixing session.
 8. [Difficulty Scaling](#8-difficulty-scaling)
 9. [UI Specifications](#9-ui-specifications)
 10. [Offline Progress System](#10-offline-progress-system)
+11. [Expedition Events System](#11-expedition-events-system)
 
 ---
 
@@ -1220,6 +1221,369 @@ Player can toggle each notification type individually.
 
 ---
 
+## 11. Expedition Events System
+
+### Overview
+
+Events create emergent stories during expeditions. They add flavor, test hero capabilities, present choices, and trigger rare occurrences.
+
+### Event Categories
+
+| Type | Frequency | Resolution | Impact |
+|------|-----------|------------|--------|
+| Flavor | 50% | Auto, during expedition | Log texture only |
+| Skill Check | 25% | Auto, during expedition | Rewards or penalties |
+| Choice | 20% | Queued, after return | Player decides outcome |
+| Rare Occurrence | 5% | Mixed | Story traits, discoveries, hooks |
+
+### Core Principle
+
+**Events don't interrupt idle gameplay.** Flavor and skill checks resolve automatically. Choices queue for later resolution.
+
+### Event Count Per Expedition
+
+```typescript
+interface ExpeditionEventConfig {
+  eventsByDuration: {
+    short: { min: 2, max: 4 },    // < 30 min
+    medium: { min: 3, max: 6 },   // 30-60 min
+    long: { min: 5, max: 8 },     // 1-2 hr
+    extended: { min: 6, max: 10 } // 2+ hr
+  }
+
+  // Some zones are more eventful
+  zoneEventModifier: Record<string, number>  // e.g., ruins: 1.3
+}
+```
+
+---
+
+### 1. Flavor Events
+
+Text events that add expedition log texture. No mechanical impact.
+
+```typescript
+interface FlavorEvent {
+  id: string
+  templates: string[]  // Random selection with variables
+
+  // Conditions
+  zoneTypes?: ZoneType[]
+  subzoneIds?: string[]
+
+  // Trigger trait reactions
+  triggerTraitReactions: boolean
+}
+```
+
+**Example Templates:**
+- "The party crossed a rickety bridge."
+- "A cold wind swept through the {zoneType}."
+- "{hero} noticed strange markings on the wall."
+- "Something rustled in the undergrowth. Probably nothing."
+
+---
+
+### 2. Skill Check Events
+
+Auto-resolved based on hero stats, tags, or traits.
+
+```typescript
+interface SkillCheckEvent {
+  id: string
+  title: string
+  description: string
+
+  // Check type
+  checkType: 'stat' | 'tag' | 'trait'
+  checkTarget: string
+  checkDifficulty: number  // For stat checks
+
+  // Severity affects consequences
+  severity: 'minor' | 'moderate' | 'major'
+
+  // Outcomes
+  successOutcome: EventOutcome
+  failureOutcome: EventOutcome
+
+  // Hero selection
+  heroSelection: 'highest_stat' | 'random' | 'has_tag'
+}
+```
+
+**Skill Check Resolution:**
+
+```typescript
+function resolveSkillCheck(event: SkillCheckEvent, party: Hero[]): SkillCheckResult {
+  const hero = selectHeroForCheck(event, party)
+
+  let successChance: number
+
+  if (event.checkType === 'stat') {
+    const heroStat = hero.baseStats[event.checkTarget]
+    successChance = (heroStat / event.checkDifficulty) * 100
+    successChance = Math.min(95, Math.max(5, successChance))
+  } else if (event.checkType === 'tag') {
+    successChance = hero.archetypeTags.includes(event.checkTarget) ? 90 : 30
+  } else if (event.checkType === 'trait') {
+    const hasTrait = hero.gameplayTraits.some(t => t.traitId === event.checkTarget)
+    successChance = hasTrait ? 85 : 40
+  }
+
+  return {
+    heroId: hero.id,
+    success: Math.random() * 100 < successChance,
+    outcome: success ? event.successOutcome : event.failureOutcome
+  }
+}
+```
+
+**Consequences by Severity:**
+
+| Severity | Success | Failure |
+|----------|---------|---------|
+| Minor | Bonus loot/gold | Reduced rewards only |
+| Moderate | Good rewards + possible discovery | Morale -5, efficiency -3% |
+| Major | Great rewards + rare drops | Morale -10, efficiency -8%, possible injury |
+
+**Example Skill Checks:**
+- "A locked chest requires nimble fingers" (Utility stat check)
+- "Poison gas fills the chamber" (Cleanse tag check)
+- "The path splits in three directions" (Scout tag check)
+- "An ancient inscription needs deciphering" (Scholar trait check)
+
+---
+
+### 3. Choice Events
+
+Queued for player resolution after expedition returns.
+
+```typescript
+interface ChoiceEvent {
+  id: string
+  title: string
+  description: string
+
+  // Options presented to player
+  options: ChoiceOption[]
+
+  // Auto-resolve if player skips
+  defaultOptionIndex: number
+
+  // Optional expiry
+  expiresAt?: string
+}
+
+interface ChoiceOption {
+  label: string
+  description: string
+
+  // Optional requirements
+  requiresTag?: string
+  requiresStat?: { stat: StatType, min: number }
+
+  // Weighted random outcomes
+  outcomes: ChoiceOutcome[]
+  outcomeWeights: number[]
+}
+
+interface ChoiceOutcome {
+  type: 'reward' | 'penalty' | 'story_trait' | 'discovery' | 'story_hook'
+  value: any
+  logText: string
+}
+```
+
+**Pending Choice UI:**
+
+```
+┌─────────────────────────────────────────┐
+│  PENDING DECISIONS (3)     [Skip All]   │
+├─────────────────────────────────────────┤
+│                                         │
+│  THE WOUNDED STRANGER                   │
+│  Greg found an injured traveler on the  │
+│  road. They claim to know a secret...   │
+│                                         │
+│  [Help Them]                            │
+│   Risk: Low | Reward: Story hook        │
+│                                         │
+│  [Ignore and Move On]                   │
+│   Risk: None | Reward: None             │
+│                                         │
+│  [Search Their Belongings] (needs Scout)│
+│   Risk: Medium | Reward: Possible loot  │
+│                                         │
+│           [1 of 3]    [Next ->]         │
+└─────────────────────────────────────────┘
+```
+
+**Example Choices:**
+- "A merchant offers a suspicious deal. Accept?"
+- "You found a cursed artifact. Take it or destroy it?"
+- "A rival adventuring party challenges you. Fight or negotiate?"
+- "The wounded creature could be saved... or put down."
+
+---
+
+### 4. Rare Occurrences
+
+Low chance, high impact events that create memorable moments.
+
+```typescript
+interface RareOccurrence {
+  id: string
+  type: 'hero_moment' | 'discovery' | 'story_hook' | 'windfall'
+
+  // Trigger conditions
+  triggerChance: number         // Base % chance
+  requiresHeroTrait?: string    // Only triggers for specific trait
+  requiresZoneMastery?: number  // Min zone mastery %
+  requiresDifficulty?: number   // Min difficulty tier
+
+  // Outcome
+  outcome: RareOutcome
+}
+
+interface RareOutcome {
+  grantsStoryTrait?: string
+  discoversSubzone?: boolean
+  discoversMonster?: string
+  bonusLoot?: LootDrop
+  startsStoryHook?: string
+  logText: string
+}
+```
+
+**Rare Occurrence Types:**
+
+| Type | Example |
+|------|---------|
+| Hero Moment | "Cheese Obsessed" hero finds legendary cheese wheel |
+| Discovery | Party finds hidden entrance to secret subzone |
+| Story Hook | Hero finds mysterious map piece (starts collection) |
+| Windfall | Stumble upon abandoned treasure cache |
+
+---
+
+### 5. Story Hooks
+
+Multi-step stories triggered by rare events.
+
+```typescript
+interface StoryHook {
+  id: string
+  name: string
+  type: 'immediate' | 'collection' | 'delayed' | 'conditional'
+
+  // Tracking
+  triggeredBy: string
+  triggeredHeroId: string
+  progress: StoryHookProgress
+
+  // Completion reward
+  completion: StoryHookReward
+}
+
+type StoryHookProgress =
+  | { type: 'immediate', ready: true }
+  | { type: 'collection', current: number, required: number, itemName: string }
+  | { type: 'delayed', expeditionsRemaining: number }
+  | { type: 'conditional', condition: string, met: boolean }
+
+interface StoryHookReward {
+  unlockSubzone?: string
+  unlockMonster?: string
+  grantTitle?: string
+  grantStoryTrait?: string
+  grantEquipment?: string
+  grantGold?: number
+  specialText: string
+}
+```
+
+**Story Hook Examples:**
+
+| Hook | Type | Progress | Reward |
+|------|------|----------|--------|
+| Mysterious Map | Collection | Find 3 map pieces | Unlocks secret subzone |
+| The Wounded Beast | Delayed | Wait 5 expeditions | Rare monster appears |
+| Ancient Riddle | Conditional | Have "Scholar" trait hero | Epic equipment |
+| Dragon Sighting | Immediate | Ready now | Dragon Hunt unlocks |
+
+---
+
+### 6. Injury System
+
+Major skill check failures can cause temporary injuries.
+
+```typescript
+interface HeroInjury {
+  heroId: string
+  type: 'sprain' | 'poison' | 'curse' | 'exhaustion'
+
+  // Effect
+  statPenalty: Partial<Stats>
+
+  // Duration
+  expiresAfterExpeditions: number  // Heals after X resting
+
+  // Early cure option
+  cureCost?: {
+    gold?: number
+    healerTag?: boolean  // Party member with Healer can cure
+  }
+}
+```
+
+**Injury Types:**
+
+| Type | Penalty | Heals After | Cure Cost |
+|------|---------|-------------|-----------|
+| Sprain | -3 Combat | 2 expeditions | 50 gold |
+| Poison | -3 Survival | 3 expeditions | Cleanse tag or 75 gold |
+| Curse | -2 all stats | 5 expeditions | Decurse tag or 150 gold |
+| Exhaustion | -5 Utility | 1 expedition | Rest only |
+
+---
+
+### Event Generation Flow
+
+1. **Calculate event count** based on duration × zone modifier
+2. **Roll event type** for each slot from distribution weights
+3. **Filter available events** by zone, subzone, party composition
+4. **Select random event** from filtered pool
+5. **Resolve or queue:**
+   - Flavor → Add to log
+   - Skill Check → Resolve immediately, add result to log
+   - Choice → Queue for post-expedition
+   - Rare → Process outcome, queue if story hook
+6. **Check rare occurrence triggers** (trait-based, mastery-based)
+7. **Add trait reactions** where heroes have matching traits
+
+### Trait Reactions
+
+Heroes comment on events based on their story traits:
+
+```typescript
+interface TraitReaction {
+  traitId: string
+  eventTypes: string[]        // Which events trigger reactions
+  reactions: string[]         // Random selection of comments
+}
+```
+
+**Example Reactions:**
+
+| Trait | Event | Reaction |
+|-------|-------|----------|
+| Cheese Obsessed | Found food | "Is there any cheese?" |
+| Superstitious | Entered ruins | "We should leave an offering..." |
+| Cowardly | Combat start | "Maybe we should reconsider..." |
+| Overly Dramatic | Any loot | "At last! The treasure we sought!" |
+
+---
+
 ## Summary of Changes
 
 ### New Systems Added
@@ -1236,6 +1600,9 @@ Player can toggle each notification type individually.
 11. **Party presets** - Save team compositions
 12. **Morale system** - Simple hero state management
 13. **Offline progress** - Full progress with auto-repeat expeditions
+14. **Expedition events** - Flavor, skill checks, choices, rare occurrences
+15. **Story hooks** - Multi-step stories triggered by events
+16. **Injury system** - Temporary debuffs from failed major checks
 
 ### Updated Systems
 1. **Equipment stats** - Now uses Combat/Utility/Survival
