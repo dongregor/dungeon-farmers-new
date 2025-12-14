@@ -19,6 +19,7 @@ This document consolidates all design updates from the gap-fixing session.
 7. [Morale System](#7-morale-system)
 8. [Difficulty Scaling](#8-difficulty-scaling)
 9. [UI Specifications](#9-ui-specifications)
+10. [Offline Progress System](#10-offline-progress-system)
 
 ---
 
@@ -1067,6 +1068,158 @@ Both floating widget + dedicated Active tab.
 
 ---
 
+## 10. Offline Progress System
+
+### Overview
+
+Full offline progress - everything continues as if you were playing. The game respects player time while maintaining engagement loops.
+
+### Auto-Repeat System
+
+Auto-repeat is set per expedition (whole party repeats together).
+
+```typescript
+interface ExpeditionSettings {
+  // Set when launching expedition
+  autoRepeat: boolean
+  autoRepeatLimit?: number    // Max repeats (null = unlimited)
+
+  // Stop conditions
+  stopConditions: {
+    anyHeroTired: boolean     // Stop if any hero hits Tired
+    inventoryFull: boolean    // Stop if inventory full
+    resourceCap: boolean      // Stop if gold cap reached
+  }
+}
+```
+
+When expedition completes:
+1. Check stop conditions
+2. If auto-repeat ON and no stop conditions met → same team, same zone, same difficulty, restart
+3. Party stays together until stopped
+
+### Offline Behavior by System
+
+| System | Offline Behavior |
+|--------|------------------|
+| Active Expeditions | Complete normally, rewards stored |
+| Auto-Repeat | If enabled, starts new expedition immediately |
+| Passive Income | Accumulates at full rate |
+| Morale Recovery | +5 per hour for resting heroes |
+| Morale Drain | Applied per expedition completed |
+| Tavern Refresh | Refreshes on schedule (every 8 hours) |
+| XP/Leveling | Applied from completed expeditions |
+| Discoveries | Subzones/monsters discovered, stored for reveal |
+
+### Caps & Limits
+
+| Resource | Cap | Behavior When Full |
+|----------|-----|-------------------|
+| Gold | None | Keeps accumulating |
+| XP | None | Levels up automatically |
+| Materials | None | Keeps accumulating |
+| Equipment | Inventory slots | Auto-repeat pauses, notification |
+| Collectibles | None | Keeps accumulating |
+
+### Stop Conditions for Auto-Repeat
+
+| Condition | Behavior |
+|-----------|----------|
+| Inventory full | Pause, store "pending loot" |
+| Any hero exhausted | Pause, hero rests |
+| Any hero levels up (optional) | Pause for player to see |
+| Repeat limit reached | Pause |
+
+### Pending Loot System
+
+When inventory is full, loot goes to pending storage:
+
+```typescript
+interface PendingLoot {
+  expeditionId: string
+  items: Equipment[]
+  expiredAt: string    // 48 hours to claim
+}
+```
+
+- Loot waits in "pending" for 48 hours
+- Player must make room and claim
+- After 48h, auto-sells for gold value
+
+### Return Summary UI
+
+```
+┌─────────────────────────────────────────┐
+│         WELCOME BACK!                   │
+│         Away for 14 hours               │
+├─────────────────────────────────────────┤
+│  HIGHLIGHTS                             │
+│  * Greg leveled up! (34 -> 36)          │
+│  * New subzone discovered: Hidden Vale  │
+│  * Rare drop: Blazing Scimitar          │
+│  ! Lyra is Exhausted                    │
+├─────────────────────────────────────────┤
+│  SUMMARY                                │
+│  Expeditions completed:    12           │
+│  Gold earned:              +2,340       │
+│  XP earned:                +1,580       │
+│  Items found:              18 (3 rare)  │
+│  Passive income:           +450         │
+├─────────────────────────────────────────┤
+│  [View Details]        [Collect All]    │
+└─────────────────────────────────────────┘
+```
+
+### Offline Progress Data Structure
+
+```typescript
+interface OfflineProgress {
+  awayStartedAt: string
+  awayDuration: number        // seconds
+
+  // Completed expeditions
+  completedExpeditions: OfflineExpeditionResult[]
+
+  // Resource gains
+  goldEarned: number
+  xpByHero: Record<string, number>
+  materialsEarned: Record<string, number>
+
+  // Discoveries
+  subzonesDiscovered: string[]
+  monstersDiscovered: string[]
+  collectiblesFound: string[]
+
+  // Loot
+  itemsFound: Equipment[]
+  pendingLoot: Equipment[]    // Overflow
+
+  // Status changes
+  levelUps: { heroId: string, from: number, to: number }[]
+  moraleChanges: { heroId: string, state: MoraleState }[]
+
+  // Alerts
+  stoppedExpeditions: {
+    expeditionId: string
+    reason: 'inventory_full' | 'hero_exhausted' | 'limit_reached'
+  }[]
+}
+```
+
+### Optional Push Notifications
+
+| Event | Notification |
+|-------|--------------|
+| Expedition complete | "Greg's team returned!" |
+| Rare drop found | "Legendary item found!" |
+| Hero exhausted | "Lyra needs rest" |
+| Inventory full | "Inventory full - loot pending" |
+| Tavern refreshed | "New heroes at the tavern" |
+
+Player can toggle each notification type individually.
+
+---
+
 ## Summary of Changes
 
 ### New Systems Added
@@ -1082,6 +1235,7 @@ Both floating widget + dedicated Active tab.
 10. **Hero retirement** - Meaningful dismissal with rewards
 11. **Party presets** - Save team compositions
 12. **Morale system** - Simple hero state management
+13. **Offline progress** - Full progress with auto-repeat expeditions
 
 ### Updated Systems
 1. **Equipment stats** - Now uses Combat/Utility/Survival
@@ -1099,6 +1253,7 @@ Both floating widget + dedicated Active tab.
 - `types/titles.ts` - Title, TitleCondition
 - `types/morale.ts` - HeroMorale, MoraleState
 - `types/presets.ts` - PartyPreset
+- `types/offline.ts` - OfflineProgress, PendingLoot, ExpeditionSettings
 
 **Updated Type Files:**
 - `types/equipment.ts` - Add traits, update stats
@@ -1115,6 +1270,7 @@ Both floating widget + dedicated Active tab.
 - `utils/moraleCalculator.ts`
 - `utils/difficultyScaler.ts`
 - `utils/titleChecker.ts`
+- `utils/offlineProgressCalculator.ts`
 
 ---
 
