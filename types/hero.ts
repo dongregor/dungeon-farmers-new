@@ -1,5 +1,6 @@
 import type {
-  Rarity, Stats, Archetype, Culture, Gender, EquipmentSlot
+  Rarity, Stats, Archetype, Culture, Gender, EquipmentSlot,
+  MoraleState
 } from './base'
 import type { ArchetypeTag } from './archetypes'
 import type { HeroGameplayTrait, StoryTrait } from './traits'
@@ -44,6 +45,15 @@ export interface Hero {
   currentExpeditionId: string | null
   isFavorite: boolean
 
+  // Morale tracking
+  morale: MoraleState
+  moraleLastUpdate: string
+  
+  // Active status
+  isOnExpedition: boolean
+  isStationed: boolean
+  stationedZoneId: string | null
+
   // Timestamps
   createdAt: string
   updatedAt: string
@@ -64,8 +74,9 @@ export interface GuildMaster {
   archetype: Archetype | null
   archetypeTags: ArchetypeTag[]
 
-  // Stats scale with account
+  // Stats (scales with account progress)
   baseStats: Stats
+  level: number
 
   // Equippable traits (swappable)
   equippedTraitIds: string[]
@@ -84,7 +95,7 @@ export interface GuildMaster {
 }
 
 // Tavern hero (available for recruitment)
-export interface TavernHero extends Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt'> {
+export interface TavernHero extends Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt' | 'isOnExpedition' | 'isStationed' | 'stationedZoneId' | 'morale' | 'moraleLastUpdate'> {
   recruitCost: number
   isLocked: boolean
   expiresAt: string  // When this hero leaves the tavern

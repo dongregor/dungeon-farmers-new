@@ -42,3 +42,20 @@ export const STAT_POINTS_BY_RARITY: Record<Rarity, number> = {
 export const DIFFICULTY_MULTIPLIERS: Record<ZoneDifficulty, number> = {
   easy: 0.5, medium: 1.0, hard: 1.5, extreme: 2.0
 }
+
+// Stat distribution weights by archetype (how to distribute stat points)
+export const ARCHETYPE_STAT_WEIGHTS: Record<Archetype, Stats> = {
+  tank: { combat: 0.2, utility: 0.2, survival: 0.6 },
+  healer: { combat: 0.1, utility: 0.4, survival: 0.5 },
+  debuffer: { combat: 0.3, utility: 0.5, survival: 0.2 },
+  melee_dps: { combat: 0.6, utility: 0.2, survival: 0.2 },
+  ranged_dps: { combat: 0.5, utility: 0.3, survival: 0.2 },
+  caster: { combat: 0.6, utility: 0.3, survival: 0.1 },
+}
+
+// Quality multipliers for trait value ranges
+export const QUALITY_MULTIPLIERS: Record<TraitQuality, { min: number; max: number }> = {
+  normal: { min: 0.3, max: 0.5 },
+  magic: { min: 0.5, max: 0.8 },
+  perfect: { min: 0.8, max: 1.0 },
+}

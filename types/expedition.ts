@@ -1,19 +1,25 @@
-import type { Hero } from './hero'
+import type { Stats } from './base'
 
-export type ExpeditionStatus = 'in_progress' | 'waiting_choices' | 'completed' | 'failed'
+export type ExpeditionStatus = 'idle' | 'in_progress' | 'completed' | 'failed'
 
 export interface Expedition {
   id: string
   playerId: string
+
+  // Location
   zoneId: string
   subzoneId: string
+
+  // Party
   heroIds: string[]
-  teamPower: number
-  status: ExpeditionStatus
-  startedAt: string
-  completesAt: string
+  teamPower: number  // Calculated total power of party
+
+  // Timing
+  startedAt: string      // ISO timestamp
+  completesAt: string    // ISO timestamp
   durationMinutes: number
-  
+  status: ExpeditionStatus
+
   // Auto-repeat settings
   autoRepeat: boolean
   autoRepeatLimit?: number
@@ -22,91 +28,149 @@ export interface Expedition {
     inventoryFull: boolean
     resourceCap: boolean
   }
-  
+
   // Events
   events: ExpeditionEvent[]
   pendingChoices: ExpeditionEvent[]
-  
-  // Results
-  efficiency?: number
+
+  // Results (populated on completion)
+  efficiency?: number  // Calculated efficiency (60-150%)
   rewards?: ExpeditionRewards
   log?: ExpeditionLog
+
+  // Timestamps
+  createdAt: string
+  updatedAt: string
 }
 
-export interface ExpeditionEvent {
-  id: string
-  type: 'flavor' | 'skill_check' | 'choice' | 'rare'
-  title: string
-  description: string
-  timestamp: string
-  
-  // For skill checks
-  statType?: 'combat' | 'utility' | 'survival'
-  difficulty?: number
-  success?: boolean
-  
-  // For choices
-  choices?: ExpeditionChoice[]
-  selectedChoice?: string
-  
-  // Trait reactions
-  traitReactions?: TraitReaction[]
-}
-
-export interface ExpeditionChoice {
-  id: string
-  description: string
-  statRequirements?: Partial<Record<'combat' | 'utility' | 'survival', number>>
-  outcomes: ChoiceOutcome[]
-}
-
-export interface ChoiceOutcome {
-  success: boolean
-  description: string
-  rewards?: Partial<ExpeditionRewards>
-  penalties?: Partial<ExpeditionRewards>
-}
-
-export interface TraitReaction {
-  heroId: string
-  traitId: string
-  reactionText: string
-}
-
+// Expedition rewards
 export interface ExpeditionRewards {
   gold: number
   xp: number
-  items: ExpeditionItem[]
-  titles?: string[]
-  discoveries?: string[]
+  equipment: string[] // Equipment IDs
+  materials: Record<string, number> // Material type -> quantity
+  familiarityGain: number
+  masteryGain: number
 }
 
-export interface ExpeditionItem {
+// Expedition event types
+export type ExpeditionEventType =
+  | 'flavor'
+  | 'skill_check'
+  | 'choice'
+  | 'rare'
+  | 'story_hook'
+  | 'injury'
+
+export interface ExpeditionEvent {
   id: string
-  type: 'equipment' | 'consumable' | 'material'
-  rarity: string
-  quantity: number
+  type: ExpeditionEventType
+  timestamp: string // ISO timestamp
+
+  // Event-specific data
+  data: {
+    // Flavor
+    text?: string
+
+    // Skill check
+    stat?: 'combat' | 'utility' | 'survival'
+    difficulty?: number
+    passed?: boolean
+
+    // Choice
+    prompt?: string
+    options?: ChoiceOption[]
+    selectedOption?: number
+
+    // Rare
+    rarity?: string
+    reward?: any
+
+    // Story hook
+    hookId?: string
+    unlocked?: string[]
+
+    // Injury
+    heroId?: string
+    severity?: 'minor' | 'major' | 'severe'
+
+    // Story hook progress
+    hookProgress?: StoryHookProgress
+  }
 }
 
+// Story Hook
+export interface StoryHook {
+  id: string
+  name: string
+  type: 'immediate' | 'collection' | 'delayed' | 'conditional'
+  triggeredBy: string
+  triggeredHeroId: string
+  progress: StoryHookProgress
+  completion: StoryHookReward
+}
+
+export type StoryHookProgress =
+  | { type: 'immediate', ready: true }
+  | { type: 'collection', current: number, required: number, itemName: string }
+  | { type: 'delayed', expeditionsRemaining: number }
+  | { type: 'conditional', condition: string, met: boolean }
+
+export interface StoryHookReward {
+  unlockSubzone?: string
+  unlockMonster?: string
+  grantTitle?: string
+  grantStoryTrait?: string
+  grantEquipment?: string
+  grantGold?: number
+  specialText: string
+}
+
+// Hero Injury
+export interface HeroInjury {
+  heroId: string
+  type: 'sprain' | 'poison' | 'curse' | 'exhaustion'
+  statPenalty: Partial<Stats>
+  expiresAfterExpeditions: number  // Heals after X resting
+  cureCost?: {
+    gold?: number
+    healerTag?: boolean  // Party member with Healer can cure
+  }
+}
+
+export interface ChoiceOption {
+  id: number
+  text: string
+  outcome: string
+}
+
+// Expedition log (generated on completion)
 export interface ExpeditionLog {
+  summary: {
+    duration: string
+    efficiency: string
+    rewards: {
+      gold: number
+      xp: number
+      itemCount: number
+      rareItems: string[]
+      familiarityGain: number
+      masteryGain: number
+    }
+  }
   sections: LogSection[]
-  summary: LogSummary
 }
 
 export interface LogSection {
+  type: 'departure' | 'travel' | 'encounter' | 'discovery' | 'return'
   title: string
   entries: LogEntry[]
 }
 
 export interface LogEntry {
   text: string
-  isImportant?: boolean
-  traitReactions?: TraitReaction[]
-}
-
-export interface LogSummary {
-  duration: string
-  efficiency: string
-  rewards: string
-  notableEvents: string[]
+  heroId?: string
+  traitId?: string
+  eventId?: string
+  type: 'narrative' | 'reaction' | 'combat' | 'loot' | 'choice_result'
 }
