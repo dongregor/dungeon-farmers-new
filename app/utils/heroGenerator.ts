@@ -1,245 +1,248 @@
-import type { 
-  Hero, 
-  Gender, 
-  Culture, 
+import { v4 as uuid } from 'uuid'
+import type {
+  Hero,
+  TavernHero,
   Rarity,
+  Stats,
   Archetype,
-  HeroTrait,
-  StoryTrait,
-  Stats
+  Culture,
+  Gender,
+  GameplayTrait,
+  TraitQuality,
+  HeroGenerationOptions,
 } from '~~/types'
+import {
+  RARITY_WEIGHTS,
+  STAT_POINTS_BY_RARITY,
+  ARCHETYPE_STAT_WEIGHTS,
+  QUALITY_MULTIPLIERS,
+} from '~~/types/base'
+import { ARCHETYPE_TAG_POOLS, TAG_COUNT_BY_RARITY } from '~~/types/archetypes'
+import { GAMEPLAY_TRAIT_COUNT, STORY_TRAIT_STARTING_COUNT } from '~~/types/traits'
+import { RECRUITMENT_COSTS, TAVERN_REFRESH_HOURS } from '~~/types/recruitment'
 import { getRandomName } from '~/data/names'
-import { getRandomCulture, getCultureById } from '~/data/cultures'
-import { getRandomGameplayTrait, rollTraitValue } from '~/data/gameplayTraits'
-import { getRandomStoryTrait } from '~/data/storyTraits'
-import { getArchetypeById, ARCHETYPE_DEFINITIONS } from '~~/types/archetypes'
-import { RARITY_WEIGHTS, STAT_POINTS_BY_RARITY } from '~~/types/base'
-import { v4 as uuidv4 } from 'uuid'
+import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gameplayTraits'
+import { getGenerationStoryTraits } from '~/data/storyTraits'
+import { getRandomCulture } from '~/data/cultures'
 
-export interface HeroGenerationOptions {
-  rarity?: Rarity
-  archetype?: Archetype
-  culture?: Culture
-  gender?: Gender
-  level?: number
+// Weighted random selection
+function weightedRandom<T extends string>(weights: Record<T, number>): T {
+  const entries = Object.entries(weights) as [T, number][]
+  const total = entries.reduce((sum, [, w]) => sum + w, 0)
+  let random = Math.random() * total
+
+  for (const [key, weight] of entries) {
+    random -= weight
+    if (random <= 0) return key
+  }
+
+  return entries[0][0]
 }
 
-export function generateHero(options: HeroGenerationOptions = {}): Hero {
-  // Determine rarity
-  const rarity = options.rarity || getRandomRarity()
-  
-  // Determine archetype
-  const archetype = options.archetype || getRandomArchetype()
-  const archetypeDef = getArchetypeById(archetype)
-  
-  // Determine culture
-  const culture = options.culture || getRandomCulture().id
-  const cultureDef = getCultureById(culture)
-  
-  // Determine gender
-  const gender = options.gender || getRandomGender(culture)
-  
-  // Generate name
-  const name = getRandomName(gender, culture)
-  
-  // Generate base stats
-  const baseStats = generateBaseStats(rarity, archetypeDef.statWeights)
-  
-  // Generate traits
-  const gameplayTraits = generateGameplayTraits(rarity, cultureDef, archetype)
-  const storyTraits = generateStoryTraits(cultureDef)
-  
-  // Create hero object
-  const hero: Hero = {
-    id: uuidv4(),
+// Random array element
+function randomElement<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
 
-    // Identity
+// Random elements without replacement
+function randomElements<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, Math.min(count, arr.length))
+}
+
+// Random int in range
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+// Generate rarity
+function generateRarity(): Rarity {
+  return weightedRandom(RARITY_WEIGHTS)
+}
+
+// Generate archetype
+function generateArchetype(): Archetype {
+  const archetypes: Archetype[] = ['tank', 'healer', 'debuffer', 'dps_melee', 'dps_ranged', 'caster']
+  return randomElement(archetypes)
+}
+
+// Generate gender
+function generateGender(): Gender {
+  const roll = Math.random()
+  if (roll < 0.45) return 'male'
+  if (roll < 0.90) return 'female'
+  return 'nonbinary'
+}
+
+// Generate stats based on rarity and archetype
+function generateStats(rarity: Rarity, archetype: Archetype): Stats {
+  const totalPoints = STAT_POINTS_BY_RARITY[rarity]
+  const weights = ARCHETYPE_STAT_WEIGHTS[archetype]
+
+  // Add some variance (±20%)
+  const variance = 0.2
+  const combatWeight = weights.combat * (1 + (Math.random() - 0.5) * variance)
+  const utilityWeight = weights.utility * (1 + (Math.random() - 0.5) * variance)
+  const survivalWeight = weights.survival * (1 + (Math.random() - 0.5) * variance)
+
+  // Normalize weights
+  const totalWeight = combatWeight + utilityWeight + survivalWeight
+
+  return {
+    combat: Math.round(totalPoints * (combatWeight / totalWeight)),
+    utility: Math.round(totalPoints * (utilityWeight / totalWeight)),
+    survival: Math.round(totalPoints * (survivalWeight / totalWeight)),
+  }
+}
+
+// Generate archetype tags
+function generateArchetypeTags(archetype: Archetype, rarity: Rarity): string[] {
+  const pool = ARCHETYPE_TAG_POOLS[archetype]
+  const count = TAG_COUNT_BY_RARITY[rarity]
+  return randomElements(pool, count)
+}
+
+// Generate quality
+function generateQuality(): TraitQuality {
+  const roll = Math.random()
+  if (roll < 0.6) return 'normal'
+  if (roll < 0.9) return 'magic'
+  return 'perfect'
+}
+
+// Roll trait value based on quality
+function rollTraitValue(minValue: number, maxValue: number, quality: TraitQuality): number {
+  const multipliers = QUALITY_MULTIPLIERS[quality]
+  const range = maxValue - minValue
+  const qualityMin = minValue + range * multipliers.min
+  const qualityMax = minValue + range * multipliers.max
+  return Math.round(qualityMin + Math.random() * (qualityMax - qualityMin))
+}
+
+// Generate gameplay traits
+function generateGameplayTraits(rarity: Rarity): GameplayTrait[] {
+  const config = GAMEPLAY_TRAIT_COUNT[rarity]
+  const count = randomInt(config.min, config.max)
+
+  const positiveTraits = getPositiveGameplayTraits()
+  const negativeTraits = getNegativeGameplayTraits()
+
+  const result: GameplayTrait[] = []
+  const usedIds = new Set<string>()
+
+  // Mostly positive traits
+  const positiveCount = Math.max(1, count - (Math.random() < 0.3 ? 1 : 0))
+
+  for (let i = 0; i < positiveCount; i++) {
+    const available = positiveTraits.filter(t => !usedIds.has(t.id))
+    if (available.length === 0) break
+
+    const trait = randomElement(available)
+    const quality = generateQuality()
+
+    result.push({
+      traitId: trait.id,
+      quality,
+      rolledValue: rollTraitValue(trait.minValue, trait.maxValue, quality),
+    })
+    usedIds.add(trait.id)
+  }
+
+  // Maybe one negative trait
+  if (count > positiveCount && Math.random() < 0.3) {
+    const trait = randomElement(negativeTraits)
+    const quality = generateQuality()
+
+    result.push({
+      traitId: trait.id,
+      quality,
+      rolledValue: rollTraitValue(trait.minValue, trait.maxValue, quality),
+    })
+  }
+
+  return result
+}
+
+// Generate story traits
+function generateStoryTraits(): string[] {
+  const count = randomInt(STORY_TRAIT_STARTING_COUNT.min, STORY_TRAIT_STARTING_COUNT.max)
+  const available = getGenerationStoryTraits()
+  return randomElements(available, count).map(t => t.id)
+}
+
+// Calculate XP to next level
+function calculateXpToNextLevel(currentLevel: number): number {
+  return currentLevel * 100 + (currentLevel * currentLevel * 50)
+}
+
+// Calculate hero power
+function calculatePower(stats: Stats, gameplayTraits: GameplayTrait[]): number {
+  // Base power from stats
+  let power = stats.combat + stats.utility + stats.survival
+
+  // Bonus from positive traits (simplified - use power calculator for full calculation)
+  const positiveTraits = getPositiveGameplayTraits()
+  power += gameplayTraits.filter(t => {
+    // Filter out negative traits
+    return positiveTraits.some(gt => gt.id === t.traitId)
+  }).length * 5
+
+  return Math.round(power)
+}
+
+// Main hero generation function
+export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt' | 'isOnExpedition' | 'isStationed' | 'stationedZoneId' | 'morale' | 'moraleLastUpdate'> {
+  const rarity = options.forceRarity ?? generateRarity()
+  const archetype = options.forceArchetype ?? generateArchetype()
+  const gender = options.forceGender ?? generateGender()
+  const culture = options.forceCulture ?? getRandomCulture()
+
+  const baseStats = generateStats(rarity, archetype)
+  const archetypeTags = generateArchetypeTags(archetype, rarity)
+  const gameplayTraits = generateGameplayTraits(rarity)
+  const storyTraitIds = generateStoryTraits()
+
+  const name = getRandomName(gender, culture)
+  const power = calculatePower(baseStats, gameplayTraits)
+
+  return {
     name,
     gender,
     culture,
     titles: [],
     displayTitle: null,
-
-    // Classification
     rarity,
     archetype,
-    archetypeTags: archetypeDef.tags || [],
-
-    // Stats
+    archetypeTags,
     baseStats,
-    level: options.level || 1,
+    level: 1,
     xp: 0,
-    xpToNextLevel: calculateXpToNextLevel(options.level || 1),
-
-    // Traits
+    xpToNextLevel: calculateXpToNextLevel(1),
     gameplayTraits,
-    storyTraitIds: storyTraits.map(t => t.id),
-
-    // Calculated power (will be calculated by powerCalculator)
-    power: 0,
-
-    // Equipment
+    storyTraitIds,
+    power,
     equipment: {},
-
-    // Prestige
     prestigeLevel: 0,
     prestigeBonuses: { combat: 0, utility: 0, survival: 0 },
-
-    // State
-    currentExpeditionId: null,
-    isFavorite: false,
-
-    // Morale
-    morale: 'content',
-    moraleLastUpdate: new Date().toISOString(),
-
-    // Active status
-    isOnExpedition: false,
-    isStationed: false,
-    stationedZoneId: null,
-
-    // Timestamps
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-  
-  return hero
-}
-
-function getRandomRarity(): Rarity {
-  const totalWeight = Object.values(RARITY_WEIGHTS).reduce((sum, weight) => sum + weight, 0)
-  let random = Math.random() * totalWeight
-  
-  for (const [rarity, weight] of Object.entries(RARITY_WEIGHTS)) {
-    random -= weight
-    if (random <= 0) {
-      return rarity as Rarity
-    }
-  }
-  
-  return 'common'
-}
-
-function getRandomArchetype(): Archetype {
-  return ARCHETYPE_DEFINITIONS[Math.floor(Math.random() * ARCHETYPE_DEFINITIONS.length)].id
-}
-
-function getRandomGender(culture: Culture): Gender {
-  // Use culture preferences for gender distribution
-  const cultureDef = getCultureById(culture)
-  const totalWeight = Object.values(cultureDef.commonTraits).reduce((sum, weight) => sum + weight, 0)
-  let random = Math.random() * totalWeight
-  
-  for (const [gender, weight] of Object.entries(cultureDef.commonTraits)) {
-    random -= weight
-    if (random <= 0) {
-      return gender as Gender
-    }
-  }
-  
-  return 'male'
-}
-
-function generateBaseStats(rarity: Rarity, statWeights: Stats): Stats {
-  const totalPoints = STAT_POINTS_BY_RARITY[rarity]
-  const stats: Stats = { combat: 0, utility: 0, survival: 0 }
-  
-  // Distribute points based on archetype weights
-  const totalWeight = statWeights.combat + statWeights.utility + statWeights.survival
-  
-  stats.combat = Math.round((statWeights.combat / totalWeight) * totalPoints)
-  stats.utility = Math.round((statWeights.utility / totalWeight) * totalPoints)
-  stats.survival = Math.round((statWeights.survival / totalWeight) * totalPoints)
-  
-  // Add some randomness
-  const remainingPoints = totalPoints - (stats.combat + stats.utility + stats.survival)
-  if (remainingPoints > 0) {
-    const randomStat = Math.floor(Math.random() * 3)
-    if (randomStat === 0) stats.combat += remainingPoints
-    else if (randomStat === 1) stats.utility += remainingPoints
-    else stats.survival += remainingPoints
-  }
-  
-  return stats
-}
-
-function generateGameplayTraits(
-  rarity: Rarity,
-  cultureDef: any,
-  archetype: Archetype
-): HeroTrait[] {
-  const traits: HeroTrait[] = []
-  const numTraits = getTraitCountByRarity(rarity)
-  
-  // Get archetype-specific traits
-  const archetypeDef = getArchetypeById(archetype)
-  
-  for (let i = 0; i < numTraits; i++) {
-    let trait
-    
-    // 60% chance for archetype-related trait, 40% random
-    if (Math.random() < 0.6 && archetypeDef.tags.length > 0) {
-      // Get trait that matches archetype tags
-      trait = getRandomGameplayTrait()
-    } else {
-      trait = getRandomGameplayTrait()
-    }
-    
-    // Determine quality based on rarity
-    const quality = getTraitQualityByRarity(rarity)
-    const value = rollTraitValue(trait, quality)
-    
-    traits.push({
-      traitId: trait.id,
-      rolledValue: value,
-      quality
-    })
-  }
-  
-  return traits
-}
-
-function generateStoryTraits(cultureDef: any): StoryTrait[] {
-  const traits: StoryTrait[] = []
-  const numTraits = 1 + Math.floor(Math.random() * 2) // 1-2 story traits
-  
-  for (let i = 0; i < numTraits; i++) {
-    // 70% chance for culture-common trait, 30% for rare
-    const trait = Math.random() < 0.7 
-      ? getRandomStoryTrait()
-      : getRandomStoryTrait()
-    
-    traits.push({
-      traitId: trait.id
-    })
-  }
-  
-  return traits
-}
-
-function getTraitCountByRarity(rarity: Rarity): number {
-  switch (rarity) {
-    case 'common': return 1
-    case 'uncommon': return 2
-    case 'rare': return 3
-    case 'epic': return 4
-    case 'legendary': return 5
-    default: return 1
   }
 }
 
-function getTraitQualityByRarity(rarity: Rarity): 'normal' | 'magic' | 'perfect' {
-  switch (rarity) {
-    case 'common': return 'normal'
-    case 'uncommon': return Math.random() < 0.7 ? 'normal' : 'magic'
-    case 'rare': return Math.random() < 0.5 ? 'magic' : 'normal'
-    case 'epic': return Math.random() < 0.7 ? 'magic' : 'perfect'
-    case 'legendary': return Math.random() < 0.5 ? 'perfect' : 'magic'
-    default: return 'normal'
-  }
-}
+// Generate tavern hero (for recruitment)
+export function generateTavernHero(slotRarity: Rarity | 'epic_plus'): TavernHero {
+  // Epic+ slot can generate epic or legendary
+  const rarity: Rarity = slotRarity === 'epic_plus'
+    ? (Math.random() < 0.8 ? 'epic' : 'legendary')
+    : slotRarity
 
-function calculateXpToNextLevel(currentLevel: number): number {
-  // XP formula: level * 100 (base) + (level^2 * 50) for scaling
-  return currentLevel * 100 + (currentLevel * currentLevel * 50)
+  const hero = generateHero({ forceRarity: rarity })
+
+  const refreshTime = new Date()
+  refreshTime.setHours(refreshTime.getHours() + TAVERN_REFRESH_HOURS)
+
+  return {
+    ...hero,
+    hireCostGold: RECRUITMENT_COSTS[rarity],
+    hireCostGems: 0,
+    refreshTime: refreshTime.toISOString(),
+  }
 }
