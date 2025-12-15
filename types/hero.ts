@@ -109,10 +109,3 @@ export interface HeroGenerationOptions {
   forceGender?: Gender
 }
 
-// Party preset
-export interface PartyPreset {
-  id: string
-  name: string
-  heroIds: string[]
-  createdAt: string
-}

@@ -32,7 +32,7 @@ CREATE TABLE heroes (
   titles TEXT[] DEFAULT '{}',
   display_title TEXT,
   rarity TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary')),
-  archetype TEXT NOT NULL CHECK (archetype IN ('tank', 'healer', 'debuffer', 'dps_melee', 'dps_ranged', 'caster')),
+  archetype TEXT NOT NULL CHECK (archetype IN ('tank', 'healer', 'debuffer', 'melee_dps', 'ranged_dps', 'caster')),
   archetype_tags TEXT[] DEFAULT '{}',
   base_stats JSONB NOT NULL, -- { combat, utility, survival }
   level INTEGER DEFAULT 1,
@@ -41,12 +41,12 @@ CREATE TABLE heroes (
   gameplay_traits JSONB DEFAULT '[]', -- Array of GameplayTrait objects
   story_trait_ids TEXT[] DEFAULT '{}',
   power INTEGER DEFAULT 0,
-  equipment JSONB DEFAULT '{}', -- { head?, chest?, hands?, legs?, feet?, weapon?, accessory1?, accessory2? }
+  equipment JSONB DEFAULT '{}', -- { weapon?, armor?, helmet?, boots?, accessory1?, accessory2? }
   prestige_level INTEGER DEFAULT 0,
   prestige_bonuses JSONB DEFAULT '{"combat": 0, "utility": 0, "survival": 0}',
   current_expedition_id UUID,
   is_favorite BOOLEAN DEFAULT FALSE,
-  morale TEXT DEFAULT 'content' CHECK (morale IN ('miserable', 'unhappy', 'content', 'happy', 'jubilant')),
+  morale TEXT DEFAULT 'content' CHECK (morale IN ('excited', 'content', 'tired', 'frustrated', 'exhausted')),
   morale_last_update TIMESTAMPTZ DEFAULT NOW(),
   is_on_expedition BOOLEAN DEFAULT FALSE,
   is_stationed BOOLEAN DEFAULT FALSE,
@@ -71,7 +71,7 @@ CREATE TABLE guild_masters (
   titles TEXT[] DEFAULT '{}',
   display_title TEXT,
   rarity TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary')),
-  archetype TEXT NOT NULL CHECK (archetype IN ('tank', 'healer', 'debuffer', 'dps_melee', 'dps_ranged', 'caster')),
+  archetype TEXT NOT NULL CHECK (archetype IN ('tank', 'healer', 'debuffer', 'melee_dps', 'ranged_dps', 'caster')),
   archetype_tags TEXT[] DEFAULT '{}',
   base_stats JSONB NOT NULL,
   level INTEGER DEFAULT 1,
@@ -84,7 +84,7 @@ CREATE TABLE guild_masters (
   prestige_level INTEGER DEFAULT 0,
   prestige_bonuses JSONB DEFAULT '{"combat": 0, "utility": 0, "survival": 0}',
   is_favorite BOOLEAN DEFAULT FALSE,
-  morale TEXT DEFAULT 'content' CHECK (morale IN ('miserable', 'unhappy', 'content', 'happy', 'jubilant')),
+  morale TEXT DEFAULT 'content' CHECK (morale IN ('excited', 'content', 'tired', 'frustrated', 'exhausted')),
   morale_last_update TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -104,7 +104,7 @@ CREATE TABLE tavern_heroes (
   titles TEXT[] DEFAULT '{}',
   display_title TEXT,
   rarity TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary')),
-  archetype TEXT NOT NULL CHECK (archetype IN ('tank', 'healer', 'debuffer', 'dps_melee', 'dps_ranged', 'caster')),
+  archetype TEXT NOT NULL CHECK (archetype IN ('tank', 'healer', 'debuffer', 'melee_dps', 'ranged_dps', 'caster')),
   archetype_tags TEXT[] DEFAULT '{}',
   base_stats JSONB NOT NULL,
   level INTEGER DEFAULT 1,
@@ -118,7 +118,7 @@ CREATE TABLE tavern_heroes (
   prestige_bonuses JSONB DEFAULT '{"combat": 0, "utility": 0, "survival": 0}',
   current_expedition_id UUID,
   is_favorite BOOLEAN DEFAULT FALSE,
-  morale TEXT DEFAULT 'content' CHECK (morale IN ('miserable', 'unhappy', 'content', 'happy', 'jubilant')),
+  morale TEXT DEFAULT 'content' CHECK (morale IN ('excited', 'content', 'tired', 'frustrated', 'exhausted')),
   morale_last_update TIMESTAMPTZ DEFAULT NOW(),
   hire_cost_gold INTEGER NOT NULL,
   hire_cost_gems INTEGER DEFAULT 0,
@@ -152,7 +152,7 @@ CREATE TABLE equipment (
   player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
-  slot TEXT NOT NULL CHECK (slot IN ('head', 'chest', 'hands', 'legs', 'feet', 'weapon', 'accessory')),
+  slot TEXT NOT NULL CHECK (slot IN ('weapon', 'armor', 'helmet', 'boots', 'accessory1', 'accessory2')),
   rarity TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic')),
   base_stats JSONB NOT NULL, -- { combat, utility, survival }
   item_level INTEGER NOT NULL,

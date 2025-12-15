@@ -1,15 +1,6 @@
-import type { Hero, Expedition } from '~~/types'
+import type { Hero, Expedition, PendingLoot } from '~~/types'
 import { calculateMoraleRecovery } from './moraleService'
 import { calculateRewards } from './expeditionEngine'
-
-export interface PendingLoot {
-  id: string
-  expeditionId: string
-  equipment: any[]
-  materials: any[]
-  expiresAt: string
-  createdAt: string
-}
 
 export interface OfflineProgressResult {
   completedExpeditions: Expedition[]
@@ -67,12 +58,9 @@ export function calculateOfflineProgress(
         const expiresAt = new Date(completesAt + 48 * 60 * 60 * 1000) // 48 hours
 
         result.pendingLoot.push({
-          id: crypto.randomUUID(),
           expeditionId: expedition.id,
-          equipment: pendingEquipment,
-          materials: [],
-          expiresAt: expiresAt.toISOString(),
-          createdAt: new Date(completesAt).toISOString(),
+          items: pendingEquipment,
+          expiredAt: expiresAt.toISOString(),
         })
 
         // Only keep equipment that fits
@@ -190,13 +178,13 @@ function shouldStopAutoRepeat(
 /**
  * Get numeric morale level for comparison
  */
-function getMoraleLevel(morale: 'miserable' | 'unhappy' | 'content' | 'happy' | 'jubilant'): number {
+function getMoraleLevel(morale: 'excited' | 'content' | 'tired' | 'frustrated' | 'exhausted'): number {
   switch (morale) {
-    case 'miserable': return 0
-    case 'unhappy': return 1
-    case 'content': return 2
-    case 'happy': return 3
-    case 'jubilant': return 4
+    case 'exhausted': return 0
+    case 'frustrated': return 1
+    case 'tired': return 2
+    case 'content': return 3
+    case 'excited': return 4
     default: return 2
   }
 }
