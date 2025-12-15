@@ -1,72 +1,241 @@
-import type { Stats } from './base'
+import type { ZoneDifficulty } from './base'
+import type { ArchetypeTag } from './archetypes'
 
-export type ThreatType = 'physical' | 'magic' | 'precision' | 'area'
+// Threat severity levels
+export type ThreatSeverity = 'minor' | 'major' | 'deadly'
 
-export interface ThreatDefinition {
-  id: ThreatType
+// Base penalties by severity
+export const SEVERITY_BASE_PENALTY: Record<ThreatSeverity, number> = {
+  minor: 5,
+  major: 10,
+  deadly: 15,
+}
+
+// Threat categories
+export type ThreatCategory = 'damage' | 'enemy_type' | 'status' | 'mechanic'
+
+// Threat definition
+export interface Threat {
+  id: string
   name: string
   description: string
-  statPenalty: Partial<Stats>
-  counterThreats: ThreatType[]
+  category: ThreatCategory
+  severity: ThreatSeverity
+  counteredBy: ArchetypeTag[]
 }
 
-export const THREAT_DEFINITIONS: ThreatDefinition[] = [
-  {
-    id: 'physical',
-    name: 'Physical',
-    description: 'Direct physical attacks and melee combat',
-    statPenalty: { combat: -10 },
-    counterThreats: ['magic']
+// All threats
+export const THREATS: Record<string, Threat> = {
+  // DAMAGE THREATS
+  physical_burst: {
+    id: 'physical_burst',
+    name: 'Physical Burst',
+    description: 'High single-target physical damage',
+    category: 'damage',
+    severity: 'major',
+    counteredBy: ['heavy_armor', 'shields'],
   },
-  {
-    id: 'magic',
-    name: 'Magic',
-    description: 'Spellcasting and magical effects',
-    statPenalty: { utility: -10 },
-    counterThreats: ['physical']
+  spike_damage: {
+    id: 'spike_damage',
+    name: 'Spike Damage',
+    description: 'Sudden HP drops',
+    category: 'damage',
+    severity: 'major',
+    counteredBy: ['burst_heals', 'intercept'],
   },
-  {
-    id: 'precision',
-    name: 'Precision',
-    description: 'Accurate ranged attacks and targeted strikes',
-    statPenalty: { survival: -10 },
-    counterThreats: ['area']
+  aoe_damage: {
+    id: 'aoe_damage',
+    name: 'AoE Damage',
+    description: 'Party-wide attacks',
+    category: 'damage',
+    severity: 'major',
+    counteredBy: ['shield_wall', 'regen'],
   },
-  {
-    id: 'area',
-    name: 'Area',
-    description: 'Wide-area effects and environmental hazards',
-    statPenalty: { combat: -5, utility: -5 },
-    counterThreats: ['precision']
-  }
-]
+  attrition: {
+    id: 'attrition',
+    name: 'Attrition',
+    description: 'Slow constant damage',
+    category: 'damage',
+    severity: 'minor',
+    counteredBy: ['endurance', 'regen'],
+  },
+  spell_barrages: {
+    id: 'spell_barrages',
+    name: 'Spell Barrages',
+    description: 'Magic damage waves',
+    category: 'damage',
+    severity: 'major',
+    counteredBy: ['magic_resist', 'immunity'],
+  },
 
-export function getThreatById(id: ThreatType): ThreatDefinition {
-  return THREAT_DEFINITIONS.find(t => t.id === id)!
+  // ENEMY TYPE THREATS
+  swarms: {
+    id: 'swarms',
+    name: 'Swarms',
+    description: 'Many weak enemies',
+    category: 'enemy_type',
+    severity: 'minor',
+    counteredBy: ['cleave', 'volley', 'aoe_blast'],
+  },
+  armored: {
+    id: 'armored',
+    name: 'Armored',
+    description: 'High physical resist enemies',
+    category: 'enemy_type',
+    severity: 'major',
+    counteredBy: ['armor_break', 'lightning', 'expose'],
+  },
+  flying: {
+    id: 'flying',
+    name: 'Flying',
+    description: 'Enemies out of melee reach',
+    category: 'enemy_type',
+    severity: 'minor',
+    counteredBy: ['snipe', 'volley'],
+  },
+  evasive: {
+    id: 'evasive',
+    name: 'Evasive',
+    description: 'Hard to hit enemies',
+    category: 'enemy_type',
+    severity: 'minor',
+    counteredBy: ['precision', 'aoe_blast'],
+  },
+  fast_enemies: {
+    id: 'fast_enemies',
+    name: 'Fast Enemies',
+    description: 'Quick attackers',
+    category: 'enemy_type',
+    severity: 'minor',
+    counteredBy: ['ice', 'slow'],
+  },
+  bosses: {
+    id: 'bosses',
+    name: 'Bosses',
+    description: 'High HP single targets',
+    category: 'enemy_type',
+    severity: 'deadly',
+    counteredBy: ['execute', 'channel'],
+  },
+
+  // STATUS THREATS
+  poison: {
+    id: 'poison',
+    name: 'Poison',
+    description: 'Damage over time',
+    category: 'status',
+    severity: 'minor',
+    counteredBy: ['cleanse', 'regen'],
+  },
+  curses: {
+    id: 'curses',
+    name: 'Curses',
+    description: 'Stat debuffs',
+    category: 'status',
+    severity: 'major',
+    counteredBy: ['decurse', 'dispel'],
+  },
+  disease: {
+    id: 'disease',
+    name: 'Disease',
+    description: 'Spreading affliction',
+    category: 'status',
+    severity: 'major',
+    counteredBy: ['cleanse', 'immunity'],
+  },
+  stuns: {
+    id: 'stuns',
+    name: 'Stuns',
+    description: 'Incapacitates heroes',
+    category: 'status',
+    severity: 'major',
+    counteredBy: ['immunity', 'shields'],
+  },
+  enraged: {
+    id: 'enraged',
+    name: 'Enraged',
+    description: 'Buffed enemies',
+    category: 'status',
+    severity: 'minor',
+    counteredBy: ['weaken', 'dispel'],
+  },
+  enemy_buffs: {
+    id: 'enemy_buffs',
+    name: 'Enemy Buffs',
+    description: 'Shields and damage boosts',
+    category: 'status',
+    severity: 'minor',
+    counteredBy: ['dispel', 'silence'],
+  },
+
+  // MECHANIC THREATS
+  boss_focus: {
+    id: 'boss_focus',
+    name: 'Boss Focus',
+    description: 'Boss targets one hero',
+    category: 'mechanic',
+    severity: 'major',
+    counteredBy: ['taunt', 'intercept'],
+  },
+  time_pressure: {
+    id: 'time_pressure',
+    name: 'Time Pressure',
+    description: 'DPS check / timer',
+    category: 'mechanic',
+    severity: 'major',
+    counteredBy: ['frenzy', 'execute'],
+  },
+  ambush: {
+    id: 'ambush',
+    name: 'Ambush',
+    description: 'Surprise attacks',
+    category: 'mechanic',
+    severity: 'minor',
+    counteredBy: ['scout', 'traps'],
+  },
+  fleeing: {
+    id: 'fleeing',
+    name: 'Fleeing',
+    description: 'Enemies try to escape',
+    category: 'mechanic',
+    severity: 'minor',
+    counteredBy: ['charge', 'slow'],
+  },
+  summoners: {
+    id: 'summoners',
+    name: 'Summoners',
+    description: 'Spawn adds constantly',
+    category: 'mechanic',
+    severity: 'major',
+    counteredBy: ['silence', 'snipe'],
+  },
+  regenerators: {
+    id: 'regenerators',
+    name: 'Regenerators',
+    description: 'Enemies heal themselves',
+    category: 'mechanic',
+    severity: 'minor',
+    counteredBy: ['fire', 'execute'],
+  },
 }
 
+// Calculate penalty for uncountered threat
 export function calculateThreatPenalty(
-  heroThreats: string[],
-  zoneThreats: string[]
-): Partial<Stats> {
-  const penalty: Partial<Stats> = { combat: 0, utility: 0, survival: 0 }
-  
-  zoneThreats.forEach(threatId => {
-    const threat = getThreatById(threatId as ThreatType)
-    if (threat) {
-      // Check if hero has counter threats
-      const hasCounter = threat.counterThreats.some(counter => 
-        heroThreats.includes(counter)
-      )
-      
-      if (!hasCounter) {
-        // Apply penalty if no counter
-        if (threat.statPenalty.combat) penalty.combat! += threat.statPenalty.combat
-        if (threat.statPenalty.utility) penalty.utility! += threat.statPenalty.utility
-        if (threat.statPenalty.survival) penalty.survival! += threat.statPenalty.survival
-      }
-    }
-  })
-  
-  return penalty
+  threat: Threat,
+  difficulty: ZoneDifficulty,
+  hasCounter: boolean
+): number {
+  if (hasCounter) {
+    return -5 // Bonus for countering
+  }
+
+  const basePenalty = SEVERITY_BASE_PENALTY[threat.severity]
+  const multiplier = {
+    easy: 0.5,
+    medium: 1.0,
+    hard: 1.5,
+    extreme: 2.0,
+  }[difficulty]
+
+  return basePenalty * multiplier
 }
