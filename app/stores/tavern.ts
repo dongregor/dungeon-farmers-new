@@ -41,15 +41,29 @@ export const useTavernStore = defineStore('tavern', {
     },
 
     async lockHero(slotIndex: number) {
-      await $fetch(`/api/tavern/lock/${slotIndex}`, { method: 'POST' })
-      this.slots[slotIndex].isLocked = true
-      this.usedLockSlots++
+      if (slotIndex < 0 || slotIndex >= this.slots.length) {
+        throw new Error('Invalid slot index')
+      }
+      try {
+        await $fetch(`/api/tavern/lock/${slotIndex}`, { method: 'POST' })
+        this.slots[slotIndex].isLocked = true
+        this.usedLockSlots++
+      } catch (error) {
+        throw error
+      }
     },
 
     async unlockHero(slotIndex: number) {
-      await $fetch(`/api/tavern/unlock/${slotIndex}`, { method: 'POST' })
-      this.slots[slotIndex].isLocked = false
-      this.usedLockSlots--
+      if (slotIndex < 0 || slotIndex >= this.slots.length) {
+        throw new Error('Invalid slot index')
+      }
+      try {
+        await $fetch(`/api/tavern/unlock/${slotIndex}`, { method: 'POST' })
+        this.slots[slotIndex].isLocked = false
+        this.usedLockSlots--
+      } catch (error) {
+        throw error
+      }
     }
   }
 })
