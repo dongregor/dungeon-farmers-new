@@ -41,7 +41,7 @@ export function calculateRequiredPower(subzone: Subzone): number {
   const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[subzone.difficulty]
   const threatMultiplier = 1 + (subzone.threats.length * 0.1)
 
-  return Math.round(basePower * difficultyMultiplier * threatMultiplier)
+  return Math.max(1, Math.round(basePower * difficultyMultiplier * threatMultiplier))
 }
 
 /**

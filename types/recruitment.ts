@@ -1,10 +1,10 @@
 import type { Rarity } from './base'
-import type { Hero } from './hero'
+import type { TavernHero } from './hero'
 
 // Tavern slot (one hero available for recruitment)
 export interface TavernSlot {
   index: number
-  hero: Hero | null
+  hero: TavernHero | null
   rarity: Rarity
   isLocked: boolean
   lockedUntil?: string // ISO timestamp

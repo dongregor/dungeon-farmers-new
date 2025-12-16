@@ -3,14 +3,18 @@ import type { TavernHero } from '~~/types'
 import { getArchetypeById } from '~~/types/archetypes'
 
 const props = defineProps<{
-  hero: TavernHero
+  hero: TavernHero | null
   slotIndex: number
   isLocked: boolean
 }>()
 
 const emit = defineEmits(['recruit', 'lock', 'unlock'])
 
-const archetype = computed(() => getArchetypeById(props.hero.archetype))
+const archetype = computed(() => props.hero ? getArchetypeById(props.hero.archetype) : null)
+
+const borderColor = computed(() => {
+    return props.hero ? (rarityColors[props.hero.rarity as keyof typeof rarityColors] || 'border-gray-600') : 'border-gray-600'
+})
 
 const rarityColors = {
   common: 'border-common',
@@ -34,14 +38,14 @@ function handleLockToggle() {
 </script>
 
 <template>
-  <div class="bg-gray-800 rounded-lg overflow-hidden border-2" :class="rarityColors[hero.rarity]">
-    <div class="p-4">
+  <div class="bg-gray-800 rounded-lg overflow-hidden border-2" :class="borderColor">
+    <div v-if="hero" class="p-4">
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-lg font-bold text-guild-gold">{{ hero.name }}</h3>
         <div class="flex items-center gap-2">
           <span class="text-sm text-gray-400 capitalize">{{ hero.rarity }}</span>
-          <button 
-            @click="handleLockToggle" 
+          <button
+            @click="handleLockToggle"
             class="text-xl hover:text-guild-gold transition-colors"
             :title="isLocked ? 'Unlock this hero' : 'Lock this hero'"
           >
@@ -64,10 +68,10 @@ function handleLockToggle() {
       </div>
 
       <div class="flex gap-2 flex-wrap mb-3">
-        <span v-for="trait in hero.gameplayTraits.slice(0, 3)" 
-              :key="trait.traitId" 
+        <span v-for="trait in (hero.gameplayTraits || []).slice(0, 3)"
+              :key="trait.traitId"
               class="text-xs bg-gray-700 px-2 py-1 rounded">
-          {{ trait.traitId.replace('_', ' ') }}
+          {{ trait.traitId.replaceAll('_', ' ') }}
         </span>
       </div>
 
@@ -80,6 +84,9 @@ function handleLockToggle() {
           Recruit ({{ hero.recruitCost }} Gold)
         </button>
       </div>
+    </div>
+    <div v-else class="p-4 flex items-center justify-center h-full min-h-[200px]">
+      <span class="text-gray-500">Empty Slot</span>
     </div>
   </div>
 </template>

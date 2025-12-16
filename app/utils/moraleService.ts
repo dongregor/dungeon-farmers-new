@@ -82,7 +82,7 @@ export function updateMoraleAfterExpedition(
   // Base expedition fatigue (based on duration, -5 to -15)
   const durationHours = durationMinutes / 60
   const fatigueRange = MORALE_CHANGES.completeExpedition
-  const fatigueAmount = Math.round(fatigueRange.min + (fatigueRange.max - fatigueRange.min) * Math.min(1, durationHours / 2))
+  const fatigueAmount = Math.round(fatigueRange.max + (fatigueRange.min - fatigueRange.max) * Math.min(1, durationHours / 2))
   totalChange += fatigueAmount
 
   // Event modifiers
