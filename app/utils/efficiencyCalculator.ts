@@ -4,11 +4,15 @@ import { DIFFICULTY_MULTIPLIERS } from '~~/types/base'
 /**
  * Calculate expedition efficiency based on team power vs required power
  * Returns a percentage (60-150%) that modifies rewards
+ *
+ * @param heroes - Team of heroes
+ * @param subzone - Target subzone
+ * @param threatCounterResult - Optional pre-calculated threat counter result (for performance)
  */
 export function calculateEfficiency (
   heroes: Hero[],
   subzone: Subzone,
-  countersThreats: boolean = false
+  threatCounterResult?: ReturnType<typeof checkThreatCounters>
 ): number {
   const teamPower = calculateTeamPower(heroes)
   const requiredPower = calculateRequiredPower(subzone)
@@ -17,10 +21,15 @@ export function calculateEfficiency (
   const powerRatio = teamPower / requiredPower
   let efficiency = 60 + (powerRatio * 40) // 60-100% base range
 
-  // Bonus for countering threats
-  if (countersThreats) {
-    efficiency += 20
-  }
+  // Calculate threat counter result if not provided
+  const threatResult = threatCounterResult ?? checkThreatCounters(heroes, subzone)
+
+  // Bonus for countered threats (+5% per countered threat)
+  efficiency += threatResult.counteredThreats.length * 5
+
+  // Penalty for uncountered threats (scaled by difficulty)
+  const threatPenalty = calculateThreatPenalty(subzone, threatResult.uncounteredThreats)
+  efficiency -= threatPenalty
 
   // Cap efficiency at 60-150%
   return Math.max(60, Math.min(150, Math.round(efficiency)))

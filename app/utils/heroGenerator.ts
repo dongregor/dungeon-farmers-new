@@ -3,6 +3,7 @@ import type {
   Hero,
   TavernHero,
   Rarity,
+  SlotRarity,
   Stats,
   Archetype,
   Culture,
@@ -191,7 +192,7 @@ function calculatePower(stats: Stats, gameplayTraits: GameplayTrait[]): number {
 }
 
 // Main hero generation function
-export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt' | 'isOnExpedition' | 'isStationed' | 'stationedZoneId' | 'morale' | 'moraleLastUpdate'> {
+export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt' | 'isOnExpedition' | 'isStationed' | 'stationedZoneId' | 'morale' | 'moraleValue' | 'moraleLastUpdate'> {
   const rarity = options.forceRarity ?? generateRarity()
   const archetype = options.forceArchetype ?? generateArchetype()
   const gender = options.forceGender ?? generateGender()
@@ -228,7 +229,7 @@ export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'i
 }
 
 // Generate tavern hero (for recruitment)
-export function generateTavernHero(slotRarity: Rarity | 'epic_plus'): TavernHero {
+export function generateTavernHero(slotRarity: SlotRarity): TavernHero {
   // Epic+ slot can generate epic or legendary
   const rarity: Rarity = slotRarity === 'epic_plus'
     ? (Math.random() < 0.8 ? 'epic' : 'legendary')
@@ -236,13 +237,13 @@ export function generateTavernHero(slotRarity: Rarity | 'epic_plus'): TavernHero
 
   const hero = generateHero({ forceRarity: rarity })
 
-  const refreshTime = new Date()
-  refreshTime.setHours(refreshTime.getHours() + TAVERN_REFRESH_HOURS)
+  const expiresAt = new Date()
+  expiresAt.setHours(expiresAt.getHours() + TAVERN_REFRESH_HOURS)
 
   return {
     ...hero,
-    hireCostGold: RECRUITMENT_COSTS[rarity],
-    hireCostGems: 0,
-    refreshTime: refreshTime.toISOString(),
+    recruitCost: RECRUITMENT_COSTS[rarity],
+    isLocked: false,
+    expiresAt: expiresAt.toISOString(),
   }
 }

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
-import type { TavernHero, TavernState } from '~~/types'
+import type { TavernHero, TavernSlot, TavernState } from '~~/types'
 
 export const useTavernStore = defineStore('tavern', {
   state: () => ({
-    slots: [] as TavernHero[],
+    slots: [] as TavernSlot[],
     lockSlots: 1,
     usedLockSlots: 0,
     lastRefresh: '',
@@ -28,16 +28,21 @@ export const useTavernStore = defineStore('tavern', {
         this.lockSlots = data.lockSlots
         this.usedLockSlots = data.usedLockSlots
         this.lastRefresh = data.lastRefreshAt
-        this.nextRefresh = data.nextFreeRefresh
+        this.nextRefresh = data.nextRefreshAt
       } finally {
         this.loading = false
       }
     },
 
     async refreshTavern() {
-      const data = await $fetch<{ slots: TavernHero[], nextFreeRefresh: string }>('/api/tavern/refresh', { method: 'POST' })
-      this.slots = data.slots
-      this.nextRefresh = data.nextFreeRefresh
+      const data = await $fetch<{ slots: TavernSlot[], nextRefresh: string }>('/api/tavern/refresh', { method: 'POST' })
+      this.slots = data.slots.map((slot, index) => ({
+        index,
+        hero: slot.hero,
+        rarity: slot.rarity,
+        isLocked: slot.isLocked,
+      }))
+      this.nextRefresh = data.nextRefresh
     },
 
     async lockHero(slotIndex: number) {
@@ -46,7 +51,7 @@ export const useTavernStore = defineStore('tavern', {
       }
       try {
         await $fetch(`/api/tavern/lock/${slotIndex}`, { method: 'POST' })
-        this.slots[slotIndex].isLocked = true
+        this.slots[slotIndex]!.isLocked = true
         this.usedLockSlots++
       } catch (error) {
         throw error
@@ -59,7 +64,7 @@ export const useTavernStore = defineStore('tavern', {
       }
       try {
         await $fetch(`/api/tavern/unlock/${slotIndex}`, { method: 'POST' })
-        this.slots[slotIndex].isLocked = false
+        this.slots[slotIndex]!.isLocked = false
         this.usedLockSlots--
       } catch (error) {
         throw error

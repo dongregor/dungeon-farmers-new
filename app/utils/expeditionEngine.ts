@@ -45,7 +45,7 @@ export function completeExpedition(
   zone: Zone,
   subzone: Subzone
 ): Expedition {
-  const efficiency = calculateEfficiency(heroes, zone, subzone)
+  const efficiency = calculateEfficiency(heroes, subzone)
   const events = generateExpeditionEvents(subzone, heroes, efficiency)
   const rewards = calculateRewards(subzone, efficiency, events)
   const log = generateExpeditionLog({

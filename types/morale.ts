@@ -30,9 +30,9 @@ export const MORALE_CHANGES = {
 }
 
 export function getMoraleState(moraleValue: number): MoraleState {
-  if (moraleValue >= 80) return 'excited'
-  if (moraleValue >= 50) return 'content'
-  if (moraleValue >= 30) return 'tired'
-  if (moraleValue >= 15) return 'frustrated'
+  if (moraleValue >= MORALE_THRESHOLDS.excited.min) return 'excited'
+  if (moraleValue >= MORALE_THRESHOLDS.content.min) return 'content'
+  if (moraleValue >= MORALE_THRESHOLDS.tired.min) return 'tired'
+  if (moraleValue >= MORALE_THRESHOLDS.frustrated.min) return 'frustrated'
   return 'exhausted'
 }

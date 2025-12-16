@@ -129,6 +129,7 @@ export function calculateOfflineProgress(
       result.heroUpdates.set(hero.id, {
         ...existingUpdate,
         morale: recovery.morale as any,
+        moraleValue: recovery.moraleValue,
         moraleLastUpdate: currentTime.toISOString(),
       })
     }

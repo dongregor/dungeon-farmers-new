@@ -23,11 +23,10 @@ export function getMoraleValue(state: MoraleState): number {
 
 // Apply morale change and return new state
 export function applyMoraleChange(
-  currentMorale: MoraleState,
+  currentMoraleValue: number,
   change: number
 ): { morale: MoraleState; moraleValue: number } {
-  const currentValue = getMoraleValue(currentMorale)
-  const newValue = Math.max(0, Math.min(100, currentValue + change))
+  const newValue = Math.max(0, Math.min(100, currentMoraleValue + change))
   const newMorale = getMoraleState(newValue)
 
   return {
@@ -49,14 +48,14 @@ export function calculateMoraleRecovery(hero: Hero): {
   if (hoursRested === 0) {
     return {
       morale: hero.morale,
-      moraleValue: getMoraleValue(hero.morale),
+      moraleValue: hero.moraleValue,
       hoursRested: 0,
     }
   }
 
   // Recovery: +5 per hour
   const recovery = hoursRested * MORALE_CHANGES.rest
-  const result = applyMoraleChange(hero.morale, recovery)
+  const result = applyMoraleChange(hero.moraleValue, recovery)
 
   return {
     ...result,
@@ -93,22 +92,24 @@ export function updateMoraleAfterExpedition(
   if (events.favoriteAlly) totalChange += MORALE_CHANGES.expeditionWithFavoriteAlly
   if (events.sameZoneBoredom) totalChange += MORALE_CHANGES.sameZone3Times
 
-  const result = applyMoraleChange(hero.morale, totalChange)
+  const result = applyMoraleChange(hero.moraleValue, totalChange)
 
   return {
     ...hero,
     morale: result.morale,
+    moraleValue: result.moraleValue,
     moraleLastUpdate: new Date().toISOString(),
   }
 }
 
 // Update hero morale after level up
 export function updateMoraleAfterLevelUp(hero: Hero): Hero {
-  const result = applyMoraleChange(hero.morale, MORALE_CHANGES.levelUp)
+  const result = applyMoraleChange(hero.moraleValue, MORALE_CHANGES.levelUp)
 
   return {
     ...hero,
     morale: result.morale,
+    moraleValue: result.moraleValue,
     moraleLastUpdate: new Date().toISOString(),
   }
 }

@@ -47,6 +47,7 @@ export interface Hero {
 
   // Morale tracking
   morale: MoraleState
+  moraleValue: number  // 0-100, persisted to avoid precision loss
   moraleLastUpdate: string
   
   // Active status
@@ -95,7 +96,7 @@ export interface GuildMaster {
 }
 
 // Tavern hero (available for recruitment)
-export interface TavernHero extends Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt' | 'isOnExpedition' | 'isStationed' | 'stationedZoneId' | 'morale' | 'moraleLastUpdate'> {
+export interface TavernHero extends Omit<Hero, 'id' | 'currentExpeditionId' | 'isFavorite' | 'createdAt' | 'updatedAt' | 'isOnExpedition' | 'isStationed' | 'stationedZoneId' | 'morale' | 'moraleValue' | 'moraleLastUpdate'> {
   recruitCost: number
   isLocked: boolean
   expiresAt: string  // When this hero leaves the tavern

@@ -1,11 +1,14 @@
 import type { Rarity } from './base'
 import type { TavernHero } from './hero'
 
+// Slot rarity (includes special 'epic_plus' for high-tier weighted slots)
+export type SlotRarity = Rarity | 'epic_plus'
+
 // Tavern slot (one hero available for recruitment)
 export interface TavernSlot {
   index: number
   hero: TavernHero | null
-  rarity: Rarity
+  rarity: SlotRarity
   isLocked: boolean
   lockedUntil?: string // ISO timestamp
 }
