@@ -6,14 +6,11 @@ const props = defineProps<{
   hero: TavernHero
   slotIndex: number
   isLocked: boolean
-  onRecruit: (slotIndex: number) => void
-  onLock: (slotIndex: number) => void
-  onUnlock: (slotIndex: number) => void
 }>()
 
 const emit = defineEmits(['recruit', 'lock', 'unlock'])
 
-const archetype = getArchetypeById(props.hero.archetype)
+const archetype = computed(() => getArchetypeById(props.hero.archetype))
 
 const rarityColors = {
   common: 'border-common',
@@ -54,7 +51,7 @@ function handleLockToggle() {
       </div>
 
       <div class="flex items-center gap-2 mb-3">
-        <span class="text-sm bg-gray-700 px-2 py-1 rounded">{{ archetype.name }}</span>
+        <span class="text-sm bg-gray-700 px-2 py-1 rounded">{{ archetype?.name || 'Unknown' }}</span>
         <span class="text-xs text-gray-400">Lvl {{ hero.level }}</span>
       </div>
 
@@ -80,7 +77,7 @@ function handleLockToggle() {
           class="bg-guild-gold text-gray-900 px-4 py-2 rounded font-semibold hover:bg-yellow-500 transition-colors flex-1"
           :disabled="isLocked"
         >
-          Recruit ({{ hero.cost }} Gold)
+          Recruit ({{ hero.recruitCost }} Gold)
         </button>
       </div>
     </div>
