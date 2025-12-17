@@ -103,9 +103,9 @@ describe('Hero Management', () => {
       testHero.equipment.weapon = weapon
 
       // Recalculate power with equipment
-      const newPower = calculateHeroPower(testHero)
+      const newPowerBreakdown = calculateHeroPower(testHero)
 
-      expect(newPower).toBeGreaterThan(initialPower)
+      expect(newPowerBreakdown.total).toBeGreaterThan(initialPower)
     })
 
     it('should handle full equipment set', () => {
