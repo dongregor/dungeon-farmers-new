@@ -85,7 +85,7 @@ export default defineEventHandler(async (event) => {
     // For now, we'll assume it's available
 
     // Calculate team power (sum of hero combat stats)
-    const teamPower = heroes.reduce((sum: number, hero: Hero) => sum + hero.stats.combat, 0)
+    const teamPower = heroes.reduce((sum: number, hero: Hero) => sum + hero.power, 0)
 
     // Get subzone duration from zone data
     // TODO: Fetch actual subzone data
