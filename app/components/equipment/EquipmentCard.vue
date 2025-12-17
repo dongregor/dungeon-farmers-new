@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Equipment } from '~~/types'
-import { getEquipmentTraitById, formatTraitDescription } from '~/data/equipmentTraits'
+import { formatTraitDescription } from '~/data/equipmentTraits'
 
 const props = defineProps<{
   equipment: Equipment
