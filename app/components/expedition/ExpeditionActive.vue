@@ -198,7 +198,7 @@ const isComplete = computed(() => {
 
 function calculateTimeRemaining() {
   const now = new Date().getTime()
-  const endTime = new Date(props.expedition.endTime).getTime()
+  const endTime = new Date(props.expedition.completesAt).getTime()
   const remaining = Math.max(0, endTime - now)
 
   timeRemaining.value = remaining
