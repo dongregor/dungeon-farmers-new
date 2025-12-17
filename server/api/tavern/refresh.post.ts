@@ -100,8 +100,8 @@ export default defineEventHandler(async (event) => {
   // Calculate next refresh time
   const nextRefresh = new Date(now.getTime() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000)
 
-  // Update tavern state in database
-  const { error: updateError } = await client
+  // Update tavern state in database (with optimistic concurrency control)
+  const { data: updateResult, error: updateError } = await client
     .from('tavern_state')
     .update({
       slots: newSlots,
@@ -110,10 +110,20 @@ export default defineEventHandler(async (event) => {
       updated_at: now.toISOString(),
     })
     .eq('player_id', player.id)
+    .eq('updated_at', tavernState.updated_at)  // Version check
+    .select('updated_at')
 
   if (updateError) {
     console.error('Error updating tavern state:', updateError)
     throw createError({ statusCode: 500, message: 'Failed to refresh tavern' })
+  }
+
+  // Check if update affected any rows (optimistic lock succeeded)
+  if (!updateResult || updateResult.length === 0) {
+    throw createError({
+      statusCode: 409,
+      message: 'Tavern state was modified by another request. Please try again.',
+    })
   }
 
   // Deduct gold if this was a paid refresh (atomic conditional update)

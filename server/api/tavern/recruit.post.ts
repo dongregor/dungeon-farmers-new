@@ -131,7 +131,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Remove hero from tavern slot
+    // Remove hero from tavern slot (with optimistic concurrency control)
     const updatedSlots = [...slots]
     updatedSlots[slotIndex] = {
       ...slot,
@@ -139,22 +139,37 @@ export default defineEventHandler(async (event) => {
       isLocked: false,
     }
 
-    const { error: tavernError } = await client
+    // Optimistic update - only succeeds if updated_at hasn't changed
+    const { data: tavernUpdateResult, error: tavernError } = await client
       .from('tavern_state')
       .update({
         slots: updatedSlots,
         updated_at: now,
       })
       .eq('player_id', player.id)
+      .eq('updated_at', tavernState.updated_at)  // Version check
+      .select('updated_at')
 
     if (tavernError) {
       console.error('Error updating tavern state:', tavernError)
       // Rollback hero creation and gold deduction
       await client.from('heroes').delete().eq('id', newHero.id)
       await client.from('players').update({ gold: player.gold }).eq('id', player.id)
-      throw createError({ 
-        statusCode: 500, 
-        message: 'Failed to update tavern after recruitment' 
+      throw createError({
+        statusCode: 500,
+        message: 'Failed to update tavern after recruitment'
+      })
+    }
+
+    // Check if tavern update affected any rows (optimistic lock succeeded)
+    if (!tavernUpdateResult || tavernUpdateResult.length === 0) {
+      console.error('Tavern state conflict - concurrent modification detected')
+      // Rollback hero creation and gold deduction
+      await client.from('heroes').delete().eq('id', newHero.id)
+      await client.from('players').update({ gold: player.gold }).eq('id', player.id)
+      throw createError({
+        statusCode: 409,
+        message: 'Tavern state was modified by another request. Please try again.',
       })
     }
 
