@@ -41,5 +41,23 @@ export const useInventoryStore = defineStore('inventory', {
       }
       return data.equipment
     },
+
+    async unequipItem(equipmentId: string) {
+      const data = await $fetch<{ equipment: Equipment }>(`/api/equipment/${equipmentId}/unequip`, {
+        method: 'POST',
+      })
+      const index = this.inventory.findIndex(e => e.id === equipmentId)
+      if (index !== -1) {
+        this.inventory[index] = data.equipment
+      }
+      return data.equipment
+    },
+
+    async deleteItem(equipmentId: string) {
+      await $fetch(`/api/equipment/${equipmentId}`, {
+        method: 'DELETE',
+      })
+      this.inventory = this.inventory.filter(e => e.id !== equipmentId)
+    },
   }
 })
