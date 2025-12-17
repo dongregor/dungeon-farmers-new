@@ -150,6 +150,19 @@ export function calculateExpectedLootQuality(params: {
     totalWeight += entry.weight
   }
 
+  if (totalWeight === 0) {
+    return {
+      averageItemLevel: itemLevel,
+      commonChance: 0,
+      uncommonChance: 0,
+      rareChance: 0,
+      epicChance: 0,
+      legendaryChance: 0,
+      mythicChance: 0,
+      masteryBonus: (masteryBonus - 1) * 100,
+    }
+  }
+
   return {
     averageItemLevel: itemLevel,
     commonChance: ((rarityCounts.common || 0) / totalWeight) * 100,
