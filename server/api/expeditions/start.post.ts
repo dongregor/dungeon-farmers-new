@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Check if heroes exist and are available
-    const { data: heroes, error: heroesError } = await supabase
+    const { data: rawHeroes, error: heroesError } = await supabase
       .from('heroes')
       .select('*')
       .in('id', heroIds)
@@ -55,30 +55,33 @@ export default defineEventHandler(async (event) => {
 
     if (heroesError) throw heroesError
 
-    if (!heroes || heroes.length !== heroIds.length) {
+    if (!rawHeroes || rawHeroes.length !== heroIds.length) {
       throw createError({
         statusCode: 404,
         statusMessage: 'One or more heroes not found'
       })
     }
 
+    // Map Supabase data to camelCase types immediately
+    const heroes = rawHeroes.map(mapSupabaseHeroToHero)
+
     // Check if any hero is busy
-    const busyHeroes = heroes.filter((h: Hero) => h.isOnExpedition || h.isStationed)
+    const busyHeroes = heroes.filter(h => h.isOnExpedition || h.isStationed)
     if (busyHeroes.length > 0) {
       throw createError({
         statusCode: 400,
         statusMessage: 'HERO_BUSY',
-        data: { busyHeroes: busyHeroes.map((h: Hero) => h.name) }
+        data: { busyHeroes: busyHeroes.map(h => h.name) }
       })
     }
 
     // Check if any hero is exhausted (morale < 20)
-    const exhaustedHeroes = heroes.filter((h: Hero) => h.moraleValue < 20)
+    const exhaustedHeroes = heroes.filter(h => h.moraleValue < 20)
     if (exhaustedHeroes.length > 0) {
       throw createError({
         statusCode: 400,
         statusMessage: 'HERO_EXHAUSTED',
-        data: { exhaustedHeroes: exhaustedHeroes.map((h: Hero) => h.name) }
+        data: { exhaustedHeroes: exhaustedHeroes.map(h => h.name) }
       })
     }
 
@@ -86,7 +89,7 @@ export default defineEventHandler(async (event) => {
     // For now, we'll assume it's available
 
     // Calculate team power (sum of hero power)
-    const teamPower = heroes.reduce((sum: number, hero: Hero) => sum + (hero.power ?? 0), 0)
+    const teamPower = heroes.reduce((sum, hero) => sum + (hero.power ?? 0), 0)
 
     // Get subzone duration from zone data
     const { ZONES } = await import('~/data/zones')
@@ -130,6 +133,8 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .update({
         status: 'expedition',
+        is_on_expedition: true,
+        current_expedition_id: expedition.id,
         updated_at: now.toISOString()
       })
       .in('id', heroIds)
