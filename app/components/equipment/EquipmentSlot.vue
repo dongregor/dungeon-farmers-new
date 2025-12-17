@@ -20,6 +20,15 @@ const rarityColors = {
   mythic: 'border-mythic bg-mythic/10'
 }
 
+const rarityTextColors = {
+  common: 'text-common',
+  uncommon: 'text-uncommon',
+  rare: 'text-rare',
+  epic: 'text-epic',
+  legendary: 'text-legendary',
+  mythic: 'text-mythic'
+}
+
 const slotIcons = {
   weapon: '⚔️',
   armor: '🛡️',
@@ -68,7 +77,7 @@ function handleClick() {
       </div>
 
       <div class="flex-1 flex flex-col justify-end">
-        <div class="text-sm font-bold truncate" :class="`text-${equipment.rarity}`">
+        <div class="text-sm font-bold truncate" :class="rarityTextColors[equipment.rarity]">
           {{ equipment.name }}
         </div>
         <div class="flex items-center gap-2 mt-1">
