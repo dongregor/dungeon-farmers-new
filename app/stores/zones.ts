@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import type { Zone, Subzone, ZONE_FAMILIARITY_BENEFITS, SUBZONE_MASTERY_BENEFITS } from '~~/types'
+import type { Zone, Subzone } from '~~/types'
+import { ZONE_FAMILIARITY_BENEFITS, SUBZONE_MASTERY_BENEFITS } from '~~/types'
 
 /**
  * Zone progress tracking (persisted per player)
