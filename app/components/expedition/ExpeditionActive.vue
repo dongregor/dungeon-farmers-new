@@ -86,7 +86,7 @@
       </div>
       <div class="stat-card bg-gray-700 rounded-lg p-4">
         <div class="text-sm text-gray-400 mb-1">Duration</div>
-        <div class="text-2xl font-bold text-gray-300">{{ expedition.duration }}m</div>
+        <div class="text-2xl font-bold text-gray-300">{{ expedition.durationMinutes }}m</div>
       </div>
       <div class="stat-card bg-gray-700 rounded-lg p-4">
         <div class="text-sm text-gray-400 mb-1">Status</div>
