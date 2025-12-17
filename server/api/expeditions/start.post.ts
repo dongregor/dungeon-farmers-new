@@ -84,12 +84,18 @@ export default defineEventHandler(async (event) => {
     // TODO: Check if zone/subzone is unlocked for this player
     // For now, we'll assume it's available
 
-    // Calculate team power (sum of hero combat stats)
-    const teamPower = heroes.reduce((sum: number, hero: Hero) => sum + hero.stats.combat, 0)
+    // Calculate team power (sum of hero power)
+    const teamPower = heroes.reduce((sum: number, hero: Hero) => sum + (hero.power ?? 0), 0)
 
     // Get subzone duration from zone data
-    // TODO: Fetch actual subzone data
-    const duration = 30 // Default 30 minutes for MVP
+    const { ZONES } = await import('~/data/zones')
+    const zone = ZONES.find(z => z.id === zoneId)
+    const subzone = zone?.subzones.find(sz => sz.id === subzoneId)
+
+    // Use actual subzone duration or fall back to 30 minutes
+    const duration = subzone?.baseDuration && subzone.baseDuration > 0
+      ? subzone.baseDuration
+      : 30
 
     // Calculate end time
     const now = new Date()
@@ -126,6 +132,7 @@ export default defineEventHandler(async (event) => {
         updated_at: now.toISOString()
       })
       .in('id', heroIds)
+      .eq('player_id', user.id)
 
     if (updateError) throw updateError
 
@@ -134,6 +141,7 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .select('*')
       .in('id', heroIds)
+      .eq('player_id', user.id)
 
     if (updatedHeroesError) throw updatedHeroesError
 

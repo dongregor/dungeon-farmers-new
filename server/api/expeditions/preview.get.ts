@@ -59,8 +59,8 @@ export default defineEventHandler(async (event) => {
     // Get threat data
     const threats = subzone.threats.map(threatId => THREATS[threatId]).filter(Boolean)
 
-    // Calculate team power
-    const teamPower = (heroes as Hero[]).reduce((sum, hero) => sum + hero.stats.combat, 0)
+    // Calculate team power (guard against missing power values)
+    const teamPower = (heroes as Hero[]).reduce((sum, hero) => sum + (hero.power ?? 0), 0)
 
     // Calculate estimated difficulty (simplified)
     const estimatedDifficulty = subzone.difficulty * 100

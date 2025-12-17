@@ -92,11 +92,6 @@
         </div>
       </div>
 
-      <!-- Discovery Requirement (if not discovered) -->
-      <div v-if="!isDiscovered && subzone.requiredZoneFamiliarity" class="requirement text-xs text-gray-500">
-        Requires {{ subzone.requiredZoneFamiliarity }}% zone familiarity
-      </div>
-
       <!-- Mastery Benefits -->
       <div v-if="masteryBenefits.length > 0" class="benefits">
         <div class="text-xs text-gray-500 mb-1">Active Benefits:</div>
@@ -115,6 +110,11 @@
       <div class="loot text-xs text-gray-500">
         Drops: Equipment, Materials, Gold
       </div>
+    </div>
+
+    <!-- Discovery Requirement (for undiscovered subzones) -->
+    <div v-if="!isDiscovered && subzone.requiredZoneFamiliarity" class="requirement text-xs text-gray-500 mt-2">
+      Requires {{ subzone.requiredZoneFamiliarity }}% zone familiarity
     </div>
   </div>
 </template>

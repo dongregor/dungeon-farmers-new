@@ -128,20 +128,15 @@ export default defineEventHandler(async (event) => {
       updatedHeroes.push(updatedHero as Hero)
     }
 
-    // Update player gold
-    const { data: player, error: playerError } = await supabase
-      .from('players')
-      .select('gold')
-      .eq('id', user.id)
-      .single()
+    // Update player gold (atomic increment to avoid race conditions)
+    const { error: goldUpdateError } = await supabase.rpc('increment_player_gold', {
+      player_id: user.id,
+      amount: gold
+    })
 
-    if (!playerError && player) {
-      await supabase
-        .from('players')
-        .update({
-          gold: player.gold + gold
-        })
-        .eq('id', user.id)
+    if (goldUpdateError) {
+      console.error('Failed to update player gold:', goldUpdateError)
+      // Don't fail the expedition completion, just log the error
     }
 
     // TODO: Update zone progress (familiarity/mastery)

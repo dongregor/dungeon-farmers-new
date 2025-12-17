@@ -80,22 +80,6 @@
         </span>
       </div>
 
-      <!-- Unlock Requirements (if not unlocked) -->
-      <div v-if="!isUnlocked && zone.unlockRequirement" class="requirements mt-3 p-3 bg-gray-900/50 rounded">
-        <div class="text-sm text-gray-400 mb-1">Requirements:</div>
-        <div class="text-xs text-gray-500 space-y-1">
-          <div v-if="zone.unlockRequirement.previousZoneId">
-            Complete: {{ zone.unlockRequirement.previousZoneId }}
-          </div>
-          <div v-if="zone.unlockRequirement.minPower">
-            Minimum Power: {{ zone.unlockRequirement.minPower }}
-          </div>
-          <div v-if="zone.unlockRequirement.questComplete">
-            Complete Quest: {{ zone.unlockRequirement.questComplete }}
-          </div>
-        </div>
-      </div>
-
       <!-- Familiarity Benefits -->
       <div v-if="benefits.length > 0" class="benefits mt-3">
         <div class="text-xs text-gray-500 mb-1">Active Benefits:</div>
@@ -107,6 +91,22 @@
           >
             {{ benefit.threshold }}%: +{{ benefit.benefit.passiveIncome }}% income
           </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unlock Requirements (for locked zones) -->
+    <div v-if="!isUnlocked && zone.unlockRequirement" class="requirements mt-3 p-3 bg-gray-900/50 rounded">
+      <div class="text-sm text-gray-400 mb-1">Requirements:</div>
+      <div class="text-xs text-gray-500 space-y-1">
+        <div v-if="zone.unlockRequirement.previousZoneId">
+          Complete: {{ zone.unlockRequirement.previousZoneId }}
+        </div>
+        <div v-if="zone.unlockRequirement.minPower">
+          Minimum Power: {{ zone.unlockRequirement.minPower }}
+        </div>
+        <div v-if="zone.unlockRequirement.questComplete">
+          Complete Quest: {{ zone.unlockRequirement.questComplete }}
         </div>
       </div>
     </div>
