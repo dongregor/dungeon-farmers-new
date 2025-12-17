@@ -43,14 +43,19 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     async unequipItem(equipmentId: string) {
-      const data = await $fetch<{ equipment: Equipment }>(`/api/equipment/${equipmentId}/unequip`, {
-        method: 'POST',
-      })
-      const index = this.inventory.findIndex(e => e.id === equipmentId)
-      if (index !== -1) {
-        this.inventory[index] = data.equipment
+      try {
+        const data = await $fetch<{ equipment: Equipment }>(`/api/equipment/${equipmentId}/unequip`, {
+          method: 'POST',
+        })
+        const index = this.inventory.findIndex(e => e.id === equipmentId)
+        if (index !== -1) {
+          this.inventory[index] = data.equipment
+        }
+        return data.equipment
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Failed to unequip item'
+        throw error
       }
-      return data.equipment
     },
 
     async deleteItem(equipmentId: string) {
