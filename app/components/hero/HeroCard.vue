@@ -50,24 +50,24 @@ const statTotal = computed(() =>
       </div>
 
       <div class="flex gap-2 flex-wrap">
-        <span v-for="trait in hero.gameplayTraits.slice(0, showDetails ? undefined : 2)" 
-              :key="trait.traitId" 
+        <span v-for="trait in hero.gameplayTraits.slice(0, showDetails ? undefined : 2)"
+              :key="trait.traitId"
               class="text-xs bg-gray-700 px-2 py-1 rounded">
-          {{ trait.traitId.replace('_', ' ') }}
+          {{ trait.traitId.replace(/_/g, ' ') }}
         </span>
-        <span v-if="hero.gameplayTraits.length > (showDetails ? 0 : 2)" 
+        <span v-if="hero.gameplayTraits.length > (showDetails ? 0 : 2)"
               class="text-xs text-gray-500">
           +{{ hero.gameplayTraits.length - (showDetails ? 0 : 2) }} more
         </span>
       </div>
 
-      <div v-if="showDetails && hero.storyTraits.length > 0" class="mt-3 pt-2 border-t border-gray-700">
+      <div v-if="showDetails && hero.storyTraitIds.length > 0" class="mt-3 pt-2 border-t border-gray-700">
         <div class="text-xs text-gray-400 mb-1">Personality:</div>
         <div class="flex gap-2 flex-wrap">
-          <span v-for="trait in hero.storyTraits.slice(0, 3)" 
-                :key="trait.traitId" 
+          <span v-for="traitId in hero.storyTraitIds.slice(0, 3)"
+                :key="traitId"
                 class="text-xs bg-gray-700 px-2 py-1 rounded">
-            {{ trait.traitId.replace('_', ' ') }}
+            {{ traitId.replace(/_/g, ' ') }}
           </span>
         </div>
       </div>

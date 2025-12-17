@@ -97,6 +97,10 @@ export const RECRUITMENT_COSTS: Record<Rarity, number> = {
 // Refresh timing
 export const TAVERN_REFRESH_HOURS = 8
 
+// Manual refresh costs (early refresh before timer)
+export const TAVERN_MANUAL_REFRESH_BASE_COST = 75
+export const TAVERN_MANUAL_REFRESH_INCREMENT = 25 // Per refresh today
+
 // Recruitment request
 export interface RecruitmentRequest {
   slotIndex: number
