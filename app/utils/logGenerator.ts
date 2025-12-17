@@ -257,8 +257,10 @@ export function generateExpeditionLog(
 
 function generateDepartureSection(heroes: Hero[], zone: Zone, subzone: Subzone): LogSection {
   const entries: LogEntry[] = []
+  if (heroes.length === 0) {
+    return { type: 'departure', title: 'Departure', entries: [] }
+  }
   const leader = heroes[0]
-
   // Opening narrative
   const template = randomElement(DEPARTURE_TEMPLATES[zone.type])
   const narrative = fillTemplate(template, {
