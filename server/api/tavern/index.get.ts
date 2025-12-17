@@ -1,5 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { TavernState } from '~~/types'
+import type { TavernSlot, TavernState } from '~~/types'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
   const response: TavernState = {
     slots: tavernState.slots || [],
     lockSlots,
-    usedLockSlots: tavernState.slots?.filter((slot: any) => slot.isLocked).length || 0,
+    usedLockSlots: tavernState.slots?.filter((slot: TavernSlot) => slot.isLocked).length || 0,
     lastRefreshAt: tavernState.last_refresh_at,
     nextRefreshAt: tavernState.next_refresh_at,
   }

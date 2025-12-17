@@ -56,30 +56,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  try {
-    // Delete hero from database
-    const { error: deleteError } = await client
-      .from('heroes')
-      .delete()
-      .eq('id', heroId)
+  // Delete hero from database
+  const { error: deleteError } = await client
+    .from('heroes')
+    .delete()
+    .eq('id', heroId)
 
-    if (deleteError) {
-      console.error('Error retiring hero:', deleteError)
-      throw createError({
-        statusCode: 500,
-        message: 'Failed to retire hero',
-      })
-    }
-
-    return {
-      success: true,
-      message: `${hero.name} has been retired`,
-    }
-  } catch (error: any) {
-    console.error('Retire error:', error)
+  if (deleteError) {
+    console.error('Error retiring hero:', deleteError)
     throw createError({
-      statusCode: 400,
-      message: error.message || 'Failed to retire hero',
+      statusCode: 500,
+      message: 'Failed to retire hero',
     })
+  }
+  return {
+    success: true,
+    message: `${hero.name} has been retired`,
   }
 })
