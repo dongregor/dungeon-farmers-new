@@ -182,5 +182,5 @@ export interface LogEntry {
 export interface PendingLoot {
   expeditionId: string
   items: Equipment[]
-  expiredAt: string    // 48 hours to claim
+  expiresAt: string    // 48 hours to claim
 }

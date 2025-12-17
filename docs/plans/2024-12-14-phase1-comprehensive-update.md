@@ -1148,7 +1148,7 @@ When inventory is full, loot goes to pending storage:
 interface PendingLoot {
   expeditionId: string
   items: Equipment[]
-  expiredAt: string    // 48 hours to claim
+  expiresAt: string    // 48 hours to claim
 }
 ```
 
