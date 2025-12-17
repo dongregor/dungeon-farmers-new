@@ -152,7 +152,7 @@ CREATE TABLE equipment (
   player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
-  slot TEXT NOT NULL CHECK (slot IN ('weapon', 'armor', 'helmet', 'boots', 'accessory1', 'accessory2')),
+  slot TEXT NOT NULL CHECK (slot IN ('weapon', 'head', 'chest', 'hands', 'legs', 'feet', 'accessory')),
   rarity TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic')),
   base_stats JSONB NOT NULL, -- { combat, utility, survival }
   item_level INTEGER NOT NULL,
