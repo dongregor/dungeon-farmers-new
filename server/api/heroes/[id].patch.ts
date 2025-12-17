@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import type { Hero } from '~~/types'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<Hero> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const heroId = getRouterParam(event, 'id')

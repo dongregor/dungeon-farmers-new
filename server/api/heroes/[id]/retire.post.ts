@@ -1,6 +1,11 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
-export default defineEventHandler(async (event) => {
+interface RetireResponse {
+  success: boolean
+  message: string
+}
+
+export default defineEventHandler(async (event): Promise<RetireResponse> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const heroId = getRouterParam(event, 'id')
