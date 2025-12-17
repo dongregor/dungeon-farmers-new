@@ -1,9 +1,9 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Equipment, Hero } from '~~/types'
+import type { Equipment, Hero, EquipmentSlot } from '~~/types'
 
 interface EquipRequest {
   heroId: string
-  slot: string
+  slot: EquipmentSlot
 }
 
 interface EquipResponse {
@@ -13,6 +13,13 @@ interface EquipResponse {
 }
 
 export default defineEventHandler(async (event): Promise<EquipResponse> => {
+  // NOTE: This endpoint performs multiple sequential database updates without a transaction:
+  // 1. Unequip previous item (if exists)
+  // 2. Equip new item
+  // 3. Update hero's equipment mapping
+  // For production, consider using a Supabase RPC function with a database transaction
+  // to ensure atomicity and prevent inconsistent states on partial failures.
+
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const equipmentId = getRouterParam(event, 'id')
@@ -91,7 +98,10 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
       .select()
       .single()
 
-    if (!prevError && prevEquipment) {
+    if (prevError) {
+      console.warn('Failed to unequip previous item:', prevError)
+      // Continue anyway to avoid blocking equip, but this could leave old item in inconsistent state
+    } else if (prevEquipment) {
       unequipped = prevEquipment
     }
   }

@@ -1,9 +1,8 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Equipment, TraitQuality } from '~~/types'
+import type { Equipment, TraitQuality, EquipmentRarity } from '~~/types'
 
 interface UpgradeRequest {
   traitIndex: number
-  goldCost: number
 }
 
 interface UpgradeResponse {
@@ -15,6 +14,42 @@ const QUALITY_PROGRESSION: Record<TraitQuality, TraitQuality | null> = {
   normal: 'magic',
   magic: 'perfect',
   perfect: null, // Already max quality
+}
+
+// Base upgrade costs by quality level
+const BASE_UPGRADE_COSTS: Record<TraitQuality, number> = {
+  normal: 100,   // normal -> magic
+  magic: 500,    // magic -> perfect
+  perfect: 0,    // Cannot upgrade (already max)
+}
+
+// Rarity multipliers for upgrade costs
+const RARITY_COST_MULTIPLIERS: Record<EquipmentRarity, number> = {
+  common: 1.0,
+  uncommon: 1.5,
+  rare: 2.0,
+  epic: 3.0,
+  legendary: 4.0,
+  mythic: 5.0,
+}
+
+/**
+ * Calculate the gold cost to upgrade a trait on equipment
+ * Cost scales with:
+ * - Quality upgrade tier (normal->magic is cheaper than magic->perfect)
+ * - Equipment rarity (mythic costs more than common)
+ * - Item level (higher level = higher cost)
+ */
+function calculateUpgradeCost(
+  currentQuality: TraitQuality,
+  equipmentRarity: EquipmentRarity,
+  itemLevel: number
+): number {
+  const baseCost = BASE_UPGRADE_COSTS[currentQuality]
+  const rarityMultiplier = RARITY_COST_MULTIPLIERS[equipmentRarity]
+  const levelMultiplier = 1 + (itemLevel / 100) // +1% per level
+
+  return Math.floor(baseCost * rarityMultiplier * levelMultiplier)
 }
 
 export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
@@ -31,12 +66,8 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
     throw createError({ statusCode: 400, message: 'Equipment ID required' })
   }
 
-  if (body.traitIndex === undefined || body.goldCost === undefined) {
-    throw createError({ statusCode: 400, message: 'Trait index and gold cost required' })
-  }
-
-  if (body.goldCost <= 0) {
-    throw createError({ statusCode: 400, message: 'Invalid gold cost' })
+  if (body.traitIndex === undefined) {
+    throw createError({ statusCode: 400, message: 'Trait index required' })
   }
 
   // Get player
@@ -48,15 +79,6 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
 
   if (playerError || !player) {
     throw createError({ statusCode: 404, message: 'Player not found' })
-  }
-
-  // Check if player has enough gold
-  if (player.gold < body.goldCost) {
-    throw createError({
-      statusCode: 400,
-      message: 'Insufficient gold',
-      data: { required: body.goldCost, available: player.gold }
-    })
   }
 
   // Get equipment
@@ -92,6 +114,35 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
     })
   }
 
+  // Calculate upgrade cost server-side (NEVER trust client input for pricing)
+  const upgradeCost = calculateUpgradeCost(
+    currentQuality,
+    equipment.rarity as EquipmentRarity,
+    equipment.item_level
+  )
+
+  // Deduct gold FIRST using atomic conditional update
+  // This prevents the player from upgrading if they don't have enough gold
+  // and avoids the data inconsistency issue if equipment update succeeds but gold deduction fails
+  const { data: updatedPlayer, error: goldError } = await client
+    .from('players')
+    .update({
+      gold: player.gold - upgradeCost,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', player.id)
+    .gte('gold', upgradeCost)  // Atomic check: only update if player has enough gold
+    .select('gold')
+    .single()
+
+  if (goldError || !updatedPlayer) {
+    throw createError({
+      statusCode: 400,
+      message: 'Insufficient gold',
+      data: { required: upgradeCost, available: player.gold }
+    })
+  }
+
   // Upgrade the trait
   const updatedTraits = [...traits]
   updatedTraits[body.traitIndex] = {
@@ -112,26 +163,16 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
 
   if (updateError || !updatedEquipment) {
     console.error('Error updating equipment:', updateError)
+    // Rollback: refund the gold since equipment upgrade failed
+    await client
+      .from('players')
+      .update({ gold: player.gold })
+      .eq('id', player.id)
     throw createError({ statusCode: 500, message: 'Failed to upgrade equipment' })
-  }
-
-  // Deduct gold from player
-  const { error: goldError } = await client
-    .from('players')
-    .update({
-      gold: player.gold - body.goldCost,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', player.id)
-
-  if (goldError) {
-    console.error('Error deducting gold:', goldError)
-    // Note: Equipment was already upgraded. In production, this should use a transaction.
-    throw createError({ statusCode: 500, message: 'Failed to deduct gold' })
   }
 
   return {
     equipment: updatedEquipment,
-    goldSpent: body.goldCost,
+    goldSpent: upgradeCost,
   }
 })
