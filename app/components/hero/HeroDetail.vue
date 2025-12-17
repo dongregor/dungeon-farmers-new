@@ -3,7 +3,7 @@ import type { Hero } from '~~/types'
 import { getArchetypeById } from '~~/types/archetypes'
 import { getGameplayTraitById } from '~/data/gameplayTraits'
 import { getStoryTraitById } from '~/data/storyTraits'
-import { getCultureById } from '~/data/cultures'
+import { getCultureInfo } from '~/data/cultures'
 
 const props = defineProps<{
   hero: Hero
@@ -12,7 +12,7 @@ const props = defineProps<{
 const emit = defineEmits(['close'])
 
 const archetype = getArchetypeById(props.hero.archetype)
-const culture = getCultureById(props.hero.culture)
+const culture = getCultureInfo(props.hero.culture)
 
 const rarityColors = {
   common: 'border-common',
@@ -63,7 +63,7 @@ const powerBreakdown = computed(() => {
                 <span class="text-sm bg-gray-700 px-2 py-1 rounded">{{ culture.name }}</span>
               </div>
               <p class="text-gray-300 text-sm mb-2">{{ archetype.description }}</p>
-              <p class="text-gray-400 text-xs italic">{{ culture.flavorText }}</p>
+              <p class="text-gray-400 text-xs italic">{{ culture.description }}</p>
             </div>
 
             <div class="mb-4">

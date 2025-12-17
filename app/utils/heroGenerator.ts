@@ -63,7 +63,7 @@ function generateRarity(): Rarity {
 
 // Generate archetype
 function generateArchetype(): Archetype {
-  const archetypes: Archetype[] = ['tank', 'healer', 'debuffer', 'dps_melee', 'dps_ranged', 'caster']
+  const archetypes: Archetype[] = ['tank', 'healer', 'debuffer', 'melee_dps', 'ranged_dps', 'caster']
   return randomElement(archetypes)
 }
 
