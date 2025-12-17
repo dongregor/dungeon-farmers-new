@@ -134,7 +134,11 @@ export default defineEventHandler(async (event) => {
       .in('id', heroIds)
       .eq('player_id', user.id)
 
-    if (updateError) throw updateError
+    if (updateError) {
+      // Compensate: delete the created expedition
+      await supabase.from('expeditions').delete().eq('id', expedition.id)
+      throw updateError
+    }
 
     // Fetch updated heroes
     const { data: updatedHeroes, error: updatedHeroesError } = await supabase

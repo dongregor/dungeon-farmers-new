@@ -239,9 +239,12 @@ function toggleHero(heroId: string) {
 }
 
 // Watch for hero selection changes to update preview
+const previewError = ref<string | null>(null)
+
 watch(selectedHeroIds, async (newIds) => {
   if (newIds.length > 0) {
     try {
+      previewError.value = null
       preview.value = await $fetch('/api/expeditions/preview', {
         params: {
           zoneId: props.zone.id,
@@ -251,6 +254,8 @@ watch(selectedHeroIds, async (newIds) => {
       })
     } catch (err: any) {
       console.error('Failed to fetch preview:', err)
+      previewError.value = 'Could not load preview'
+      preview.value = null
     }
   } else {
     preview.value = null
@@ -271,8 +276,11 @@ async function startExpedition() {
       autoRepeat: autoRepeat.value,
       stopConditions: stopConditions.value
     })
-
-    emit('started', result.expedition.id)
+    if (result?.expedition?.id) {
+      emit('started', result.expedition.id)
+    } else {
+      throw new Error('Invalid response from server')
+    }
   } catch (err: any) {
     error.value = err.message || 'Failed to start expedition'
   } finally {

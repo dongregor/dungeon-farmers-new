@@ -42,6 +42,7 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .select('*')
       .in('id', expedition.hero_ids)
+      .eq('player_id', user.id)
 
     if (heroesError) throw heroesError
 

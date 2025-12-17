@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
       id: subzoneId,
       name: 'Test Subzone',
       baseDuration: 30,
-      threats: ['heavy_damage', 'swarms'] as string[],
+      threats: ['physical_burst', 'swarms'] as string[],
       difficulty: 1
     }
 
