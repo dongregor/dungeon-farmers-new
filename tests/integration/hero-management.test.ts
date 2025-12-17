@@ -294,7 +294,7 @@ describe('Hero Management', () => {
       testHero.moraleValue -= 10
 
       if (testHero.moraleValue >= 80) {
-        testHero.morale = 'energized'
+        testHero.morale = 'excited'
       } else if (testHero.moraleValue >= 50) {
         testHero.morale = 'content'
       } else if (testHero.moraleValue >= 20) {
