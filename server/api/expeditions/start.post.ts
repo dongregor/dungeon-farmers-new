@@ -150,8 +150,8 @@ export default defineEventHandler(async (event) => {
     if (updatedHeroesError) throw updatedHeroesError
 
     return {
-      expedition: expedition as Expedition,
-      heroesUpdated: updatedHeroes as Hero[]
+      expedition: mapSupabaseExpeditionToExpedition(expedition),
+      heroesUpdated: (updatedHeroes || []).map(mapSupabaseHeroToHero)
     }
   } catch (error: any) {
     if (error.statusCode) throw error
