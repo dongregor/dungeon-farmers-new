@@ -113,10 +113,10 @@ function weightedRandom(weights: Record<string, number>): string {
 }
 
 // Generate timestamp for event (relative to expedition start)
-function generateEventTimestamp(expeditionStartedAt: Date, index: number, totalEvents: number): string {
+function generateEventTimestamp(expeditionStartedAt: Date, index: number, totalEvents: number, durationMinutes: number): string {
   // Distribute events throughout the expedition duration
   const progress = totalEvents > 1 ? index / (totalEvents - 1) : 0.5
-  const offset = Math.floor(progress * 1000 * 60) // Spread events over time
+  const offset = Math.floor(progress * durationMinutes * 60 * 1000) // Spread events across actual duration
   const eventTime = new Date(expeditionStartedAt.getTime() + offset)
   return eventTime.toISOString()
 }
@@ -162,7 +162,7 @@ export function generateExpeditionEvents(
 
     if (event) {
       // ✅ FIXED: Add timestamp to all events
-      event.timestamp = generateEventTimestamp(startTime, i, eventCount)
+      event.timestamp = generateEventTimestamp(startTime, i, eventCount, subzone.baseDuration)
       events.push(event)
     }
   }
@@ -294,7 +294,7 @@ function generateTagCheck(subzone: Subzone, heroes: Hero[], severity: SkillCheck
   // Find hero with counter tag
   const requiredTags = threat.counteredBy
   const selectedHero = heroes.find(hero =>
-    hero.archetypeTags.some(tag => requiredTags.includes(tag as ArchetypeTag))
+    hero.archetypeTags.some(tag => requiredTags.includes(tag))
   )
 
   const passed = selectedHero !== undefined
@@ -512,8 +512,8 @@ function generateChoiceEvent(subzone: Subzone, heroes: Hero[]): ExpeditionEvent 
 // ========================================
 
 function generateRareEvent(subzone: Subzone, heroes: Hero[], efficiency: number): ExpeditionEvent | null {
-  // Higher efficiency increases rare event chance
-  const efficiencyBonus = Math.max(0, efficiency - 1.0) // 0.1 for 110% efficiency, etc.
+  // Higher efficiency increases rare event chance (efficiency is a percentage: 100 = 100%)
+  const efficiencyBonus = Math.max(0, (efficiency / 100) - 1.0) // 0.1 for 110% efficiency, etc.
   const baseChance = 0.05
   const totalChance = baseChance + efficiencyBonus
 

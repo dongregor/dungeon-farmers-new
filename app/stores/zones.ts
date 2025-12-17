@@ -27,8 +27,8 @@ export const useZoneStore = defineStore('zones', {
     zones: [] as Zone[],
 
     // Player progress (from database)
-    zoneProgress: new Map<string, ZoneProgress>(),
-    subzoneProgress: new Map<string, SubzoneProgress>(),
+    zoneProgress: {} as Record<string, ZoneProgress>,
+    subzoneProgress: {} as Record<string, SubzoneProgress>,
 
     loading: false,
     error: null as string | null,
@@ -42,17 +42,17 @@ export const useZoneStore = defineStore('zones', {
       const zone = state.zones.find(z => z.id === id)
       if (!zone) return undefined
 
-      const progress = state.zoneProgress.get(id)
+      const progress = state.zoneProgress[id]
       return {
         ...zone,
         familiarity: progress?.familiarity ?? 0,
         isUnlocked: progress?.isUnlocked ?? false,
         isMastered: progress?.isMastered ?? false,
         subzones: zone.subzones.map(sz => {
-          const szProgress = state.subzoneProgress.get(sz.id)
+          const szProgress = state.subzoneProgress[sz.id]
           return {
             ...sz,
-            isDiscovered: progress?.discoveredSubzones.includes(sz.id) ?? false,
+            isDiscovered: progress?.discoveredSubzones?.includes(sz.id) ?? false,
             mastery: szProgress?.mastery ?? 0,
           }
         }),
@@ -64,9 +64,9 @@ export const useZoneStore = defineStore('zones', {
      */
     unlockedZones: (state) => {
       return state.zones
-        .filter(z => state.zoneProgress.get(z.id)?.isUnlocked ?? false)
+        .filter(z => state.zoneProgress[z.id]?.isUnlocked ?? false)
         .map(z => {
-          const progress = state.zoneProgress.get(z.id)!
+          const progress = state.zoneProgress[z.id]!
           return {
             ...z,
             familiarity: progress.familiarity,
@@ -83,13 +83,13 @@ export const useZoneStore = defineStore('zones', {
       const zone = state.zones.find(z => z.id === zoneId)
       if (!zone) return []
 
-      const progress = state.zoneProgress.get(zoneId)
+      const progress = state.zoneProgress[zoneId]
       if (!progress) return []
 
       return zone.subzones.filter(sz =>
         progress.discoveredSubzones.includes(sz.id)
       ).map(sz => {
-        const szProgress = state.subzoneProgress.get(sz.id)
+        const szProgress = state.subzoneProgress[sz.id]
         return {
           ...sz,
           isDiscovered: true,
@@ -108,12 +108,12 @@ export const useZoneStore = defineStore('zones', {
       const subzone = zone.subzones.find(sz => sz.id === subzoneId)
       if (!subzone) return undefined
 
-      const progress = state.zoneProgress.get(zoneId)
-      const szProgress = state.subzoneProgress.get(subzoneId)
+      const progress = state.zoneProgress[zoneId]
+      const szProgress = state.subzoneProgress[subzoneId]
 
       return {
         ...subzone,
-        isDiscovered: progress?.discoveredSubzones.includes(subzoneId) ?? false,
+        isDiscovered: progress?.discoveredSubzones?.includes(subzoneId) ?? false,
         mastery: szProgress?.mastery ?? 0,
       }
     },
@@ -122,22 +122,22 @@ export const useZoneStore = defineStore('zones', {
      * Check if zone is unlocked
      */
     isZoneUnlocked: (state) => (zoneId: string): boolean => {
-      return state.zoneProgress.get(zoneId)?.isUnlocked ?? false
+      return state.zoneProgress[zoneId]?.isUnlocked ?? false
     },
 
     /**
      * Check if subzone is discovered
      */
     isSubzoneDiscovered: (state) => (zoneId: string, subzoneId: string): boolean => {
-      const progress = state.zoneProgress.get(zoneId)
-      return progress?.discoveredSubzones.includes(subzoneId) ?? false
+      const progress = state.zoneProgress[zoneId]
+      return progress?.discoveredSubzones?.includes(subzoneId) ?? false
     },
 
     /**
      * Get zone familiarity benefits earned
      */
     getZoneBenefits: (state) => (zoneId: string) => {
-      const progress = state.zoneProgress.get(zoneId)
+      const progress = state.zoneProgress[zoneId]
       if (!progress) return []
 
       const familiarity = progress.familiarity
@@ -158,7 +158,7 @@ export const useZoneStore = defineStore('zones', {
      * Get subzone mastery benefits earned
      */
     getSubzoneBenefits: (state) => (subzoneId: string) => {
-      const progress = state.subzoneProgress.get(subzoneId)
+      const progress = state.subzoneProgress[subzoneId]
       if (!progress) return []
 
       const mastery = progress.mastery
@@ -180,7 +180,7 @@ export const useZoneStore = defineStore('zones', {
      */
     totalPassiveIncomeBonus: (state) => {
       let total = 0
-      for (const [zoneId, progress] of state.zoneProgress.entries()) {
+      for (const [zoneId, progress] of Object.entries(state.zoneProgress)) {
         const benefits = ZONE_FAMILIARITY_BENEFITS
         for (const [threshold, benefit] of Object.entries(benefits)) {
           if (progress.familiarity >= parseInt(threshold)) {
@@ -196,14 +196,14 @@ export const useZoneStore = defineStore('zones', {
      */
     availableToUnlock: (state) => {
       return state.zones.filter(zone => {
-        const progress = state.zoneProgress.get(zone.id)
+        const progress = state.zoneProgress[zone.id]
         if (progress?.isUnlocked) return false
 
         // Check unlock requirements
         const req = zone.unlockRequirement
 
         if (req.previousZoneId) {
-          const prevProgress = state.zoneProgress.get(req.previousZoneId)
+          const prevProgress = state.zoneProgress[req.previousZoneId]
           if (!prevProgress?.isUnlocked) return false
         }
 
@@ -245,14 +245,14 @@ export const useZoneStore = defineStore('zones', {
         this.zones = data.zones
 
         // Store player progress
-        this.zoneProgress.clear()
+        this.zoneProgress = {}
         for (const zp of data.progress.zones) {
-          this.zoneProgress.set(zp.zoneId, zp)
+          this.zoneProgress[zp.zoneId] = zp
         }
 
-        this.subzoneProgress.clear()
+        this.subzoneProgress = {}
         for (const sp of data.progress.subzones) {
-          this.subzoneProgress.set(sp.subzoneId, sp)
+          this.subzoneProgress[sp.subzoneId] = sp
         }
       } catch (e: any) {
         this.error = e.message || 'Failed to load zones'
@@ -274,17 +274,17 @@ export const useZoneStore = defineStore('zones', {
         })
 
         // Update local state
-        const progress = this.zoneProgress.get(zoneId)
+        const progress = this.zoneProgress[zoneId]
         if (progress) {
           progress.isUnlocked = true
         } else {
-          this.zoneProgress.set(zoneId, {
+          this.zoneProgress[zoneId] = {
             zoneId,
             familiarity: 0,
             isUnlocked: true,
             isMastered: false,
             discoveredSubzones: [],
-          })
+          }
         }
 
         // Discover the first subzone automatically
@@ -313,18 +313,18 @@ export const useZoneStore = defineStore('zones', {
         })
 
         // Update local state
-        const progress = this.zoneProgress.get(zoneId)
+        const progress = this.zoneProgress[zoneId]
         if (progress && !progress.discoveredSubzones.includes(subzoneId)) {
           progress.discoveredSubzones.push(subzoneId)
         }
 
         // Initialize subzone progress
-        if (!this.subzoneProgress.has(subzoneId)) {
-          this.subzoneProgress.set(subzoneId, {
+        if (!(subzoneId in this.subzoneProgress)) {
+          this.subzoneProgress[subzoneId] = {
             subzoneId,
             mastery: 0,
             isMastered: false,
-          })
+          }
         }
       } catch (e: any) {
         this.error = e.message || 'Failed to discover subzone'
@@ -337,7 +337,7 @@ export const useZoneStore = defineStore('zones', {
      * Add familiarity to a zone (from expedition completion)
      */
     async addFamiliarity(zoneId: string, amount: number) {
-      const progress = this.zoneProgress.get(zoneId)
+      const progress = this.zoneProgress[zoneId]
       if (!progress) return
 
       const oldFamiliarity = progress.familiarity
@@ -349,19 +349,20 @@ export const useZoneStore = defineStore('zones', {
           body: { amount }
         })
 
-        // Update local state
+        // Check for subzone unlocks before updating state
+        await this.checkSubzoneUnlocks(zoneId, oldFamiliarity, newFamiliarity)
+
+        // Update local state only after all async operations succeed
         progress.familiarity = newFamiliarity
 
         // Check for mastery
         if (newFamiliarity >= 100 && !progress.isMastered) {
           progress.isMastered = true
         }
-
-        // Check for subzone unlocks
-        await this.checkSubzoneUnlocks(zoneId, oldFamiliarity, newFamiliarity)
       } catch (e: any) {
         this.error = e.message || 'Failed to update familiarity'
         console.error('Error updating familiarity:', e)
+        throw e
       }
     },
 
@@ -369,7 +370,7 @@ export const useZoneStore = defineStore('zones', {
      * Add mastery to a subzone (from expedition completion)
      */
     async addMastery(subzoneId: string, amount: number) {
-      const progress = this.subzoneProgress.get(subzoneId)
+      const progress = this.subzoneProgress[subzoneId]
       if (!progress) return
 
       const newMastery = Math.min(100, progress.mastery + amount)
@@ -400,7 +401,7 @@ export const useZoneStore = defineStore('zones', {
       const zone = this.zones.find(z => z.id === zoneId)
       if (!zone) return
 
-      const progress = this.zoneProgress.get(zoneId)
+      const progress = this.zoneProgress[zoneId]
       if (!progress) return
 
       // Check each familiarity threshold
@@ -434,7 +435,7 @@ export const useZoneStore = defineStore('zones', {
         return { canUnlock: false, reason: 'Zone not found' }
       }
 
-      const progress = this.zoneProgress.get(zoneId)
+      const progress = this.zoneProgress[zoneId]
       if (progress?.isUnlocked) {
         return { canUnlock: false, reason: 'Already unlocked' }
       }
@@ -443,7 +444,7 @@ export const useZoneStore = defineStore('zones', {
 
       // Check previous zone requirement
       if (req.previousZoneId) {
-        const prevProgress = this.zoneProgress.get(req.previousZoneId)
+        const prevProgress = this.zoneProgress[req.previousZoneId]
         if (!prevProgress?.isUnlocked) {
           return { canUnlock: false, reason: 'Previous zone not unlocked' }
         }
@@ -466,7 +467,7 @@ export const useZoneStore = defineStore('zones', {
       const zone = this.getZoneById(zoneId)
       if (!zone) return null
 
-      const progress = this.zoneProgress.get(zoneId)
+      const progress = this.zoneProgress[zoneId]
       if (!progress) return null
 
       // Find undiscovered subzones that meet familiarity requirement

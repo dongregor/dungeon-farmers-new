@@ -128,7 +128,8 @@ function randomElement<T>(arr: T[]): T {
 function fillTemplate(template: string, vars: Record<string, string>): string {
   let result = template
   for (const [key, value] of Object.entries(vars)) {
-    result = result.replace(new RegExp(`{${key}}`, 'g'), value)
+    // Use split/join to avoid regex and potential ReDoS
+    result = result.split(`{${key}}`).join(value)
   }
   return result
 }
@@ -511,23 +512,18 @@ function generateCombatSection(expedition: Expedition, heroes: Hero[], subzone: 
   })
 
   // Threat countering
-  const threatsCountered: string[] = []
-  const threatsNotCountered: string[] = []
-
   for (const threatId of subzone.threats) {
     const counteringHero = findHeroCountering(heroes, threatId)
     const threat = THREATS[threatId]
     if (!threat) continue
 
     if (counteringHero) {
-      threatsCountered.push(threatId)
       entries.push({
         text: `${counteringHero.name} expertly counters the ${threat.name} threat!`,
         type: 'combat',
         heroId: counteringHero.id
       })
     } else {
-      threatsNotCountered.push(threatId)
       entries.push({
         text: `The party struggles against ${threat.name}.`,
         type: 'combat'
@@ -586,15 +582,17 @@ function generateDiscoverySection(expedition: Expedition, heroes: Hero[], zone: 
       type: 'loot'
     })
 
-    // Random hero finds loot
-    const finder = heroes[Math.floor(Math.random() * heroes.length)]
-    const itemCount = expedition.rewards.equipment.length
-    const plural = itemCount === 1 ? 'item' : 'items'
-    entries.push({
-      text: `${finder.name} finds ${itemCount} ${plural}.`,
-      type: 'loot',
-      heroId: finder.id
-    })
+    // Random hero finds loot (only if heroes exist)
+    if (heroes.length > 0) {
+      const finder = heroes[Math.floor(Math.random() * heroes.length)]
+      const itemCount = expedition.rewards.equipment.length
+      const plural = itemCount === 1 ? 'item' : 'items'
+      entries.push({
+        text: `${finder.name} finds ${itemCount} ${plural}.`,
+        type: 'loot',
+        heroId: finder.id
+      })
+    }
 
     // Highlight rare items
     const rareItems = expedition.rewards.equipment.slice(0, 2) // Show top 2
@@ -631,6 +629,19 @@ function generateDiscoverySection(expedition: Expedition, heroes: Hero[], zone: 
 
 function generateReturnSection(expedition: Expedition, heroes: Hero[]): LogSection {
   const entries: LogEntry[] = []
+
+  // Guard against empty heroes array
+  if (heroes.length === 0) {
+    return {
+      type: 'return',
+      title: 'Return',
+      entries: [{
+        text: 'The expedition has concluded.',
+        type: 'narrative'
+      }]
+    }
+  }
+
   const leader = heroes[0]
 
   const efficiency = expedition.efficiency ?? 100

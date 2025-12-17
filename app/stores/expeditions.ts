@@ -94,9 +94,9 @@ export const useExpeditionStore = defineStore('expeditions', {
           method: 'POST'
         })
 
-        // Update state with synced expeditions
+        // Update state with synced expeditions (replace to avoid duplicates)
         this.activeExpeditions = data.active
-        this.completedExpeditions.push(...data.completed)
+        this.completedExpeditions = data.completed
 
         return data.completed
       } catch (e: any) {
@@ -358,12 +358,13 @@ export const useExpeditionStore = defineStore('expeditions', {
     /**
      * Check for and process any auto-repeat expeditions
      */
-    processAutoRepeats() {
+    async processAutoRepeats() {
       const ready = this.readyToComplete
 
+      // Process sequentially to avoid race conditions on shared state
       for (const expedition of ready) {
         if (expedition.autoRepeat) {
-          this.handleTimerComplete(expedition.id)
+          await this.handleTimerComplete(expedition.id)
         }
       }
     },
