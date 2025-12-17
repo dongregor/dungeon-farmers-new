@@ -89,13 +89,15 @@ export function mapSupabaseHeroToHero(data: any): Hero {
     currentExpeditionId: data.current_expedition_id,
     isFavorite: data.is_favorite || false,
 
-    // Morale
-    morale: data.morale || {
-      current: 100,
-      state: 'content',
-      lastExpeditionAt: new Date().toISOString(),
-      consecutiveExpeditions: 0
-    },
+    // Morale tracking
+    morale: data.morale || 'content',
+    moraleValue: data.morale_value ?? 100,
+    moraleLastUpdate: data.morale_last_update || new Date().toISOString(),
+    
+    // Active status
+    isOnExpedition: data.is_on_expedition || false,
+    isStationed: data.is_stationed || false,
+    stationedZoneId: data.stationed_zone_id,
 
     // Timestamps
     createdAt: data.created_at,
