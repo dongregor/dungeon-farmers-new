@@ -5446,13 +5446,12 @@ Equip item to hero.
 
 #### POST /api/equipment/[id]/upgrade
 
-Upgrade equipment trait quality.
+Upgrade equipment trait quality. Cost is calculated server-side based on equipment rarity, item level, and current trait quality.
 
 **Request:**
 ```typescript
 {
   traitIndex: number
-  goldCost: number
 }
 ```
 
@@ -5460,13 +5459,19 @@ Upgrade equipment trait quality.
 ```typescript
 {
   equipment: Equipment      // With upgraded trait
-  goldSpent: number
+  goldSpent: number         // Server-calculated cost
 }
 ```
 
 **Errors:**
 - `INSUFFICIENT_GOLD` - Can't afford upgrade
 - `INVALID_INPUT` - Trait already max quality
+
+**Cost Formula:**
+- Base cost: normal→magic: 100 gold, magic→perfect: 500 gold
+- Rarity multiplier: common: 1x, uncommon: 1.5x, rare: 2x, epic: 3x, legendary: 4x, mythic: 5x
+- Level multiplier: 1 + (itemLevel / 100)
+- Total: baseCost × rarityMultiplier × levelMultiplier
 
 ---
 
