@@ -67,12 +67,12 @@
             <div class="font-semibold text-white">{{ hero.name }}</div>
             <div class="text-sm text-gray-400">Level {{ hero.level }} {{ hero.archetype }}</div>
             <div class="text-xs text-gray-500 mt-1">
-              Morale: {{ hero.morale }}/100
+              Morale: {{ hero.moraleValue }}/100
             </div>
           </div>
           <div class="text-right">
             <div class="text-sm text-gray-400">Power</div>
-            <div class="text-lg font-bold text-blue-400">{{ hero.stats.combat }}</div>
+            <div class="text-lg font-bold text-blue-400">{{ hero.power }}</div>
           </div>
         </div>
       </div>
