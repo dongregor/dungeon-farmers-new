@@ -259,7 +259,7 @@ describe('Core Game Loop', () => {
 
       if (weapon) {
         // Equip the weapon
-        testHero.equipment[weapon.slot] = weapon
+        testHero.equipment[weapon.slot] = weapon.id
 
         // Recalculate power (simplified)
         const gearBonus = weapon.gearScore
@@ -341,7 +341,7 @@ describe('Core Game Loop', () => {
       // Step 8: Equip loot
       const weapon = loot.find(item => item.slot === 'weapon')
       if (weapon) {
-        hero.equipment[weapon.slot] = weapon
+        hero.equipment[weapon.slot] = weapon.id
       }
 
       // Step 9: Complete expedition (mark hero as idle)

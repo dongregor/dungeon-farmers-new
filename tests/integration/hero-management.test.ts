@@ -81,15 +81,15 @@ describe('Hero Management', () => {
         })
 
         expect(equipment.slot).toBe(slot)
-        testHero.equipment[slot] = equipment
+        testHero.equipment[slot] = equipment.id
 
         expect(testHero.equipment[slot]).toBeDefined()
-        expect(testHero.equipment[slot]?.id).toBe(equipment.id)
+        expect(testHero.equipment[slot]).toBe(equipment.id)
       })
     })
 
     it('should increase hero power when equipping items', () => {
-      const initialPower = testHero.power
+      const initialPowerBreakdown = calculateHeroPower(testHero)
 
       const weapon = generateEquipment({
         playerId: testPlayerId,
@@ -100,16 +100,17 @@ describe('Hero Management', () => {
         sourceSubzoneId: 'woods_edge',
       })
 
-      testHero.equipment.weapon = weapon
+      testHero.equipment.weapon = weapon.id
 
       // Recalculate power with equipment
-      const newPower = calculateHeroPower(testHero)
+      const newPowerBreakdown = calculateHeroPower(testHero, [weapon])
 
-      expect(newPower).toBeGreaterThan(initialPower)
+      expect(newPowerBreakdown.total).toBeGreaterThan(initialPowerBreakdown.total)
     })
 
     it('should handle full equipment set', () => {
       const equipmentSlots: EquipmentSlot[] = ['weapon', 'head', 'chest', 'hands', 'legs', 'feet', 'accessory']
+      const equipmentItems: Equipment[] = []
 
       equipmentSlots.forEach(slot => {
         const equipment = generateEquipment({
@@ -121,15 +122,17 @@ describe('Hero Management', () => {
           sourceSubzoneId: 'woods_edge',
         })
 
-        testHero.equipment[slot] = equipment
+        testHero.equipment[slot] = equipment.id
+        equipmentItems.push(equipment)
       })
 
       // All slots should be filled
       expect(Object.keys(testHero.equipment).length).toBe(equipmentSlots.length)
 
       // Power should be significantly higher with full gear
-      const fullyEquippedPower = calculateHeroPower(testHero)
-      expect(fullyEquippedPower).toBeGreaterThan(testHero.power * 1.5)
+      const basePowerBreakdown = calculateHeroPower(testHero)
+      const fullyEquippedPowerBreakdown = calculateHeroPower(testHero, equipmentItems)
+      expect(fullyEquippedPowerBreakdown.total).toBeGreaterThan(basePowerBreakdown.total * 1.5)
     })
 
     it('should replace equipment when equipping new item in same slot', () => {
@@ -151,12 +154,12 @@ describe('Hero Management', () => {
         sourceSubzoneId: 'cave_entrance',
       })
 
-      testHero.equipment.weapon = oldWeapon
-      expect(testHero.equipment.weapon?.id).toBe(oldWeapon.id)
+      testHero.equipment.weapon = oldWeapon.id
+      expect(testHero.equipment.weapon).toBe(oldWeapon.id)
 
-      testHero.equipment.weapon = newWeapon
-      expect(testHero.equipment.weapon?.id).toBe(newWeapon.id)
-      expect(testHero.equipment.weapon?.id).not.toBe(oldWeapon.id)
+      testHero.equipment.weapon = newWeapon.id
+      expect(testHero.equipment.weapon).toBe(newWeapon.id)
+      expect(testHero.equipment.weapon).not.toBe(oldWeapon.id)
     })
   })
 
