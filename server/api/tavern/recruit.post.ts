@@ -141,7 +141,13 @@ export default defineEventHandler(async (event) => {
 
     if (tavernError) {
       console.error('Error updating tavern state:', tavernError)
-      // Note: Don't rollback hero creation at this point, just log the error
+      // Rollback hero creation and gold deduction
+      await client.from('heroes').delete().eq('id', newHero.id)
+      await client.from('players').update({ gold: player.gold }).eq('id', player.id)
+      throw createError({ 
+        statusCode: 500, 
+        message: 'Failed to update tavern after recruitment' 
+      })
     }
 
     return {
