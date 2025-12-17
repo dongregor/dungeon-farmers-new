@@ -271,8 +271,11 @@ async function startExpedition() {
       autoRepeat: autoRepeat.value,
       stopConditions: stopConditions.value
     })
-
-    emit('started', result.expedition.id)
+    if (result?.expedition?.id) {
+      emit('started', result.expedition.id)
+    } else {
+      throw new Error('Invalid response from server')
+    }
   } catch (err: any) {
     error.value = err.message || 'Failed to start expedition'
   } finally {
