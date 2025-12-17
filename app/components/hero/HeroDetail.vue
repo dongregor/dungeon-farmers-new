@@ -139,18 +139,18 @@ const powerBreakdown = computed(() => {
               </div>
             </div>
 
-            <div v-if="hero.storyTraits.length > 0" class="mb-4">
+            <div v-if="hero.storyTraitIds.length > 0" class="mb-4">
               <h4 class="text-sm font-semibold text-guild-gold mb-2">STORY TRAITS</h4>
               <div class="space-y-2">
-                <div v-for="trait in hero.storyTraits" :key="trait.traitId" class="p-2 bg-gray-700 rounded text-sm">
+                <div v-for="traitId in hero.storyTraitIds" :key="traitId" class="p-2 bg-gray-700 rounded text-sm">
                   <div class="flex justify-between items-center">
-                    <span class="capitalize">{{ trait.traitId.replace('_', ' ') }}</span>
+                    <span class="capitalize">{{ traitId.replace(/_/g, ' ') }}</span>
                     <span class="text-xs text-gray-400">
-                      {{ getStoryTraitById(trait.traitId)?.reactions.join(', ') || '' }}
+                      {{ getStoryTraitById(traitId)?.reactions.join(', ') || '' }}
                     </span>
                   </div>
                   <div class="text-xs text-gray-300 mt-1">
-                    {{ getStoryTraitById(trait.traitId)?.description || 'No description' }}
+                    {{ getStoryTraitById(traitId)?.description || 'No description' }}
                   </div>
                 </div>
               </div>

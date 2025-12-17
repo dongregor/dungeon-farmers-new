@@ -16,11 +16,15 @@ export default defineEventHandler(async (event) => {
   }
 
   // Get player
-  const { data: player } = await client
+  const { data: player, error: playerError } = await client
     .from('players')
     .select('id, account_level, is_supporter')
     .eq('auth_user_id', user.id)
     .single()
+
+  if (playerError) {
+    throw createError({ statusCode: 500, message: 'Failed to fetch player' })
+  }
 
   if (!player) {
     throw createError({ statusCode: 404, message: 'Player not found' })
