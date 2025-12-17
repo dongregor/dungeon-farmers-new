@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 
 interface RetireResponse {
   success: boolean
@@ -45,8 +46,10 @@ export default defineEventHandler(async (event): Promise<RetireResponse> => {
     throw createError({ statusCode: 404, message: 'Hero not found' })
   }
 
+  const mappedHero = mapSupabaseHeroToHero(hero)
+
   // Check if hero is on expedition
-  if (hero.is_on_expedition) {
+  if (mappedHero.isOnExpedition) {
     throw createError({
       statusCode: 400,
       message: 'Cannot retire hero while on expedition',
@@ -54,7 +57,7 @@ export default defineEventHandler(async (event): Promise<RetireResponse> => {
   }
 
   // Check if hero is stationed
-  if (hero.is_stationed) {
+  if (mappedHero.isStationed) {
     throw createError({
       statusCode: 400,
       message: 'Cannot retire hero while stationed. Unassign them first.',

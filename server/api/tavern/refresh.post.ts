@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
 
   // Check if refresh is free (timer expired) or requires payment
   const now = new Date()
-  const nextRefreshTime = new Date(tavernState.next_refresh_at)
+  const nextRefreshTime = new Date(tavernState.nextRefreshAt)
   const isFreeRefresh = now >= nextRefreshTime
 
   // TODO: Implement daily refresh counter for scaling cost (75g + 25g per refresh today)
