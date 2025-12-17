@@ -119,7 +119,7 @@ const powerBreakdown = computed(() => {
                 <div v-for="trait in hero.gameplayTraits" :key="trait.traitId" class="p-3 bg-gray-700 rounded">
                   <div class="flex justify-between items-start">
                     <div>
-                      <div class="font-semibold text-guild-gold capitalize">{{ trait.traitId.replace('_', ' ') }}</div>
+                      <div class="font-semibold text-guild-gold capitalize">{{ trait.traitId.replace(/_/g, ' ') }}</div>
                       <div class="text-xs text-gray-400 capitalize">{{ getGameplayTraitById(trait.traitId)?.statType || 'unknown' }}</div>
                     </div>
                     <div class="text-right">

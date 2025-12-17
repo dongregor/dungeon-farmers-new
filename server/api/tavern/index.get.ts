@@ -41,11 +41,21 @@ export default defineEventHandler(async (event) => {
   const supporterBonus = player.is_supporter ? 2 : 0
   const lockSlots = baseLockSlots + accountLevelBonus + supporterBonus
 
+  // Calculate used lock slots and ensure consistency
+  const usedLockSlots = tavernState.slots?.filter((slot: TavernSlot) => slot.isLocked).length || 0
+
+  // Log or handle case where usedLockSlots exceeds available lockSlots
+  // This can happen if supporter status was removed or level decreased
+  if (usedLockSlots > lockSlots) {
+    console.warn(`Player ${player.id} has ${usedLockSlots} locked slots but only ${lockSlots} available`)
+    // Optionally: auto-unlock excess slots or handle in UI
+  }
+
   // Return tavern state
   const response: TavernState = {
     slots: tavernState.slots || [],
     lockSlots,
-    usedLockSlots: tavernState.slots?.filter((slot: TavernSlot) => slot.isLocked).length || 0,
+    usedLockSlots,
     lastRefreshAt: tavernState.last_refresh_at,
     nextRefreshAt: tavernState.next_refresh_at,
   }

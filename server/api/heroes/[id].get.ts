@@ -20,11 +20,7 @@ export default defineEventHandler(async (event) => {
     .eq('auth_user_id', user.id)
     .single()
 
-  if (playerError) {
-    throw createError({ statusCode: 500, message: 'Failed to fetch player' })
-  }
-
-  if (!player) {
+  if (playerError || !player) {
     throw createError({ statusCode: 404, message: 'Player not found' })
   }
 
