@@ -60,7 +60,7 @@ export function calculateOfflineProgress(
         result.pendingLoot.push({
           expeditionId: expedition.id,
           items: pendingEquipment,
-          expiredAt: expiresAt.toISOString(),
+          expiresAt: expiresAt.toISOString(),
         })
 
         // Only keep equipment that fits
