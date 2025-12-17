@@ -92,7 +92,7 @@ const hasActiveSets = computed(() => activeSets.value.length > 0)
         <div class="mt-2 w-full bg-gray-700 rounded-full h-2">
           <div
             class="bg-loot-purple h-2 rounded-full transition-all"
-            :style="`width: ${(set.equippedCount / set.totalPieces) * 100}%`"
+            :style="`width: ${set.totalPieces > 0 ? (set.equippedCount / set.totalPieces) * 100 : 0}%`"
           />
         </div>
       </div>
