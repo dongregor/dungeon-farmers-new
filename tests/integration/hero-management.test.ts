@@ -23,7 +23,7 @@ describe('Hero Management', () => {
 
   describe('Hero Creation', () => {
     it('should generate heroes with different archetypes', () => {
-      const archetypes = ['tank', 'dps', 'support', 'balanced'] as const
+      const archetypes = ['tank', 'melee_dps', 'healer', 'caster'] as const
 
       archetypes.forEach(archetype => {
         const hero = generateHero({ playerId: testPlayerId, archetype })
