@@ -24,7 +24,7 @@ export const STARTING_EQUIPMENT: EquipmentTemplate[] = [
   {
     id: 'leather_vest',
     name: 'Leather Vest',
-    slot: 'armor',
+    slot: 'chest',
     baseRarity: 'common',
     minItemLevel: 1,
     sourceZones: []
@@ -45,7 +45,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'bark_shield',
     name: 'Bark Shield',
-    slot: 'armor',
+    slot: 'chest',
     baseRarity: 'uncommon',
     minItemLevel: 5,
     sourceZones: ['verdant_woods'],
@@ -54,7 +54,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'leaf_cloak',
     name: 'Leaf Cloak',
-    slot: 'armor',
+    slot: 'chest',
     baseRarity: 'rare',
     minItemLevel: 10,
     sourceZones: ['verdant_woods'],
@@ -63,7 +63,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'root_treads',
     name: 'Root Treads',
-    slot: 'boots',
+    slot: 'feet',
     baseRarity: 'uncommon',
     minItemLevel: 5,
     sourceZones: ['verdant_woods'],
@@ -82,7 +82,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'scavenged_mail',
     name: 'Scavenged Mail',
-    slot: 'armor',
+    slot: 'chest',
     baseRarity: 'uncommon',
     minItemLevel: 8,
     sourceZones: ['goblin_caves']
@@ -90,7 +90,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'tunnel_diggers',
     name: 'Tunnel Diggers',
-    slot: 'boots',
+    slot: 'feet',
     baseRarity: 'rare',
     minItemLevel: 12,
     sourceZones: ['goblin_caves']
@@ -108,7 +108,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'swamp_hide_armor',
     name: 'Swamp Hide Armor',
-    slot: 'armor',
+    slot: 'chest',
     baseRarity: 'rare',
     minItemLevel: 15,
     sourceZones: ['misty_swamp'],
@@ -117,7 +117,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'toxic_treads',
     name: 'Toxic Treads',
-    slot: 'boots',
+    slot: 'feet',
     baseRarity: 'epic',
     minItemLevel: 20,
     sourceZones: ['misty_swamp'],
@@ -126,7 +126,7 @@ export const EQUIPMENT_TEMPLATES: EquipmentTemplate[] = [
   {
     id: 'miasma_charm',
     name: 'Miasma Charm',
-    slot: 'accessory1',
+    slot: 'accessory',
     baseRarity: 'epic',
     minItemLevel: 18,
     sourceZones: ['misty_swamp']

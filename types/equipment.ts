@@ -69,11 +69,12 @@ export interface SetBonusTrait {
 // Slot stat tendencies
 export const SLOT_STAT_TENDENCIES = {
   weapon: { primary: 'combat', secondary: 'utility', rare: 'survival' },
-  armor: { primary: 'survival', secondary: 'combat', rare: 'utility' },
-  helmet: { primary: 'survival', secondary: 'utility', rare: 'combat' },
-  boots: { primary: 'utility', secondary: 'survival', rare: 'combat' },
-  accessory1: { primary: 'any', secondary: null, rare: null },
-  accessory2: { primary: 'any', secondary: null, rare: null },
+  head: { primary: 'survival', secondary: 'utility', rare: 'combat' },
+  chest: { primary: 'survival', secondary: 'combat', rare: 'utility' },
+  hands: { primary: 'combat', secondary: 'survival', rare: 'utility' },
+  legs: { primary: 'survival', secondary: 'combat', rare: 'utility' },
+  feet: { primary: 'utility', secondary: 'survival', rare: 'combat' },
+  accessory: { primary: 'any', secondary: null, rare: null },
 }
 
 // Trait slots by rarity

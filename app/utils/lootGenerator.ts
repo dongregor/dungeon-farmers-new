@@ -98,7 +98,7 @@ export function generateFirstClearReward(params: {
 /**
  * Upgrade rarity by one tier (for special rewards)
  */
-function upgradeRarity(rarity: string): 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' {
+function upgradeRarity(rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'): 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' {
   const rarityOrder: Array<'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'> = [
     'common',
     'uncommon',
@@ -108,9 +108,9 @@ function upgradeRarity(rarity: string): 'common' | 'uncommon' | 'rare' | 'epic' 
     'mythic',
   ]
 
-  const currentIndex = rarityOrder.indexOf(rarity as any)
+  const currentIndex = rarityOrder.indexOf(rarity)
   if (currentIndex === -1 || currentIndex === rarityOrder.length - 1) {
-    return rarity as any
+    return rarity
   }
 
   return rarityOrder[currentIndex + 1]

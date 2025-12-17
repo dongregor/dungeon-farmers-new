@@ -41,7 +41,7 @@ CREATE TABLE heroes (
   gameplay_traits JSONB DEFAULT '[]', -- Array of GameplayTrait objects
   story_trait_ids TEXT[] DEFAULT '{}',
   power INTEGER DEFAULT 0,
-  equipment JSONB DEFAULT '{}', -- { weapon?, armor?, helmet?, boots?, accessory1?, accessory2? }
+  equipment JSONB DEFAULT '{}', -- { weapon?, head?, chest?, hands?, legs?, feet?, accessory? }
   prestige_level INTEGER DEFAULT 0,
   prestige_bonuses JSONB DEFAULT '{"combat": 0, "utility": 0, "survival": 0}',
   current_expedition_id UUID,
