@@ -10,6 +10,16 @@ const emit = defineEmits<{
   equipmentClick: [equipment: Equipment]
 }>()
 
+// Rarity ordering constant (used for sorting)
+const RARITY_ORDER: Record<EquipmentRarity, number> = {
+  common: 1,
+  uncommon: 2,
+  rare: 3,
+  epic: 4,
+  legendary: 5,
+  mythic: 6
+}
+
 // Filters
 const selectedSlot = ref<EquipmentSlot | 'all'>('all')
 const selectedRarity = ref<EquipmentRarity | 'all'>('all')
@@ -42,17 +52,8 @@ const filteredEquipment = computed(() => {
         return b.gearScore - a.gearScore
       case 'itemLevel':
         return b.itemLevel - a.itemLevel
-      case 'rarity': {
-        const rarityOrder: Record<EquipmentRarity, number> = {
-          mythic: 6,
-          legendary: 5,
-          epic: 4,
-          rare: 3,
-          uncommon: 2,
-          common: 1
-        }
-        return rarityOrder[b.rarity] - rarityOrder[a.rarity]
-      }
+      case 'rarity':
+        return RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity]
       case 'name':
         return a.name.localeCompare(b.name)
       default:
@@ -72,17 +73,7 @@ const availableSlots = computed(() => {
 // Available rarities from equipment
 const availableRarities = computed(() => {
   const rarities = new Set(props.equipment.map(e => e.rarity))
-  return Array.from(rarities).sort((a, b) => {
-    const order: Record<EquipmentRarity, number> = {
-      common: 1,
-      uncommon: 2,
-      rare: 3,
-      epic: 4,
-      legendary: 5,
-      mythic: 6
-    }
-    return order[b] - order[a]
-  })
+  return Array.from(rarities).sort((a, b) => RARITY_ORDER[b] - RARITY_ORDER[a])
 })
 
 function handleEquipmentClick(equipment: Equipment) {
