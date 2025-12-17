@@ -100,7 +100,30 @@ export default defineEventHandler(async (event) => {
   // Calculate next refresh time
   const nextRefresh = new Date(now.getTime() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000)
 
-  // Update tavern state in database (with optimistic concurrency control)
+  // STEP 1: Deduct gold FIRST if this is a paid refresh (prevents free refresh exploit)
+  let remainingGold = player.gold
+  if (!isFreeRefresh) {
+    const { data: updatedPlayer, error: goldError } = await client
+      .from('players')
+      .update({ gold: player.gold - refreshCost })
+      .eq('id', player.id)
+      .gte('gold', refreshCost)  // Conditional: only update if gold >= cost
+      .select('gold')
+      .single()
+
+    // Check if gold deduction succeeded
+    if (goldError || !updatedPlayer) {
+      console.error('Error deducting refresh cost (insufficient funds or race condition):', goldError)
+      throw createError({
+        statusCode: 400,
+        message: 'Insufficient gold for early refresh (concurrent purchase may have occurred)',
+      })
+    }
+
+    remainingGold = updatedPlayer.gold
+  }
+
+  // STEP 2: Update tavern state AFTER payment (with optimistic concurrency control)
   const { data: updateResult, error: updateError } = await client
     .from('tavern_state')
     .update({
@@ -115,40 +138,29 @@ export default defineEventHandler(async (event) => {
 
   if (updateError) {
     console.error('Error updating tavern state:', updateError)
+    // Rollback gold deduction if we charged
+    if (!isFreeRefresh) {
+      await client
+        .from('players')
+        .update({ gold: player.gold })
+        .eq('id', player.id)
+    }
     throw createError({ statusCode: 500, message: 'Failed to refresh tavern' })
   }
 
   // Check if update affected any rows (optimistic lock succeeded)
   if (!updateResult || updateResult.length === 0) {
+    // Rollback gold deduction if we charged
+    if (!isFreeRefresh) {
+      await client
+        .from('players')
+        .update({ gold: player.gold })
+        .eq('id', player.id)
+    }
     throw createError({
       statusCode: 409,
       message: 'Tavern state was modified by another request. Please try again.',
     })
-  }
-
-  // Deduct gold if this was a paid refresh (atomic conditional update)
-  let remainingGold = player.gold
-  if (!isFreeRefresh) {
-    const { data: updatedPlayer, error: goldError } = await client
-      .from('players')
-      .update({ gold: player.gold - refreshCost })
-      .eq('id', player.id)
-      .gte('gold', refreshCost)  // Conditional: only update if gold >= cost
-      .select('gold')
-      .single()
-
-    // Check if update succeeded
-    if (goldError || !updatedPlayer) {
-      console.error('Error deducting refresh cost (insufficient funds or race condition):', goldError)
-      // Note: Tavern already refreshed, but payment failed
-      // This is acceptable UX - they got the refresh but should retry payment
-      throw createError({
-        statusCode: 400,
-        message: 'Insufficient gold for early refresh (concurrent purchase may have occurred)',
-      })
-    }
-
-    remainingGold = updatedPlayer.gold
   }
 
   return {
