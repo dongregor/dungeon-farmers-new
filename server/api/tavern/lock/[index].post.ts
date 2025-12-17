@@ -86,10 +86,14 @@ export default defineEventHandler(async (event) => {
       updated_at: new Date().toISOString(),
     })
     .eq('player_id', player.id)
+    .eq('updated_at', tavernState.updated_at)
 
   if (updateError) {
     console.error('Error locking slot:', updateError)
-    throw createError({ statusCode: 500, message: 'Failed to lock slot' })
+    throw createError({ 
+      statusCode: 409, 
+      message: 'Tavern state changed. Please try again.' 
+    })
   }
 
   return {
