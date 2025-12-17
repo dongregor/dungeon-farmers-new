@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
 import type { Expedition, Hero } from '~~/types'
+import { mapSupabaseExpeditionToExpedition, mapSupabaseHeroToHero } from '../../utils/mappers'
 
 const startExpeditionSchema = z.object({
   zoneId: z.string().min(1),
@@ -62,7 +63,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if any hero is busy
-    const busyHeroes = heroes.filter((h: Hero) => h.status === 'expedition' || h.status === 'stationed')
+    const busyHeroes = heroes.filter((h: Hero) => h.isOnExpedition || h.isStationed)
     if (busyHeroes.length > 0) {
       throw createError({
         statusCode: 400,
@@ -72,7 +73,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if any hero is exhausted (morale < 20)
-    const exhaustedHeroes = heroes.filter((h: Hero) => h.morale < 20)
+    const exhaustedHeroes = heroes.filter((h: Hero) => h.moraleValue < 20)
     if (exhaustedHeroes.length > 0) {
       throw createError({
         statusCode: 400,
