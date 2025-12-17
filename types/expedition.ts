@@ -1,8 +1,20 @@
 import type { Stats } from './base'
+import type { Equipment } from './equipment'
 
 export type ExpeditionStatus = 'idle' | 'in_progress' | 'completed' | 'failed'
 
-export interface Expedition {
+// Expedition settings (reused in Expedition interface)
+export interface ExpeditionSettings {
+  autoRepeat: boolean
+  autoRepeatLimit?: number    // Max repeats (null = unlimited)
+  stopConditions: {
+    anyHeroTired: boolean     // Stop if any hero hits Tired
+    inventoryFull: boolean    // Stop if inventory full
+    resourceCap: boolean      // Stop if gold cap reached
+  }
+}
+
+export interface Expedition extends ExpeditionSettings {
   id: string
   playerId: string
 
@@ -19,15 +31,6 @@ export interface Expedition {
   completesAt: string    // ISO timestamp
   durationMinutes: number
   status: ExpeditionStatus
-
-  // Auto-repeat settings
-  autoRepeat: boolean
-  autoRepeatLimit?: number
-  stopConditions: {
-    anyHeroTired: boolean
-    inventoryFull: boolean
-    resourceCap: boolean
-  }
 
   // Events
   events: ExpeditionEvent[]
@@ -173,4 +176,11 @@ export interface LogEntry {
   traitId?: string
   eventId?: string
   type: 'narrative' | 'reaction' | 'combat' | 'loot' | 'choice_result'
+}
+
+// Pending Loot
+export interface PendingLoot {
+  expeditionId: string
+  items: Equipment[]
+  expiresAt: string    // 48 hours to claim
 }

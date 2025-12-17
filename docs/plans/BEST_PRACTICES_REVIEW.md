@@ -726,3 +726,8 @@ const { fetchHeroes } = store  // Actions can be destructured directly
 - [Pinia Core Concepts](https://pinia.vuejs.org/core-concepts/)
 - [Pinia Actions](https://pinia.vuejs.org/core-concepts/actions.html)
 - [Nuxt Supabase Module](https://supabase.nuxtjs.org/)
+
+
+
+
+

@@ -1,70 +1,32 @@
-import type { Hero, Morale } from '~~/types'
-
-// Morale thresholds
-export const MORALE_THRESHOLDS = {
-  jubilant: 80,
-  happy: 60,
-  content: 40,
-  unhappy: 20,
-  miserable: 0,
-}
+import type { Hero, MoraleState } from '~~/types'
+import { MORALE_THRESHOLDS, MORALE_CHANGES, getMoraleState as getMoraleStateFromTypes } from '~~/types/morale'
 
 // Morale effects on efficiency
-export const MORALE_EFFICIENCY_MODIFIERS: Record<Morale, number> = {
-  jubilant: 0.10,   // +10% efficiency
-  happy: 0.05,      // +5% efficiency
-  content: 0,       // Normal
-  unhappy: -0.05,   // -5% efficiency
-  miserable: -0.15, // -15% efficiency
-}
-
-// Morale change amounts
-export const MORALE_CHANGES = {
-  // Expedition completion (based on duration)
-  expeditionShort: -5,
-  expeditionMedium: -10,
-  expeditionLong: -15,
-
-  // Positive events
-  restPerHour: 5,
-  bigLoot: 10,
-  discoverSubzone: 15,
-  counterThreat: 5,
-  levelUp: 20,
-  favoriteAlly: 5,
-
-  // Negative events
-  failedThreat: -10,
-  sameZoneBoredom: -10,
+export const MORALE_EFFICIENCY_MODIFIERS: Record<MoraleState, number> = {
+  excited: 0.10,      // +10% efficiency
+  content: 0,         // Normal
+  tired: -0.05,       // -5% efficiency
+  frustrated: -0.15,  // -15% efficiency
+  exhausted: -0.25,   // -25% efficiency (unavailable)
 }
 
 // Calculate morale state from numeric value (0-100)
-export function getMoraleState(moraleValue: number): Morale {
-  if (moraleValue >= MORALE_THRESHOLDS.jubilant) return 'jubilant'
-  if (moraleValue >= MORALE_THRESHOLDS.happy) return 'happy'
-  if (moraleValue >= MORALE_THRESHOLDS.content) return 'content'
-  if (moraleValue >= MORALE_THRESHOLDS.unhappy) return 'unhappy'
-  return 'miserable'
+export function getMoraleState(moraleValue: number): MoraleState {
+  return getMoraleStateFromTypes(moraleValue)
 }
 
 // Get numeric morale value from state (for initialization)
-export function getMoraleValue(state: Morale): number {
-  switch (state) {
-    case 'jubilant': return 90
-    case 'happy': return 70
-    case 'content': return 50
-    case 'unhappy': return 30
-    case 'miserable': return 10
-  }
+export function getMoraleValue(state: MoraleState): number {
+  const thresholds = MORALE_THRESHOLDS[state]
+  return Math.floor((thresholds.min + thresholds.max) / 2)
 }
 
 // Apply morale change and return new state
 export function applyMoraleChange(
-  currentMorale: Morale,
+  currentMoraleValue: number,
   change: number
-): { morale: Morale; moraleValue: number } {
-  const currentValue = getMoraleValue(currentMorale)
-  const newValue = Math.max(0, Math.min(100, currentValue + change))
+): { morale: MoraleState; moraleValue: number } {
+  const newValue = Math.max(0, Math.min(100, currentMoraleValue + change))
   const newMorale = getMoraleState(newValue)
 
   return {
@@ -75,7 +37,7 @@ export function applyMoraleChange(
 
 // Calculate morale recovery from resting
 export function calculateMoraleRecovery(hero: Hero): {
-  morale: Morale
+  morale: MoraleState
   moraleValue: number
   hoursRested: number
 } {
@@ -86,14 +48,14 @@ export function calculateMoraleRecovery(hero: Hero): {
   if (hoursRested === 0) {
     return {
       morale: hero.morale,
-      moraleValue: getMoraleValue(hero.morale),
+      moraleValue: hero.moraleValue,
       hoursRested: 0,
     }
   }
 
   // Recovery: +5 per hour
-  const recovery = hoursRested * MORALE_CHANGES.restPerHour
-  const result = applyMoraleChange(hero.morale, recovery)
+  const recovery = hoursRested * MORALE_CHANGES.rest
+  const result = applyMoraleChange(hero.moraleValue, recovery)
 
   return {
     ...result,
@@ -116,39 +78,38 @@ export function updateMoraleAfterExpedition(
 ): Hero {
   let totalChange = 0
 
-  // Base expedition fatigue
-  if (durationMinutes < 30) {
-    totalChange += MORALE_CHANGES.expeditionShort
-  } else if (durationMinutes < 60) {
-    totalChange += MORALE_CHANGES.expeditionMedium
-  } else {
-    totalChange += MORALE_CHANGES.expeditionLong
-  }
+  // Base expedition fatigue (based on duration, -5 to -15)
+  const durationHours = durationMinutes / 60
+  const fatigueRange = MORALE_CHANGES.completeExpedition
+  const fatigueAmount = Math.round(fatigueRange.max + (fatigueRange.min - fatigueRange.max) * Math.min(1, durationHours / 2))
+  totalChange += fatigueAmount
 
   // Event modifiers
-  if (events.bigLoot) totalChange += MORALE_CHANGES.bigLoot
+  if (events.bigLoot) totalChange += MORALE_CHANGES.bigLootDrop
   if (events.discoverSubzone) totalChange += MORALE_CHANGES.discoverSubzone
   if (events.counterThreat) totalChange += MORALE_CHANGES.counterThreat
   if (events.failedThreat) totalChange += MORALE_CHANGES.failedThreat
-  if (events.favoriteAlly) totalChange += MORALE_CHANGES.favoriteAlly
-  if (events.sameZoneBoredom) totalChange += MORALE_CHANGES.sameZoneBoredom
+  if (events.favoriteAlly) totalChange += MORALE_CHANGES.expeditionWithFavoriteAlly
+  if (events.sameZoneBoredom) totalChange += MORALE_CHANGES.sameZone3Times
 
-  const result = applyMoraleChange(hero.morale, totalChange)
+  const result = applyMoraleChange(hero.moraleValue, totalChange)
 
   return {
     ...hero,
     morale: result.morale,
+    moraleValue: result.moraleValue,
     moraleLastUpdate: new Date().toISOString(),
   }
 }
 
 // Update hero morale after level up
 export function updateMoraleAfterLevelUp(hero: Hero): Hero {
-  const result = applyMoraleChange(hero.morale, MORALE_CHANGES.levelUp)
+  const result = applyMoraleChange(hero.moraleValue, MORALE_CHANGES.levelUp)
 
   return {
     ...hero,
     morale: result.morale,
+    moraleValue: result.moraleValue,
     moraleLastUpdate: new Date().toISOString(),
   }
 }
@@ -159,7 +120,7 @@ export function canGoOnExpedition(hero: Hero, durationMinutes: number): {
   reason?: string
 } {
   // Exhausted heroes can't go on any expedition
-  if (hero.morale === 'miserable') {
+  if (hero.morale === 'exhausted') {
     return {
       canGo: false,
       reason: 'Hero is exhausted and needs rest',
@@ -167,7 +128,7 @@ export function canGoOnExpedition(hero: Hero, durationMinutes: number): {
   }
 
   // Frustrated heroes refuse long expeditions
-  if (hero.morale === 'unhappy' && durationMinutes > 60) {
+  if (hero.morale === 'frustrated' && durationMinutes > 60) {
     return {
       canGo: false,
       reason: 'Hero is too frustrated for long expeditions',
@@ -178,28 +139,28 @@ export function canGoOnExpedition(hero: Hero, durationMinutes: number): {
 }
 
 // Get morale efficiency modifier
-export function getMoraleEfficiencyModifier(morale: Morale): number {
+export function getMoraleEfficiencyModifier(morale: MoraleState): number {
   return MORALE_EFFICIENCY_MODIFIERS[morale]
 }
 
 // Get morale color for UI
-export function getMoraleColor(morale: Morale): string {
+export function getMoraleColor(morale: MoraleState): string {
   switch (morale) {
-    case 'jubilant': return 'text-purple-500'
-    case 'happy': return 'text-green-500'
+    case 'excited': return 'text-purple-500'
     case 'content': return 'text-blue-500'
-    case 'unhappy': return 'text-yellow-500'
-    case 'miserable': return 'text-red-500'
+    case 'tired': return 'text-yellow-500'
+    case 'frustrated': return 'text-orange-500'
+    case 'exhausted': return 'text-red-500'
   }
 }
 
 // Get morale description
-export function getMoraleDescription(morale: Morale): string {
+export function getMoraleDescription(morale: MoraleState): string {
   switch (morale) {
-    case 'jubilant': return 'Feeling fantastic! Ready for anything!'
-    case 'happy': return 'In good spirits and eager for adventure'
+    case 'excited': return 'Feeling fantastic! Ready for anything!'
     case 'content': return 'Rested and ready to work'
-    case 'unhappy': return 'Tired and grumpy'
-    case 'miserable': return 'Completely exhausted'
+    case 'tired': return 'Feeling tired, but can still work'
+    case 'frustrated': return 'Tired and grumpy'
+    case 'exhausted': return 'Completely exhausted and unavailable'
   }
 }

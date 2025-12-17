@@ -1,12 +1,24 @@
 import type { Rarity } from './base'
 import type { TavernHero } from './hero'
 
-// Tavern slot configuration
+// Slot rarity (includes special 'epic_plus' for high-tier weighted slots)
+export type SlotRarity = Rarity | 'epic_plus'
+
+// Tavern slot (one hero available for recruitment)
 export interface TavernSlot {
-  id: string
-  rarity: Rarity | 'epic_plus'  // 'epic_plus' = epic or legendary
+  index: number
   hero: TavernHero | null
+  rarity: SlotRarity
   isLocked: boolean
+  lockedUntil?: string // ISO timestamp
+}
+
+// Tavern state (all available slots)
+export interface Tavern {
+  slots: TavernSlot[]
+  lastRefresh: string // ISO timestamp
+  refreshCost: number // Gold cost to refresh
+  lockCost: number    // Gold cost to lock a slot
 }
 
 // Tavern state
@@ -84,3 +96,9 @@ export const RECRUITMENT_COSTS: Record<Rarity, number> = {
 
 // Refresh timing
 export const TAVERN_REFRESH_HOURS = 8
+
+// Recruitment request
+export interface RecruitmentRequest {
+  slotIndex: number
+  lockSlot?: boolean
+}

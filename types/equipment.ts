@@ -49,7 +49,7 @@ export interface EquipmentSet {
   id: string
   name: string
   description: string
-  pieces: string[]  // Equipment slot IDs
+  pieces: string[]  // Equipment item IDs
   bonuses: SetBonus[]
   biome?: ZoneType
   sourceZone?: string

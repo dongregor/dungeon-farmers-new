@@ -1720,7 +1720,7 @@ export interface HeroInjury {
 export interface PendingLoot {
   expeditionId: string
   items: Equipment[]
-  expiredAt: string    // 48 hours to claim
+  expiresAt: string    // 48 hours to claim
 }
 
 // Expedition Settings
@@ -5637,3 +5637,8 @@ Delete party preset.
 ---
 
 **Note:** This plan is self-contained. All implementation details are included above. For additional context on game design philosophy, see `design/GAME_DESIGN_V2.md` (optional reference).
+
+
+
+
+

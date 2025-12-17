@@ -100,7 +100,8 @@ export function prestigeHero(hero: Hero): PrestigeResult {
     prestigeBonuses: newPrestigeBonuses,
     gameplayTraits: upgradedTraits,
     equipment: {}, // Unequip all gear
-    morale: 'jubilant', // Fully restore morale on prestige
+    morale: 'excited', // Fully restore morale on prestige
+    moraleValue: 90, // High morale value within excited range (80-100)
     moraleLastUpdate: new Date().toISOString(),
   }
 
