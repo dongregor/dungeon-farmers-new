@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
   const tavernHero = slot.hero as TavernHero
   const recruitCost = tavernHero.recruitCost
 
-  // Check if player has enough gold
+  // Early check for better UX (but still use atomic update for correctness)
   if (player.gold < recruitCost) {
     throw createError({
       statusCode: 400,
@@ -110,17 +110,25 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, message: 'Failed to create hero' })
     }
 
-    // Deduct gold from player
-    const { error: goldError } = await client
+    // Atomic conditional gold deduction - prevents race conditions and negative balances
+    // This will only succeed if player still has enough gold
+    const { data: updatedPlayer, error: goldError } = await client
       .from('players')
       .update({ gold: player.gold - recruitCost })
       .eq('id', player.id)
+      .gte('gold', recruitCost)  // Conditional: only update if gold >= cost
+      .select('gold')
+      .single()
 
-    if (goldError) {
-      console.error('Error updating player gold:', goldError)
+    // Check if update succeeded (row was affected)
+    if (goldError || !updatedPlayer) {
+      console.error('Error deducting gold (insufficient funds or race condition):', goldError)
       // Rollback hero creation
       await client.from('heroes').delete().eq('id', newHero.id)
-      throw createError({ statusCode: 500, message: 'Failed to deduct gold' })
+      throw createError({
+        statusCode: 400,
+        message: 'Insufficient gold (concurrent purchase may have occurred)',
+      })
     }
 
     // Remove hero from tavern slot
@@ -147,7 +155,7 @@ export default defineEventHandler(async (event) => {
     return {
       success: true,
       hero: createdHero,
-      remainingGold: player.gold - recruitCost,
+      remainingGold: updatedPlayer.gold,
     }
   } catch (error: any) {
     console.error('Recruit error:', error)
