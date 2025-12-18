@@ -41,7 +41,7 @@ CREATE TABLE heroes (
   gameplay_traits JSONB DEFAULT '[]', -- Array of GameplayTrait objects
   story_trait_ids TEXT[] DEFAULT '{}',
   power INTEGER DEFAULT 0,
-  equipment JSONB DEFAULT '{}', -- { weapon?, armor?, helmet?, boots?, accessory1?, accessory2? }
+  equipment JSONB DEFAULT '{}', -- { weapon?, head?, chest?, hands?, legs?, feet?, accessory? }
   prestige_level INTEGER DEFAULT 0,
   prestige_bonuses JSONB DEFAULT '{"combat": 0, "utility": 0, "survival": 0}',
   current_expedition_id UUID,
@@ -152,7 +152,7 @@ CREATE TABLE equipment (
   player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
-  slot TEXT NOT NULL CHECK (slot IN ('weapon', 'armor', 'helmet', 'boots', 'accessory1', 'accessory2')),
+  slot TEXT NOT NULL CHECK (slot IN ('weapon', 'head', 'chest', 'hands', 'legs', 'feet', 'accessory')),
   rarity TEXT NOT NULL CHECK (rarity IN ('common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic')),
   base_stats JSONB NOT NULL, -- { combat, utility, survival }
   item_level INTEGER NOT NULL,

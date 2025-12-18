@@ -1,4 +1,4 @@
-import type { EquipmentSlot, EquipmentRarity, Stats, TraitQuality, ZoneType } from './base'
+import type { EquipmentSlot, EquipmentRarity, Stats, StatType, TraitQuality, ZoneType } from './base'
 
 // Equipment item
 export interface Equipment {
@@ -67,13 +67,14 @@ export interface SetBonusTrait {
 }
 
 // Slot stat tendencies
-export const SLOT_STAT_TENDENCIES = {
+export const SLOT_STAT_TENDENCIES: Record<EquipmentSlot, { primary: StatType | 'any'; secondary: StatType | null; rare: StatType | null }> = {
   weapon: { primary: 'combat', secondary: 'utility', rare: 'survival' },
-  armor: { primary: 'survival', secondary: 'combat', rare: 'utility' },
-  helmet: { primary: 'survival', secondary: 'utility', rare: 'combat' },
-  boots: { primary: 'utility', secondary: 'survival', rare: 'combat' },
-  accessory1: { primary: 'any', secondary: null, rare: null },
-  accessory2: { primary: 'any', secondary: null, rare: null },
+  head: { primary: 'survival', secondary: 'utility', rare: 'combat' },
+  chest: { primary: 'survival', secondary: 'combat', rare: 'utility' },
+  hands: { primary: 'combat', secondary: 'survival', rare: 'utility' },
+  legs: { primary: 'survival', secondary: 'combat', rare: 'utility' },
+  feet: { primary: 'utility', secondary: 'survival', rare: 'combat' },
+  accessory: { primary: 'any', secondary: null, rare: null },
 }
 
 // Trait slots by rarity

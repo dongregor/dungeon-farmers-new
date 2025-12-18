@@ -21,7 +21,7 @@ export type Culture = 'northfolk' | 'coastborn' | 'woodwalkers' | 'crownlanders'
 export type TraitQuality = 'normal' | 'magic' | 'perfect'
 
 // Equipment
-export type EquipmentSlot = 'weapon' | 'armor' | 'helmet' | 'boots' | 'accessory1' | 'accessory2'
+export type EquipmentSlot = 'weapon' | 'head' | 'chest' | 'hands' | 'legs' | 'feet' | 'accessory'
 
 // Zones
 export type ZoneType = 'forest' | 'cave' | 'mountain' | 'swamp' | 'desert' | 'ruins'

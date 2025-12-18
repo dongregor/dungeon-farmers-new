@@ -31,15 +31,48 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     async equipItem(equipmentId: string, heroId: string) {
-      const data = await $fetch<{ equipment: Equipment }>(`/api/equipment/${equipmentId}/equip`, {
-        method: 'POST',
-        body: { heroId }
-      })
-      const index = this.inventory.findIndex(e => e.id === equipmentId)
-      if (index !== -1) {
-        this.inventory[index] = data.equipment
+      try {
+        const data = await $fetch<{ equipment: Equipment }>(`/api/equipment/${equipmentId}/equip`, {
+          method: 'POST',
+          body: { heroId }
+        })
+        const index = this.inventory.findIndex(e => e.id === equipmentId)
+        if (index !== -1) {
+          this.inventory[index] = data.equipment
+        }
+        return data.equipment
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Failed to equip item'
+        throw error
       }
-      return data.equipment
+    },
+
+    async unequipItem(equipmentId: string) {
+      try {
+        const data = await $fetch<{ equipment: Equipment }>(`/api/equipment/${equipmentId}/unequip`, {
+          method: 'POST',
+        })
+        const index = this.inventory.findIndex(e => e.id === equipmentId)
+        if (index !== -1) {
+          this.inventory[index] = data.equipment
+        }
+        return data.equipment
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Failed to unequip item'
+        throw error
+      }
+    },
+
+    async deleteItem(equipmentId: string) {
+      try {
+        await $fetch(`/api/equipment/${equipmentId}`, {
+          method: 'DELETE',
+        })
+        this.inventory = this.inventory.filter(e => e.id !== equipmentId)
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Failed to delete item'
+        throw error
+      }
     },
   }
 })
