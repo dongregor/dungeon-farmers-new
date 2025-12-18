@@ -352,12 +352,15 @@ export const WEEKLY_CHALLENGE_POOL: Omit<Challenge, 'id' | 'type'>[] = [
  * Generate random daily challenges
  */
 export function generateDailyChallenges(count: number = 3, seed?: number): Challenge[] {
+  // Create a seeded PRNG that advances state on each call
+  let currentSeed = seed ?? Math.floor(Math.random() * 233280)
+  const seededRandom = () => {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280
+    return currentSeed / 233280
+  }
+
   const shuffled = [...DAILY_CHALLENGE_POOL].sort(() => {
-    if (seed) {
-      // Simple seeded random for consistent daily challenges
-      return ((seed * 9301 + 49297) % 233280) / 233280 - 0.5
-    }
-    return Math.random() - 0.5
+    return (seed !== undefined ? seededRandom() : Math.random()) - 0.5
   })
 
   return shuffled.slice(0, count).map((challenge, index) => ({
@@ -371,12 +374,15 @@ export function generateDailyChallenges(count: number = 3, seed?: number): Chall
  * Generate random weekly challenges
  */
 export function generateWeeklyChallenges(count: number = 5, seed?: number): Challenge[] {
+  // Create a seeded PRNG that advances state on each call
+  let currentSeed = seed ?? Math.floor(Math.random() * 233280)
+  const seededRandom = () => {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280
+    return currentSeed / 233280
+  }
+
   const shuffled = [...WEEKLY_CHALLENGE_POOL].sort(() => {
-    if (seed) {
-      // Simple seeded random for consistent weekly challenges
-      return ((seed * 9301 + 49297) % 233280) / 233280 - 0.5
-    }
-    return Math.random() - 0.5
+    return (seed !== undefined ? seededRandom() : Math.random()) - 0.5
   })
 
   return shuffled.slice(0, count).map((challenge, index) => ({

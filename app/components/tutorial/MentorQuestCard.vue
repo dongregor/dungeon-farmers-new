@@ -48,7 +48,7 @@ const handleClaim = () => {
 
 <template>
   <div
-    class="bg-white rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg border-2"
+    class="relative bg-white rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg border-2"
     :class="[
       tierBorderColors[quest.tier],
       {

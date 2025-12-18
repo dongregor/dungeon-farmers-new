@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { getMentorQuestsByTier } from '~/data/mentorQuests'
-
 const {
   allQuests,
   unlockedQuests,

@@ -445,10 +445,11 @@ export function isQuestUnlocked(
       if (!quest.unlock.requiredQuestIds) return true
       return quest.unlock.requiredQuestIds.every(id => completedQuestIds.includes(id))
 
-    case 'stat_threshold':
+    case 'stat_threshold': {
       if (!quest.unlock.threshold) return true
       const stat = playerStats[quest.unlock.threshold.stat] || 0
       return stat >= quest.unlock.threshold.value
+    }
 
     default:
       return false
@@ -490,12 +491,13 @@ export function getUnlockConditionText(quest: MentorQuest, playerStats: Record<s
     case 'quest_complete':
       return 'Complete previous quests'
 
-    case 'stat_threshold':
+    case 'stat_threshold': {
       if (!quest.unlock.threshold) return 'Unknown requirement'
       const stat = playerStats[quest.unlock.threshold.stat] || 0
       const target = quest.unlock.threshold.value
       const statName = quest.unlock.threshold.stat.replace(/_/g, ' ')
       return `Requires: ${statName} ${stat}/${target}`
+    }
 
     default:
       return 'Unknown requirement'

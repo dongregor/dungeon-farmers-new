@@ -176,7 +176,12 @@ export const useTutorial = () => {
    * Initialize tutorial on app start
    */
   const initializeTutorial = async () => {
-    await fetchTutorialState()
+    try {
+      await fetchTutorialState()
+    } catch (error) {
+      console.error('Failed to load tutorial state:', error)
+      // Still allow tutorial to start for new players even if fetch fails
+    }
 
     // If no tutorial state exists, start tutorial for new players
     if (!tutorial.value.isComplete && !tutorial.value.isActive) {

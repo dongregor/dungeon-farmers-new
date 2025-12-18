@@ -3,6 +3,13 @@ const { tutorial, nextTutorialStep, setGuildMasterName, completeTutorialExpediti
 
 const guildNameInput = ref('')
 const showSkipConfirm = ref(false)
+const expeditionTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+
+onUnmounted(() => {
+  if (expeditionTimeout.value) {
+    clearTimeout(expeditionTimeout.value)
+  }
+})
 
 const handleNameSubmit = () => {
   if (guildNameInput.value.trim()) {
@@ -14,7 +21,7 @@ const handleNameSubmit = () => {
 const handleStartExpedition = () => {
   // In a real implementation, this would trigger an instant expedition
   // For now, we'll simulate it
-  setTimeout(() => {
+  expeditionTimeout.value = setTimeout(() => {
     completeTutorialExpedition()
     nextTutorialStep()
   }, 500)
@@ -44,7 +51,7 @@ const cancelSkip = () => {
 
 <template>
   <div v-if="tutorial.isActive" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="relative bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <!-- Skip button (top right) -->
       <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
         <h2 class="text-xl font-bold text-gray-800">Tutorial</h2>
