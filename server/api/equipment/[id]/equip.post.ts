@@ -1,16 +1,13 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
-import type { Equipment, Hero, EquipmentSlot } from '~~/types'
+import type { Equipment, Hero } from '~~/types'
 
 const equipSchema = z.object({
   heroId: z.string().uuid(),
   slot: z.enum(['weapon', 'armor', 'accessory'])
 })
 
-interface EquipRequest {
-  heroId: string
-  slot: EquipmentSlot
-}
+type EquipRequest = z.infer<typeof equipSchema>
 
 interface EquipResponse {
   equipment: Equipment

@@ -6,9 +6,7 @@ const upgradeSchema = z.object({
   traitIndex: z.number().int().min(0)
 })
 
-interface UpgradeRequest {
-  traitIndex: number
-}
+type UpgradeRequest = z.infer<typeof upgradeSchema>
 
 interface UpgradeResponse {
   equipment: Equipment
@@ -178,10 +176,18 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
   if (updateError || !updatedEquipment) {
     console.error('Error updating equipment:', updateError)
     // Rollback: refund the gold since equipment upgrade failed
-    await client
+    const { error: rollbackError } = await client
       .from('players')
       .update({ gold: player.gold })
       .eq('id', player.id)
+
+    if (rollbackError) {
+      console.error('CRITICAL: Failed to rollback gold after equipment upgrade failure', {
+        playerId: player.id,
+        goldToRefund: upgradeCost,
+        rollbackError
+      })
+    }
     throw createError({ statusCode: 500, message: 'Failed to upgrade equipment' })
   }
 
