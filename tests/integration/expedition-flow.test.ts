@@ -23,8 +23,8 @@ describe('Expedition Flow', () => {
     // Create a party of 3 heroes
     testHeroes = [
       generateHero({ forceArchetype: 'tank', forceRarity: 'uncommon' }),
-      generateHero({ forceArchetype: 'dps', forceRarity: 'rare' }),
-      generateHero({ forceArchetype: 'support', forceRarity: 'uncommon' }),
+      generateHero({ forceArchetype: 'melee_dps', forceRarity: 'rare' }),
+      generateHero({ forceArchetype: 'healer', forceRarity: 'uncommon' }),
     ]
 
     testZone = {
@@ -418,7 +418,7 @@ describe('Expedition Flow', () => {
   describe('Expedition Efficiency', () => {
     it('should give bonus efficiency for matching archetype tags to threats', () => {
       const beastHunter = generateHero({
-        forceArchetype: 'dps',
+        forceArchetype: 'melee_dps',
       })
       beastHunter.archetypeTags = ['beast_slayer']
 
@@ -440,8 +440,8 @@ describe('Expedition Flow', () => {
       // Party with tank, dps, support
       const balancedParty = [
         generateHero({ forceArchetype: 'tank' }),
-        generateHero({ forceArchetype: 'dps' }),
-        generateHero({ forceArchetype: 'support' }),
+        generateHero({ forceArchetype: 'melee_dps' }),
+        generateHero({ forceArchetype: 'healer' }),
       ]
 
       const efficiency = calculateEfficiency({
@@ -455,9 +455,9 @@ describe('Expedition Flow', () => {
 
     it('should reduce efficiency for all-dps party', () => {
       const allDpsParty = [
-        generateHero({ forceArchetype: 'dps' }),
-        generateHero({ forceArchetype: 'dps' }),
-        generateHero({ forceArchetype: 'dps' }),
+        generateHero({ forceArchetype: 'melee_dps' }),
+        generateHero({ forceArchetype: 'melee_dps' }),
+        generateHero({ forceArchetype: 'melee_dps' }),
       ]
 
       const efficiency = calculateEfficiency({
