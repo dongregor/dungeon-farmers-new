@@ -1,5 +1,11 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { z } from 'zod'
 import type { Equipment, Hero, EquipmentSlot } from '~~/types'
+
+const equipSchema = z.object({
+  heroId: z.string().uuid(),
+  slot: z.enum(['weapon', 'armor', 'accessory'])
+})
 
 interface EquipRequest {
   heroId: string
@@ -23,7 +29,6 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const equipmentId = getRouterParam(event, 'id')
-  const body = await readBody<EquipRequest>(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -33,9 +38,19 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
     throw createError({ statusCode: 400, message: 'Equipment ID required' })
   }
 
-  if (!body.heroId || !body.slot) {
-    throw createError({ statusCode: 400, message: 'Hero ID and slot required' })
+  // Validate request body with Zod
+  const bodyData = await readBody(event)
+  const parsed = equipSchema.safeParse(bodyData)
+
+  if (!parsed.success) {
+    throw createError({
+      statusCode: 400,
+      message: 'Invalid request',
+      data: { errors: parsed.error.issues }
+    })
   }
+
+  const body = parsed.data
 
   // Get player
   const { data: player, error: playerError } = await client

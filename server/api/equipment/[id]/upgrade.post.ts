@@ -1,5 +1,10 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { z } from 'zod'
 import type { Equipment, TraitQuality, EquipmentRarity } from '~~/types'
+
+const upgradeSchema = z.object({
+  traitIndex: z.number().int().min(0)
+})
 
 interface UpgradeRequest {
   traitIndex: number
@@ -56,7 +61,6 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const equipmentId = getRouterParam(event, 'id')
-  const body = await readBody<UpgradeRequest>(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -66,9 +70,19 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
     throw createError({ statusCode: 400, message: 'Equipment ID required' })
   }
 
-  if (body.traitIndex === undefined) {
-    throw createError({ statusCode: 400, message: 'Trait index required' })
+  // Validate request body with Zod
+  const bodyData = await readBody(event)
+  const parsed = upgradeSchema.safeParse(bodyData)
+
+  if (!parsed.success) {
+    throw createError({
+      statusCode: 400,
+      message: 'Invalid request',
+      data: { errors: parsed.error.issues }
+    })
   }
+
+  const body = parsed.data
 
   // Get player
   const { data: player, error: playerError } = await client
