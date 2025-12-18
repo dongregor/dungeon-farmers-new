@@ -383,6 +383,342 @@ export const VETERAN_ACHIEVEMENTS: Record<string, Achievement> = {
   },
 }
 
+// ===== STORYTELLER ACHIEVEMENTS =====
+
+export const STORYTELLER_ACHIEVEMENTS: Record<string, Achievement> = {
+  storyteller_bronze: {
+    id: 'storyteller_bronze',
+    name: 'Tale Collector',
+    description: 'Discover 10 unique story traits',
+    category: 'storyteller',
+    tier: 'bronze',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'story_traits_discovered',
+      count: 10,
+    },
+    reward: {
+      type: 'gold',
+      value: 200,
+      description: '200 gold',
+    },
+    icon: '📖',
+    points: 10,
+  },
+  storyteller_silver: {
+    id: 'storyteller_silver',
+    name: 'Lorekeeper',
+    description: 'Discover 50 unique story traits',
+    category: 'storyteller',
+    tier: 'silver',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'story_traits_discovered',
+      count: 50,
+    },
+    reward: {
+      type: 'gold',
+      value: 1000,
+      description: '1000 gold',
+    },
+    icon: '📖',
+    points: 25,
+  },
+  storyteller_gold: {
+    id: 'storyteller_gold',
+    name: 'Master Chronicler',
+    description: 'Discover 150 unique story traits',
+    category: 'storyteller',
+    tier: 'gold',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'story_traits_discovered',
+      count: 150,
+    },
+    reward: {
+      type: 'unlock',
+      unlockId: 'trait_library',
+      description: 'Unlock trait library feature',
+    },
+    icon: '📖',
+    points: 50,
+  },
+  storyteller_platinum: {
+    id: 'storyteller_platinum',
+    name: 'Legendary Storyteller',
+    description: 'Discover 300 unique story traits',
+    category: 'storyteller',
+    tier: 'platinum',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'story_traits_discovered',
+      count: 300,
+    },
+    reward: {
+      type: 'title',
+      description: 'Unlock profile title: "The Chronicler"',
+    },
+    icon: '📖',
+    points: 100,
+  },
+}
+
+// ===== MASTER ACHIEVEMENTS =====
+
+export const MASTER_ACHIEVEMENTS: Record<string, Achievement> = {
+  master_bronze: {
+    id: 'master_bronze',
+    name: 'Zone Master',
+    description: 'Fully master 1 zone',
+    category: 'master',
+    tier: 'bronze',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'zones_mastered',
+      count: 1,
+    },
+    reward: {
+      type: 'gold',
+      value: 300,
+      description: '300 gold',
+    },
+    icon: '🏆',
+    points: 15,
+  },
+  master_silver: {
+    id: 'master_silver',
+    name: 'Regional Master',
+    description: 'Fully master 3 zones',
+    category: 'master',
+    tier: 'silver',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'zones_mastered',
+      count: 3,
+    },
+    reward: {
+      type: 'gold',
+      value: 1500,
+      description: '1500 gold',
+    },
+    icon: '🏆',
+    points: 30,
+  },
+  master_gold: {
+    id: 'master_gold',
+    name: 'Continental Master',
+    description: 'Fully master 7 zones',
+    category: 'master',
+    tier: 'gold',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'zones_mastered',
+      count: 7,
+    },
+    reward: {
+      type: 'unlock',
+      unlockId: 'zone_mastery_bonus',
+      description: 'Unlock enhanced mastery bonuses',
+    },
+    icon: '🏆',
+    points: 60,
+  },
+  master_platinum: {
+    id: 'master_platinum',
+    name: 'World Master',
+    description: 'Fully master 12 zones',
+    category: 'master',
+    tier: 'platinum',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'zones_mastered',
+      count: 12,
+    },
+    reward: {
+      type: 'cosmetic',
+      description: 'Unlock exclusive "Master" guild frame',
+    },
+    icon: '🏆',
+    points: 120,
+  },
+}
+
+// ===== MERCHANT ACHIEVEMENTS =====
+
+export const MERCHANT_ACHIEVEMENTS: Record<string, Achievement> = {
+  merchant_bronze: {
+    id: 'merchant_bronze',
+    name: 'Coin Collector',
+    description: 'Earn 10,000 gold (lifetime)',
+    category: 'merchant',
+    tier: 'bronze',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'lifetime_gold_earned',
+      count: 10000,
+    },
+    reward: {
+      type: 'gold',
+      value: 500,
+      description: '500 gold',
+    },
+    icon: '💰',
+    points: 10,
+  },
+  merchant_silver: {
+    id: 'merchant_silver',
+    name: 'Treasure Hunter',
+    description: 'Earn 100,000 gold (lifetime)',
+    category: 'merchant',
+    tier: 'silver',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'lifetime_gold_earned',
+      count: 100000,
+    },
+    reward: {
+      type: 'gold',
+      value: 2500,
+      description: '2500 gold',
+    },
+    icon: '💰',
+    points: 25,
+  },
+  merchant_gold: {
+    id: 'merchant_gold',
+    name: 'Gold Baron',
+    description: 'Earn 500,000 gold (lifetime)',
+    category: 'merchant',
+    tier: 'gold',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'lifetime_gold_earned',
+      count: 500000,
+    },
+    reward: {
+      type: 'unlock',
+      unlockId: 'merchant_discount',
+      description: 'Unlock 5% discount at gold sinks',
+    },
+    icon: '💰',
+    points: 50,
+  },
+  merchant_platinum: {
+    id: 'merchant_platinum',
+    name: 'Legendary Tycoon',
+    description: 'Earn 2,000,000 gold (lifetime)',
+    category: 'merchant',
+    tier: 'platinum',
+    isHidden: false,
+    requirement: {
+      type: 'count',
+      target: 'lifetime_gold_earned',
+      count: 2000000,
+    },
+    reward: {
+      type: 'title',
+      description: 'Unlock profile title: "The Tycoon"',
+    },
+    icon: '💰',
+    points: 100,
+  },
+}
+
+// ===== CHALLENGER ACHIEVEMENTS =====
+
+export const CHALLENGER_ACHIEVEMENTS: Record<string, Achievement> = {
+  challenger_bronze: {
+    id: 'challenger_bronze',
+    name: 'Challenge Seeker',
+    description: 'Clear content at difficulty tier 3',
+    category: 'challenger',
+    tier: 'bronze',
+    isHidden: false,
+    requirement: {
+      type: 'milestone',
+      target: 'highest_difficulty_cleared',
+      count: 3,
+    },
+    reward: {
+      type: 'gold',
+      value: 300,
+      description: '300 gold',
+    },
+    icon: '⚔️',
+    points: 15,
+  },
+  challenger_silver: {
+    id: 'challenger_silver',
+    name: 'Difficulty Conqueror',
+    description: 'Clear content at difficulty tier 5',
+    category: 'challenger',
+    tier: 'silver',
+    isHidden: false,
+    requirement: {
+      type: 'milestone',
+      target: 'highest_difficulty_cleared',
+      count: 5,
+    },
+    reward: {
+      type: 'gold',
+      value: 1500,
+      description: '1500 gold',
+    },
+    icon: '⚔️',
+    points: 30,
+  },
+  challenger_gold: {
+    id: 'challenger_gold',
+    name: 'Elite Challenger',
+    description: 'Clear content at difficulty tier 7',
+    category: 'challenger',
+    tier: 'gold',
+    isHidden: false,
+    requirement: {
+      type: 'milestone',
+      target: 'highest_difficulty_cleared',
+      count: 7,
+    },
+    reward: {
+      type: 'unlock',
+      unlockId: 'challenger_badge',
+      description: 'Unlock difficulty tier badge',
+    },
+    icon: '⚔️',
+    points: 60,
+  },
+  challenger_platinum: {
+    id: 'challenger_platinum',
+    name: 'Ultimate Champion',
+    description: 'Clear content at difficulty tier 10',
+    category: 'challenger',
+    tier: 'platinum',
+    isHidden: false,
+    requirement: {
+      type: 'milestone',
+      target: 'highest_difficulty_cleared',
+      count: 10,
+    },
+    reward: {
+      type: 'cosmetic',
+      description: 'Unlock exclusive "Champion" effect',
+    },
+    icon: '⚔️',
+    points: 120,
+  },
+}
+
 // ===== HIDDEN ACHIEVEMENTS =====
 
 export const HIDDEN_ACHIEVEMENTS: Record<string, Achievement> = {
@@ -461,6 +797,61 @@ export const HIDDEN_ACHIEVEMENTS: Record<string, Achievement> = {
     icon: '🦉',
     points: 35,
   },
+  cheese_enthusiast: {
+    id: 'cheese_enthusiast',
+    name: 'Cheese Enthusiast',
+    description: 'Collect 5 cheese-related story traits',
+    category: 'hidden',
+    tier: 'bronze',
+    isHidden: true,
+    requirement: {
+      type: 'condition',
+      target: 'collect_cheese_traits',
+    },
+    reward: {
+      type: 'cosmetic',
+      description: 'Unlock "Cheese Lover" badge',
+    },
+    icon: '🧀',
+    points: 20,
+  },
+  full_house: {
+    id: 'full_house',
+    name: 'Full House',
+    description: 'Have 5 heroes with contradictory traits',
+    category: 'hidden',
+    tier: 'silver',
+    isHidden: true,
+    requirement: {
+      type: 'condition',
+      target: 'contradictory_traits',
+    },
+    reward: {
+      type: 'gold',
+      value: 800,
+      description: '800 gold',
+    },
+    icon: '🎭',
+    points: 30,
+  },
+  lucky_find: {
+    id: 'lucky_find',
+    name: 'Lucky Find',
+    description: 'Discover a rare subzone on first visit to a zone',
+    category: 'hidden',
+    tier: 'gold',
+    isHidden: true,
+    requirement: {
+      type: 'condition',
+      target: 'rare_subzone_first_visit',
+    },
+    reward: {
+      type: 'cosmetic',
+      description: 'Unlock "Lucky" title effect',
+    },
+    icon: '🍀',
+    points: 50,
+  },
 }
 
 /**
@@ -471,7 +862,11 @@ export function getAllAchievements(): Achievement[] {
     ...Object.values(EXPLORER_ACHIEVEMENTS),
     ...Object.values(COLLECTOR_ACHIEVEMENTS),
     ...Object.values(HOARDER_ACHIEVEMENTS),
+    ...Object.values(STORYTELLER_ACHIEVEMENTS),
+    ...Object.values(MASTER_ACHIEVEMENTS),
     ...Object.values(VETERAN_ACHIEVEMENTS),
+    ...Object.values(MERCHANT_ACHIEVEMENTS),
+    ...Object.values(CHALLENGER_ACHIEVEMENTS),
     ...Object.values(HIDDEN_ACHIEVEMENTS),
   ]
 }
