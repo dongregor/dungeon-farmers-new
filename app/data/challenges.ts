@@ -349,15 +349,22 @@ export const WEEKLY_CHALLENGE_POOL: Omit<Challenge, 'id' | 'type'>[] = [
 ]
 
 /**
- * Generate random daily challenges
+ * Create a seeded PRNG (Linear Congruential Generator)
+ * Uses the same parameters as the MINSTD Lehmer RNG
  */
-export function generateDailyChallenges(count: number = 3, seed?: number): Challenge[] {
-  // Create a seeded PRNG that advances state on each call
+function createSeededRandom(seed?: number): () => number {
   let currentSeed = seed ?? Math.floor(Math.random() * 233280)
-  const seededRandom = () => {
+  return () => {
     currentSeed = (currentSeed * 9301 + 49297) % 233280
     return currentSeed / 233280
   }
+}
+
+/**
+ * Generate random daily challenges
+ */
+export function generateDailyChallenges(count: number = 3, seed?: number): Challenge[] {
+  const seededRandom = createSeededRandom(seed)
 
   const shuffled = [...DAILY_CHALLENGE_POOL].sort(() => {
     return (seed !== undefined ? seededRandom() : Math.random()) - 0.5
@@ -374,12 +381,7 @@ export function generateDailyChallenges(count: number = 3, seed?: number): Chall
  * Generate random weekly challenges
  */
 export function generateWeeklyChallenges(count: number = 5, seed?: number): Challenge[] {
-  // Create a seeded PRNG that advances state on each call
-  let currentSeed = seed ?? Math.floor(Math.random() * 233280)
-  const seededRandom = () => {
-    currentSeed = (currentSeed * 9301 + 49297) % 233280
-    return currentSeed / 233280
-  }
+  const seededRandom = createSeededRandom(seed)
 
   const shuffled = [...WEEKLY_CHALLENGE_POOL].sort(() => {
     return (seed !== undefined ? seededRandom() : Math.random()) - 0.5
@@ -441,14 +443,14 @@ export function getRecommendedChallengeCount(type: ChallengeType): number {
 }
 
 /**
- * Get all daily challenge templates
+ * Get all daily challenge templates (returns a copy to prevent mutations)
  */
 export function getDailyChallengeTemplates() {
-  return DAILY_CHALLENGE_POOL
+  return [...DAILY_CHALLENGE_POOL]
 }
 
 /**
- * Get all weekly challenge templates
+ * Get all weekly challenge templates (returns a copy to prevent mutations)
  */
 export function getWeeklyChallengeTemplates() {
   return [...WEEKLY_CHALLENGE_POOL]
