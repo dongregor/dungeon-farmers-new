@@ -16,8 +16,7 @@ describe('Hero Management', () => {
   beforeEach(() => {
     testPlayerId = 'test-player-456'
     testHero = generateHero({
-      playerId: testPlayerId,
-      rarity: 'rare',
+      forceRarity: 'rare',
     })
   })
 
@@ -26,7 +25,7 @@ describe('Hero Management', () => {
       const archetypes = ['tank', 'melee_dps', 'healer', 'caster'] as const
 
       archetypes.forEach(archetype => {
-        const hero = generateHero({ playerId: testPlayerId, archetype })
+        const hero = generateHero({ forceArchetype: archetype })
 
         expect(hero.archetype).toBe(archetype)
         expect(hero.archetypeTags).toBeDefined()
@@ -38,7 +37,7 @@ describe('Hero Management', () => {
       const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'] as const
 
       rarities.forEach(rarity => {
-        const hero = generateHero({ playerId: testPlayerId, rarity })
+        const hero = generateHero({ forceRarity: rarity })
 
         expect(hero.rarity).toBe(rarity)
         expect(hero.gameplayTraits).toBeDefined()
@@ -46,9 +45,9 @@ describe('Hero Management', () => {
     })
 
     it('should assign appropriate base stats based on archetype', () => {
-      const tank = generateHero({ playerId: testPlayerId, archetype: 'tank' })
-      const dps = generateHero({ playerId: testPlayerId, archetype: 'dps' })
-      const support = generateHero({ playerId: testPlayerId, archetype: 'support' })
+      const tank = generateHero({ forceArchetype: 'tank' })
+      const dps = generateHero({ forceArchetype: 'dps' })
+      const support = generateHero({ forceArchetype: 'support' })
 
       // Each archetype should excel in their primary stat
       const tankTotal = tank.baseStats.combat + tank.baseStats.survival + tank.baseStats.utility
@@ -284,7 +283,7 @@ describe('Hero Management', () => {
 
   describe('Hero Morale System', () => {
     it('should start with content morale', () => {
-      const newHero = generateHero({ playerId: testPlayerId })
+      const newHero = generateHero({})
 
       expect(newHero.morale).toBe('content')
       expect(newHero.moraleValue).toBe(50)
@@ -370,8 +369,8 @@ describe('Hero Management', () => {
     })
 
     it('should include prestige bonuses in power calculation', () => {
-      const hero1 = generateHero({ playerId: testPlayerId, rarity: 'uncommon' })
-      const hero2 = generateHero({ playerId: testPlayerId, rarity: 'uncommon' })
+      const hero1 = generateHero({ forceRarity: 'uncommon' })
+      const hero2 = generateHero({ forceRarity: 'uncommon' })
 
       // Same base stats, but hero2 has prestige
       hero2.prestigeLevel = 2

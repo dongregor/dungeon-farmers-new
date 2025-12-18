@@ -49,7 +49,6 @@ describe('Core Game Loop', () => {
     it('should generate a valid hero with correct initial state', () => {
       expect(testHero).toBeDefined()
       expect(testHero.id).toBeDefined()
-      expect(testHero.playerId).toBe(testPlayerId)
       expect(testHero.level).toBe(1)
       expect(testHero.xp).toBe(0)
       expect(testHero.isOnExpedition).toBe(false)

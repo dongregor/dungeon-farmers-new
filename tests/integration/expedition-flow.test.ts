@@ -22,9 +22,9 @@ describe('Expedition Flow', () => {
 
     // Create a party of 3 heroes
     testHeroes = [
-      generateHero({ playerId: testPlayerId, archetype: 'tank', rarity: 'uncommon' }),
-      generateHero({ playerId: testPlayerId, archetype: 'dps', rarity: 'rare' }),
-      generateHero({ playerId: testPlayerId, archetype: 'support', rarity: 'uncommon' }),
+      generateHero({ forceArchetype: 'tank', forceRarity: 'uncommon' }),
+      generateHero({ forceArchetype: 'dps', forceRarity: 'rare' }),
+      generateHero({ forceArchetype: 'support', forceRarity: 'uncommon' }),
     ]
 
     testZone = {
@@ -440,9 +440,9 @@ describe('Expedition Flow', () => {
     it('should calculate balanced party efficiency bonus', () => {
       // Party with tank, dps, support
       const balancedParty = [
-        generateHero({ playerId: testPlayerId, archetype: 'tank' }),
-        generateHero({ playerId: testPlayerId, archetype: 'dps' }),
-        generateHero({ playerId: testPlayerId, archetype: 'support' }),
+        generateHero({ forceArchetype: 'tank' }),
+        generateHero({ forceArchetype: 'dps' }),
+        generateHero({ forceArchetype: 'support' }),
       ]
 
       const efficiency = calculateEfficiency({
@@ -456,9 +456,9 @@ describe('Expedition Flow', () => {
 
     it('should reduce efficiency for all-dps party', () => {
       const allDpsParty = [
-        generateHero({ playerId: testPlayerId, archetype: 'dps' }),
-        generateHero({ playerId: testPlayerId, archetype: 'dps' }),
-        generateHero({ playerId: testPlayerId, archetype: 'dps' }),
+        generateHero({ forceArchetype: 'dps' }),
+        generateHero({ forceArchetype: 'dps' }),
+        generateHero({ forceArchetype: 'dps' }),
       ]
 
       const efficiency = calculateEfficiency({
