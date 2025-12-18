@@ -361,14 +361,25 @@ function createSeededRandom(seed?: number): () => number {
 }
 
 /**
+ * Fisher-Yates shuffle algorithm for unbiased randomization
+ * Supports both seeded (deterministic) and unseeded (random) shuffling
+ */
+function fisherYatesShuffle<T>(array: T[], randomFn: () => number): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(randomFn() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+/**
  * Generate random daily challenges
  */
 export function generateDailyChallenges(count: number = 3, seed?: number): Challenge[] {
-  const seededRandom = createSeededRandom(seed)
+  const randomFn = seed !== undefined ? createSeededRandom(seed) : Math.random
 
-  const shuffled = [...DAILY_CHALLENGE_POOL].sort(() => {
-    return (seed !== undefined ? seededRandom() : Math.random()) - 0.5
-  })
+  const shuffled = fisherYatesShuffle(DAILY_CHALLENGE_POOL, randomFn)
 
   return shuffled.slice(0, count).map((challenge, index) => ({
     id: `daily_${new Date().toISOString().split('T')[0]}_${index}`,
@@ -381,11 +392,9 @@ export function generateDailyChallenges(count: number = 3, seed?: number): Chall
  * Generate random weekly challenges
  */
 export function generateWeeklyChallenges(count: number = 5, seed?: number): Challenge[] {
-  const seededRandom = createSeededRandom(seed)
+  const randomFn = seed !== undefined ? createSeededRandom(seed) : Math.random
 
-  const shuffled = [...WEEKLY_CHALLENGE_POOL].sort(() => {
-    return (seed !== undefined ? seededRandom() : Math.random()) - 0.5
-  })
+  const shuffled = fisherYatesShuffle(WEEKLY_CHALLENGE_POOL, randomFn)
 
   return shuffled.slice(0, count).map((challenge, index) => ({
     id: `weekly_${getWeekNumber()}_${index}`,
@@ -396,6 +405,12 @@ export function generateWeeklyChallenges(count: number = 5, seed?: number): Chal
 
 /**
  * Get current week number (for consistent weekly challenges)
+ *
+ * Note: This is a simple sequential week counter, NOT ISO 8601 compliant.
+ * It counts weeks from January 1st of each year (Week 0 = Jan 1-7).
+ * This approach is simpler and sufficient for challenge rotation purposes.
+ *
+ * Returns format: "YYYY_W#" (e.g., "2024_W42")
  */
 function getWeekNumber(): string {
   const now = new Date()
