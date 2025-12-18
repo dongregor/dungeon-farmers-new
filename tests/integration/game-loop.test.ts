@@ -186,7 +186,7 @@ describe('Core Game Loop', () => {
       }
     })
 
-    it('should apply mastery bonus to drop count', () => {
+    it('should apply mastery bonus to drop count with probabilistic rounding', () => {
       const noMastery = generateExpeditionLoot({
         playerId: testPlayerId,
         zoneId: testZone.id,
@@ -208,7 +208,37 @@ describe('Core Game Loop', () => {
       })
 
       // High mastery should give more drops (1.5x multiplier at mastery 100)
+      // dropCount=2, mastery=100 (1.5x) → 2*1.5=3.0 → 3 guaranteed + 0% bonus = 3 drops
       expect(highMastery.length).toBeGreaterThanOrEqual(noMastery.length)
+      expect(noMastery.length).toBe(2)
+      expect(highMastery.length).toBe(3)
+    })
+
+    it('should make mastery effective for single-drop expeditions via probabilistic rounding', () => {
+      // Statistical test: Run many trials to verify average approaches expected value
+      const trials = 100
+      let totalDrops = 0
+
+      for (let i = 0; i < trials; i++) {
+        const loot = generateExpeditionLoot({
+          playerId: testPlayerId,
+          zoneId: testZone.id,
+          subzoneId: testSubzone.id,
+          zoneDifficulty: 'easy',
+          tier: 1,
+          mastery: 100, // 1.5x multiplier
+          dropCount: 1,
+        })
+        totalDrops += loot.length
+      }
+
+      const averageDrops = totalDrops / trials
+
+      // dropCount=1, mastery=100 (1.5x) → 1 guaranteed + 50% chance of 1 more
+      // Expected average: 1.5 drops
+      // With 100 trials, we expect the average to be close to 1.5 (within reasonable variance)
+      expect(averageDrops).toBeGreaterThan(1.2) // Should be significantly above 1
+      expect(averageDrops).toBeLessThan(1.8) // Should be reasonably close to 1.5
     })
 
     it('should generate guaranteed first clear reward with upgraded rarity', () => {

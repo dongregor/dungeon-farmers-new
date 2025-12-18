@@ -1,5 +1,5 @@
 import type { Equipment, EquipmentRarity } from '~~/types'
-import { generateEquipment } from './equipmentGenerator'
+import { generateEquipment } from '~/utils/equipmentGenerator'
 import {
   getLootTableForTier,
   rollLootDrop,
@@ -43,8 +43,16 @@ export function generateExpeditionLoot(params: {
   const itemLevel = calculateItemLevel(zoneDifficulty, tier)
   const masteryBonus = getMasteryDropBonus(mastery)
 
-  // Apply mastery bonus to drop count (rounds down)
-  const effectiveDropCount = Math.floor(dropCount * masteryBonus)
+  // Apply mastery bonus to drop count with probabilistic rounding
+  // This ensures fractional bonuses are valuable even for single-drop expeditions
+  // Example: dropCount=1, mastery=100 (1.5x) → 1 guaranteed + 50% chance of 1 more
+  const bonusedDropCount = dropCount * masteryBonus
+  const guaranteedDrops = Math.floor(bonusedDropCount)
+  const fractionalPart = bonusedDropCount - guaranteedDrops
+
+  // Add one extra drop based on fractional probability
+  const bonusDropChance = Math.random() < fractionalPart
+  const effectiveDropCount = guaranteedDrops + (bonusDropChance ? 1 : 0)
 
   for (let i = 0; i < effectiveDropCount; i++) {
     const drop = rollLootDrop(lootTable)
