@@ -418,8 +418,7 @@ describe('Expedition Flow', () => {
   describe('Expedition Efficiency', () => {
     it('should give bonus efficiency for matching archetype tags to threats', () => {
       const beastHunter = generateHero({
-        playerId: testPlayerId,
-        archetype: 'dps',
+        forceArchetype: 'dps',
       })
       beastHunter.archetypeTags = ['beast_slayer']
 

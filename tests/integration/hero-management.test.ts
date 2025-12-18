@@ -261,13 +261,11 @@ describe('Hero Management', () => {
 
     it('should transfer story trait to another hero on retirement', () => {
       const heroToRetire = generateHero({
-        playerId: testPlayerId,
-        rarity: 'legendary',
+        forceRarity: 'legendary',
       })
 
       const recipientHero = generateHero({
-        playerId: testPlayerId,
-        rarity: 'common',
+        forceRarity: 'common',
       })
 
       // Give hero a story trait
@@ -342,8 +340,7 @@ describe('Hero Management', () => {
   describe('Hero Power Calculation', () => {
     it('should calculate base power from stats', () => {
       const hero = generateHero({
-        playerId: testPlayerId,
-        rarity: 'common',
+        forceRarity: 'common',
       })
 
       const powerBreakdown = calculateHeroPower(hero)
