@@ -1,4 +1,4 @@
-import type { Equipment } from '~~/types'
+import type { Equipment, EquipmentRarity } from '~~/types'
 import { generateEquipment } from './equipmentGenerator'
 import {
   getLootTableForTier,
@@ -98,8 +98,8 @@ export function generateFirstClearReward(params: {
 /**
  * Upgrade rarity by one tier (for special rewards)
  */
-function upgradeRarity(rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'): 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' {
-  const rarityOrder: Array<'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'> = [
+function upgradeRarity(rarity: EquipmentRarity): EquipmentRarity {
+  const rarityOrder: EquipmentRarity[] = [
     'common',
     'uncommon',
     'rare',
@@ -109,8 +109,8 @@ function upgradeRarity(rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legend
   ]
 
   const currentIndex = rarityOrder.indexOf(rarity)
-  if (currentIndex === -1 || currentIndex === rarityOrder.length - 1) {
-    return rarity
+  if (currentIndex === rarityOrder.length - 1) {
+    return rarity // Already max rarity
   }
 
   return rarityOrder[currentIndex + 1]
