@@ -11,7 +11,16 @@
 ALTER TABLE equipment DROP CONSTRAINT IF EXISTS equipment_slot_check;
 
 -- ============================================================================
--- STEP 2: Migrate existing data to new slot values
+-- STEP 2: Unequip accessory2 items to prevent orphaned equipment
+-- ============================================================================
+-- Since we're consolidating accessory1 and accessory2 into a single accessory slot,
+-- unequip any accessory2 items before migration to maintain data consistency
+UPDATE equipment
+SET is_equipped = false, equipped_by = NULL
+WHERE slot = 'accessory2' AND is_equipped = true;
+
+-- ============================================================================
+-- STEP 3: Migrate existing data to new slot values
 -- ============================================================================
 UPDATE equipment SET slot = 'head' WHERE slot = 'helmet';
 UPDATE equipment SET slot = 'chest' WHERE slot = 'armor';
@@ -20,13 +29,13 @@ UPDATE equipment SET slot = 'accessory' WHERE slot = 'accessory1';
 UPDATE equipment SET slot = 'accessory' WHERE slot = 'accessory2';
 
 -- ============================================================================
--- STEP 3: Add new check constraint with updated values
+-- STEP 4: Add new check constraint with updated values
 -- ============================================================================
 ALTER TABLE equipment ADD CONSTRAINT equipment_slot_check
   CHECK (slot IN ('weapon', 'head', 'chest', 'hands', 'legs', 'feet', 'accessory'));
 
 -- ============================================================================
--- STEP 4: Update hero equipment JSONB to use new slot names
+-- STEP 5: Update hero equipment JSONB to use new slot names
 -- ============================================================================
 -- This handles the equipment JSONB field in the heroes table
 -- Equipment is stored as { weapon?, head?, chest?, hands?, legs?, feet?, accessory? }
@@ -71,7 +80,7 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- STEP 5: Do the same for guild_masters table
+-- STEP 6: Do the same for guild_masters table
 -- ============================================================================
 DO $$
 DECLARE

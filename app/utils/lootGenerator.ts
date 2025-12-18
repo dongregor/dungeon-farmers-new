@@ -43,8 +43,13 @@ export function generateExpeditionLoot(params: {
   const itemLevel = calculateItemLevel(zoneDifficulty, tier)
   const masteryBonus = getMasteryDropBonus(mastery)
 
-  // Apply mastery bonus to drop count (rounds down)
-  const effectiveDropCount = Math.floor(dropCount * masteryBonus)
+  // Apply mastery bonus to drop count with probabilistic rounding
+  // This ensures fractional bonuses have a chance to grant an extra drop
+  const multipliedDrops = dropCount * masteryBonus
+  const baseDrops = Math.floor(multipliedDrops)
+  const fractionalPart = multipliedDrops - baseDrops
+  const bonusDrop = Math.random() < fractionalPart ? 1 : 0
+  const effectiveDropCount = baseDrops + bonusDrop
 
   for (let i = 0; i < effectiveDropCount; i++) {
     const drop = rollLootDrop(lootTable)
