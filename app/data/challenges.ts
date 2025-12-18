@@ -451,5 +451,5 @@ export function getDailyChallengeTemplates() {
  * Get all weekly challenge templates
  */
 export function getWeeklyChallengeTemplates() {
-  return WEEKLY_CHALLENGE_POOL
+  return [...WEEKLY_CHALLENGE_POOL]
 }
