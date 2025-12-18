@@ -207,7 +207,7 @@ export default defineEventHandler(async (event) => {
         team_power: teamPower,
         status: 'in_progress',
         started_at: now.toISOString(),
-        end_time: endTime.toISOString(),
+        completes_at: endTime.toISOString(),
         duration,
         auto_repeat: autoRepeat,
         stop_conditions: stopConditions,

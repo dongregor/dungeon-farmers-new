@@ -101,9 +101,6 @@ export function mapSupabaseHeroToHero(data: any): Hero {
 
     // Timestamps
     createdAt: data.created_at,
-    updatedAt: data.updated_at,
-
-    // Player ownership
-    playerId: data.player_id
+    updatedAt: data.updated_at
   }
 }

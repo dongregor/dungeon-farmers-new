@@ -70,7 +70,7 @@ export function completeExpedition(
   }
 }
 
-function calculateRewards(
+export function calculateRewards(
   subzone: Subzone,
   efficiency: number,
   events: any[]

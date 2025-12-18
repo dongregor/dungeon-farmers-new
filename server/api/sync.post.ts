@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { calculateOfflineProgress, calculateHoursOffline, formatOfflineDuration } from '~/utils/offlineProgress'
 import type { Hero, Expedition } from '~~/types'
+import { ZONES } from '~/data/zones'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
@@ -71,6 +72,7 @@ export default defineEventHandler(async (event) => {
       lastOnlineTime,
       (activeExpeditions as Expedition[]) || [],
       (heroes as Hero[]) || [],
+      ZONES,
       inventorySlots,
       usedInventorySlots
     )
@@ -122,18 +124,12 @@ export default defineEventHandler(async (event) => {
     }
 
     // Store pending loot
-    for (const loot of offlineResult.pendingLoot) {
-      await client
-        .from('pending_loot')
-        .insert({
-          id: loot.id,
-          player_id: player.id,
-          expedition_id: loot.expeditionId,
-          equipment: loot.equipment,
-          materials: loot.materials,
-          expires_at: loot.expiresAt,
-          created_at: loot.createdAt,
-        })
+    // TODO: Fix pending_loot schema mismatch and create table
+    // The PendingLoot type defines { expeditionId, items, expiresAt }
+    // but the database insert expects different fields
+    // For now, skip inserting pending loot until schema is finalized
+    if (offlineResult.pendingLoot.length > 0) {
+      console.warn('Pending loot not saved - table schema needs to be created and aligned with TypeScript type')
     }
 
     // Update player's last online time

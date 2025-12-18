@@ -1,7 +1,7 @@
 import type { Stats } from './base'
 import type { Equipment } from './equipment'
 
-export type ExpeditionStatus = 'idle' | 'in_progress' | 'completed' | 'failed'
+export type ExpeditionStatus = 'idle' | 'in_progress' | 'completed' | 'failed' | 'waiting_choices'
 
 // Expedition settings (reused in Expedition interface)
 export interface ExpeditionSettings {

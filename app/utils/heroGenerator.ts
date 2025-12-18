@@ -45,9 +45,19 @@ function randomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
+// Fisher-Yates shuffle for unbiased randomization
+function fisherYatesShuffle<T>(arr: T[]): T[] {
+  const shuffled = [...arr]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 // Random elements without replacement
 function randomElements<T>(arr: T[], count: number): T[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5)
+  const shuffled = fisherYatesShuffle(arr)
   return shuffled.slice(0, Math.min(count, arr.length))
 }
 
