@@ -25,46 +25,9 @@ import { getRandomName } from '~/data/names'
 import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gameplayTraits'
 import { getGenerationStoryTraits } from '~/data/storyTraits'
 import { getRandomCulture } from '~/data/cultures'
+import { randomInt, randomElement, randomElements, weightedRandom } from '~~/shared/utils/randomization'
 
-// Weighted random selection
-function weightedRandom<T extends string>(weights: Record<T, number>): T {
-  const entries = Object.entries(weights) as [T, number][]
-  const total = entries.reduce((sum, [, w]) => sum + w, 0)
-  let random = Math.random() * total
-
-  for (const [key, weight] of entries) {
-    random -= weight
-    if (random <= 0) return key
-  }
-
-  return entries[0][0]
-}
-
-// Random array element
-function randomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-// Fisher-Yates shuffle for unbiased randomization
-function fisherYatesShuffle<T>(arr: T[]): T[] {
-  const shuffled = [...arr]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
-
-// Random elements without replacement
-function randomElements<T>(arr: T[], count: number): T[] {
-  const shuffled = fisherYatesShuffle(arr)
-  return shuffled.slice(0, Math.min(count, arr.length))
-}
-
-// Random int in range
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
+// Helper functions now imported from shared/utils/randomization
 
 // Generate rarity
 function generateRarity(): Rarity {

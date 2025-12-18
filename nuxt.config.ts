@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     // Optional: '@nuxtjs/color-mode', '@nuxt/image', '@nuxt/fonts', '@nuxt/eslint'
   ],
-  css: ['~/app/assets/css/main.css'],
+  css: ['~/assets/css/main.css'],
   typescript: {
     strict: true,
   },
