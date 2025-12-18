@@ -427,17 +427,6 @@ export function getWeeklyResetTime(): Date {
 }
 
 /**
- * Get challenge by ID
- */
-export function getChallengeById(id: string): Challenge | undefined {
-  const allChallenges = [
-    ...DAILY_CHALLENGE_POOL.map((c, i) => ({ id: `daily_${i}`, type: 'daily' as ChallengeType, ...c })),
-    ...WEEKLY_CHALLENGE_POOL.map((c, i) => ({ id: `weekly_${i}`, type: 'weekly' as ChallengeType, ...c })),
-  ]
-  return allChallenges.find(c => c.id === id)
-}
-
-/**
  * Check if a challenge type is valid
  */
 export function isValidChallengeType(type: string): type is ChallengeType {
