@@ -18,7 +18,7 @@ export function mapSupabaseExpeditionToExpedition(data: any): Expedition {
 
     // Timing
     startedAt: data.started_at,
-    completesAt: data.end_time,
+    completesAt: data.completes_at,
     durationMinutes: data.duration || 0,
     status: data.status,
 
