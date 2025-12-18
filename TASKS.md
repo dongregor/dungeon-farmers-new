@@ -1,0 +1,323 @@
+# Dungeon Farmers - Task List
+
+**Generated:** 2024-12-18
+**Based on:** Codebase Analysis
+**Status:** Phase 1 Complete, Ready for Bug Fixes & Improvements
+
+---
+
+## Priority Legend
+
+- **P0** - Critical bugs that break functionality
+- **P1** - High priority improvements
+- **P2** - Medium priority refactoring
+- **P3** - Low priority enhancements
+
+---
+
+## P0: Critical Bugs
+
+### Type & Export Errors
+
+- [ ] **BUG-001**: Fix invalid expedition status type
+  - File: `app/utils/expeditionEngine.ts:64`
+  - Issue: Sets `status: 'waiting_choices'` but type only allows `'idle' | 'in_progress' | 'completed' | 'failed'`
+  - Fix: Add `'waiting_choices'` to `ExpeditionStatus` type or use valid status
+
+- [ ] **BUG-002**: Export missing `calculateRewards` function
+  - File: `app/utils/expeditionEngine.ts:73`
+  - Issue: Function defined but not exported
+  - Impact: Runtime crash in offlineProgress.ts
+
+- [ ] **BUG-003**: Fix `calculateRewards` parameter mismatch
+  - File: `app/utils/offlineProgress.ts:45-48`
+  - Issue: Calls `calculateRewards(expedition, teamPower, durationMinutes)` but signature requires `(subzone, efficiency, events)`
+  - Fix: Pass correct parameters or refactor function signature
+
+### Morale Type Mismatches
+
+- [ ] **BUG-004**: Fix morale arithmetic in expedition complete
+  - File: `server/api/expeditions/[id]/complete.post.ts:120`
+  - Issue: `Math.max(0, hero.morale - 10)` treats MoraleState (string) as number
+  - Fix: Use `moraleValue` (number) instead of `morale` (string)
+
+- [ ] **BUG-005**: Fix morale arithmetic in expedition cancel
+  - File: `server/api/expeditions/[id]/cancel.post.ts:76`
+  - Issue: Same as BUG-004
+  - Fix: Use `moraleValue` instead of `morale`
+
+### Property Name Errors
+
+- [ ] **BUG-006**: Fix choice event property name
+  - File: `server/api/expeditions/[id]/choice.post.ts:85,93`
+  - Issue: Uses `choiceEvent.data.choices` but type defines `data.options`
+  - Fix: Change `choices` to `options`
+
+### Database Schema Issues
+
+- [ ] **BUG-007**: Fix inconsistent timestamp field names
+  - Files:
+    - `server/api/expeditions/start.post.ts:210` uses `end_time`
+    - `server/api/sync.post.ts:113` uses `completes_at`
+    - `server/api/expeditions/[id]/complete.post.ts:43` reads `end_time`
+  - Fix: Standardize on one field name across all files
+
+- [ ] **BUG-008**: Fix array length check on object
+  - File: `server/api/tavern/recruit.post.ts:165`
+  - Issue: `if (!tavernUpdateResult || tavernUpdateResult.length === 0)` checks `.length` on object
+  - Fix: Use proper object check or verify return type
+
+- [ ] **BUG-009**: Fix pending_loot schema mismatch
+  - File: `server/api/sync.post.ts:129-136`
+  - Issue: Inserts `id`, `materials`, `createdAt` but type only has `expeditionId`, `items`, `expiresAt`
+  - Fix: Align insert fields with PendingLoot type
+
+- [ ] **BUG-010**: Remove undeclared `playerId` from Hero mapper
+  - File: `server/utils/mappers.ts:107`
+  - Issue: Adds `playerId: data.player_id` but Hero interface doesn't define this field
+  - Fix: Remove or add to Hero type
+
+### Algorithm Issues
+
+- [ ] **BUG-011**: Replace biased shuffle in heroGenerator
+  - File: `app/utils/heroGenerator.ts:50`
+  - Issue: Uses `.sort(() => Math.random() - 0.5)` which is biased
+  - Fix: Use Fisher-Yates shuffle (already implemented in challenges.ts)
+
+---
+
+## P1: High Priority Improvements
+
+### Type Safety
+
+- [ ] **TYPE-001**: Eliminate `any` types across codebase
+  - Files affected: 20+ files
+  - Examples:
+    - `app/utils/levelUpHandler.ts` - `equipment: any[] = []`
+    - `app/pages/guild-master.vue` - `catch (error: any)`
+    - `app/components/zone/StationingPanel.vue` - Multiple `error: any`
+    - `app/stores/zones.ts` - `benefit: any`
+  - Fix: Create specific types for each use case
+
+### Server Validation
+
+- [ ] **VAL-001**: Add Zod validation to tavern routes
+  - Files:
+    - `server/api/tavern/refresh.post.ts`
+    - `server/api/tavern/recruit.post.ts`
+    - `server/api/tavern/lock/[index].post.ts`
+    - `server/api/tavern/unlock/[index].post.ts`
+
+- [ ] **VAL-002**: Add Zod validation to equipment routes
+  - Files:
+    - `server/api/equipment/[id]/equip.post.ts`
+    - `server/api/equipment/[id]/upgrade.post.ts`
+
+- [ ] **VAL-003**: Add Zod validation to hero routes
+  - Files:
+    - `server/api/heroes/[id]/prestige.post.ts`
+    - `server/api/heroes/[id]/retire.post.ts`
+
+### DRY Violations
+
+- [ ] **DRY-001**: Create shared randomization utilities
+  - Create: `shared/utils/randomization.ts`
+  - Functions to centralize:
+    - `randomInt(min, max)`
+    - `randomElement(array)`
+    - `randomElements(array, count)`
+    - `weightedRandom(weights)`
+    - `fisherYatesShuffle(array)`
+    - `createSeededRandom(seed)`
+  - Files to update:
+    - `app/utils/heroGenerator.ts`
+    - `app/utils/eventGenerator.ts`
+    - `app/data/challenges.ts`
+    - `app/utils/equipmentGenerator.ts`
+    - `app/utils/lootGenerator.ts`
+
+### Error Handling
+
+- [ ] **ERR-001**: Create centralized error handling utility
+  - Create: `shared/utils/errorHandler.ts`
+  - Functions:
+    - `handleError(error, context): { message, statusCode, shouldRetry }`
+    - `createAppError(type, message, data)`
+  - Update 15+ files with consistent pattern
+
+### Missing Shared Directory
+
+- [ ] **ARCH-001**: Create shared directory structure
+  - Create directories:
+    ```
+    shared/
+    ├── utils/
+    │   ├── randomization.ts
+    │   ├── validation.ts
+    │   └── errorHandler.ts
+    ├── types/
+    │   └── errors.ts
+    └── constants/
+        └── gameRules.ts
+    ```
+
+---
+
+## P2: Medium Priority Refactoring
+
+### Game Rules Constants
+
+- [ ] **CONST-001**: Extract magic numbers to constants
+  - Create: `shared/constants/gameRules.ts`
+  - Values to extract:
+    - Max hero level: `60`
+    - Prestige bonus: `5 * efficiency`
+    - Threat penalty: `5 * basePenalty * difficultyMultiplier`
+    - Morale recovery: `1 per minute`
+    - XP formula: `level * 100 + (level * level * 50)`
+
+### Missing Composables
+
+- [ ] **COMP-001**: Create `useHeroActions` composable
+  - Functions: level up, retire, prestige, toggle favorite
+
+- [ ] **COMP-002**: Create `useExpeditionValidation` composable
+  - Functions: validate party, check morale, verify requirements
+
+- [ ] **COMP-003**: Create `usePowerCalculation` composable
+  - Reactive power updates when equipment/level changes
+
+- [ ] **COMP-004**: Create `useInventoryManagement` composable
+  - Equipment slot management, overflow handling
+
+### Performance
+
+- [ ] **PERF-001**: Add caching for zone lookups
+  - Issue: `ZONES.find(z => z.id === zoneId)` repeated many times
+  - Fix: Create zone Map for O(1) lookups
+
+- [ ] **PERF-002**: Consider Map for hero store state
+  - Issue: `state.heroes.find(h => h.id === id)` is O(n)
+  - Fix: Use `Map<string, Hero>` for frequently accessed data
+
+### Incomplete Features
+
+- [ ] **TODO-001**: Implement smart replacement logic
+  - File: `app/stores/presets.ts:138`
+  - Comment: "TODO: Implement smart replacement logic"
+
+- [ ] **TODO-002**: Implement resource cap checking
+  - File: `app/utils/offlineProgress.ts:172`
+  - Comment: "TODO: Implement resource cap checking"
+
+### Transaction Safety
+
+- [ ] **DB-001**: Add transaction for equipment operations
+  - File: `server/api/equipment/[id]/equip.post.ts`
+  - Issue: 3 sequential DB updates without transaction
+  - Risk: Race condition on concurrent equip operations
+
+---
+
+## P3: Testing & Documentation
+
+### Unit Tests
+
+- [ ] **TEST-001**: Add randomization utility tests
+  - File: `tests/unit/utils/randomization.test.ts`
+  - Cover: Fisher-Yates uniformity, weighted distribution, seeded reproducibility
+
+- [ ] **TEST-002**: Add power calculator tests
+  - File: `tests/unit/utils/powerCalculator.test.ts`
+  - Cover: Edge cases, trait interactions, prestige bonuses
+
+- [ ] **TEST-003**: Add efficiency calculator tests
+  - File: `tests/unit/utils/efficiencyCalculator.test.ts`
+  - Cover: Threat counters, difficulty scaling, bounds (60-150%)
+
+- [ ] **TEST-004**: Add offline progress tests
+  - File: `tests/unit/utils/offlineProgress.test.ts`
+  - Cover: Multiple expedition completion, morale recovery, auto-repeat
+
+- [ ] **TEST-005**: Add morale service tests
+  - File: `tests/unit/utils/moraleService.test.ts`
+  - Cover: State transitions, recovery calculations
+
+### Server Route Tests
+
+- [ ] **TEST-006**: Add tavern API tests
+  - File: `tests/server/tavern.test.ts`
+
+- [ ] **TEST-007**: Add expedition API tests
+  - File: `tests/server/expeditions.test.ts`
+
+- [ ] **TEST-008**: Add hero API tests
+  - File: `tests/server/heroes.test.ts`
+
+- [ ] **TEST-009**: Add equipment API tests
+  - File: `tests/server/equipment.test.ts`
+
+### E2E Tests
+
+- [ ] **E2E-001**: Set up Playwright
+  - Install Playwright
+  - Configure for Nuxt
+
+- [ ] **E2E-002**: Add hero recruitment flow test
+- [ ] **E2E-003**: Add expedition flow test
+- [ ] **E2E-004**: Add equipment management test
+- [ ] **E2E-005**: Add prestige flow test
+
+### Documentation
+
+- [ ] **DOC-001**: Add JSDoc to complex components
+  - `ExpeditionSetup.vue`
+  - `StationingPanel.vue`
+  - `HeroDetail.vue`
+  - `InventoryGrid.vue`
+
+- [ ] **DOC-002**: Create types barrel export
+  - File: `types/index.ts`
+  - Export all types for cleaner imports
+
+---
+
+## Effort Estimates
+
+| Priority | Tasks | Est. Hours |
+|----------|-------|------------|
+| P0 Critical Bugs | 11 | 4-6h |
+| P1 High Priority | 8 | 8-12h |
+| P2 Medium Priority | 10 | 10-15h |
+| P3 Testing/Docs | 15 | 15-20h |
+| **Total** | **44** | **37-53h** |
+
+---
+
+## Suggested Order of Execution
+
+### Sprint 1: Critical Fixes (4-6h)
+1. BUG-001 through BUG-011
+
+### Sprint 2: Type Safety & Validation (6-8h)
+1. TYPE-001
+2. VAL-001, VAL-002, VAL-003
+
+### Sprint 3: Architecture (6-8h)
+1. ARCH-001
+2. DRY-001
+3. ERR-001
+
+### Sprint 4: Refactoring (6-8h)
+1. CONST-001
+2. COMP-001 through COMP-004
+3. TODO-001, TODO-002
+
+### Sprint 5: Testing (10-15h)
+1. TEST-001 through TEST-009
+2. E2E-001 through E2E-005
+
+### Sprint 6: Polish (4-6h)
+1. PERF-001, PERF-002
+2. DOC-001, DOC-002
+3. DB-001
