@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { generateHero } from '~/utils/heroGenerator'
 import { generateExpeditionLoot, generateFirstClearReward } from '~/utils/lootGenerator'
 import { calculateTeamPower } from '~/utils/efficiencyCalculator'
@@ -22,9 +22,8 @@ describe('Core Game Loop', () => {
 
     // Generate a test hero (simulating tavern recruit)
     testHero = generateHero({
-      playerId: testPlayerId,
-      rarity: 'uncommon',
-    })
+      forceRarity: 'uncommon',
+    }) as Hero
 
     // Mock zone and subzone data
     testZone = {
@@ -59,23 +58,30 @@ describe('Core Game Loop', () => {
     })
 
     it('should generate hero with archetype-appropriate base stats', () => {
-      const tank = generateHero({ playerId: testPlayerId, archetype: 'tank' })
-      const dps = generateHero({ playerId: testPlayerId, archetype: 'dps' })
-      const support = generateHero({ playerId: testPlayerId, archetype: 'support' })
+      // Mock Math.random to make stat generation deterministic
+      // Use 0.5 to get mid-range variance (no extreme randomness)
+      vi.spyOn(Math, 'random').mockReturnValue(0.5)
 
-      // Tanks should have higher survival
-      expect(tank.baseStats.survival).toBeGreaterThan(dps.baseStats.survival)
+      const tank = generateHero({ forceRarity: 'common', forceArchetype: 'tank' })
+      const meleeDps = generateHero({ forceRarity: 'common', forceArchetype: 'melee_dps' })
+      const healer = generateHero({ forceRarity: 'common', forceArchetype: 'healer' })
 
-      // DPS should have higher combat
-      expect(dps.baseStats.combat).toBeGreaterThan(support.baseStats.combat)
+      // Tanks should have higher survival than DPS
+      expect(tank.baseStats.survival).toBeGreaterThan(meleeDps.baseStats.survival)
 
-      // Support should have higher utility
-      expect(support.baseStats.utility).toBeGreaterThan(tank.baseStats.utility)
+      // DPS should have higher combat than healer
+      expect(meleeDps.baseStats.combat).toBeGreaterThan(healer.baseStats.combat)
+
+      // Healer should have higher utility than tank
+      expect(healer.baseStats.utility).toBeGreaterThan(tank.baseStats.utility)
+
+      // Restore Math.random
+      vi.restoreAllMocks()
     })
 
     it('should generate rarer heroes with more traits', () => {
-      const common = generateHero({ playerId: testPlayerId, rarity: 'common' })
-      const legendary = generateHero({ playerId: testPlayerId, rarity: 'legendary' })
+      const common = generateHero({ forceRarity: 'common' })
+      const legendary = generateHero({ forceRarity: 'legendary' })
 
       expect(legendary.gameplayTraits.length).toBeGreaterThan(common.gameplayTraits.length)
     })
@@ -90,8 +96,8 @@ describe('Core Game Loop', () => {
     })
 
     it('should calculate team power correctly for multiple heroes', () => {
-      const hero2 = generateHero({ playerId: testPlayerId, rarity: 'rare' })
-      const hero3 = generateHero({ playerId: testPlayerId, rarity: 'epic' })
+      const hero2 = generateHero({ forceRarity: 'rare' })
+      const hero3 = generateHero({ forceRarity: 'epic' })
 
       const teamPower = calculateTeamPower([testHero, hero2, hero3])
       const expectedPower = testHero.power + hero2.power + hero3.power
@@ -304,9 +310,8 @@ describe('Core Game Loop', () => {
     it('should complete full flow: recruit → expedition → loot → level up', () => {
       // Step 1: Recruit hero
       const hero = generateHero({
-        playerId: testPlayerId,
-        rarity: 'uncommon',
-      })
+        forceRarity: 'uncommon',
+      }) as Hero
       expect(hero.level).toBe(1)
       expect(hero.xp).toBe(0)
 
@@ -385,7 +390,7 @@ describe('Core Game Loop', () => {
     })
 
     it('should handle multiple expeditions with leveling', () => {
-      const hero = generateHero({ playerId: testPlayerId, rarity: 'rare' })
+      const hero = generateHero({ forceRarity: 'rare' }) as Hero
       let totalXp = 0
 
       // Simulate 5 expeditions
