@@ -144,11 +144,6 @@ function generateStoryTraits(): string[] {
   return randomElements(available, count).map(t => t.id)
 }
 
-// Calculate XP to next level
-function calculateXpToNextLevel(currentLevel: number): number {
-  return currentLevel * 100 + (currentLevel * currentLevel * 50)
-}
-
 // Calculate hero power
 function calculatePower(stats: Stats, gameplayTraits: GameplayTrait[]): number {
   // Base power from stats
