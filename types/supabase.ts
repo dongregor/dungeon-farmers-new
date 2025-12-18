@@ -14,7 +14,6 @@ export interface SupabaseExpeditionRow {
   started_at: string
   completes_at: string
   duration_minutes?: number
-  duration?: number
   auto_repeat: boolean
   auto_repeat_limit?: number
   stop_conditions: {

@@ -20,7 +20,7 @@ export function mapSupabaseExpeditionToExpedition(data: SupabaseExpeditionRow): 
     // Timing
     startedAt: data.started_at,
     completesAt: data.completes_at,
-    durationMinutes: data.duration || 0,
+    durationMinutes: data.duration_minutes || 0,
     status: data.status,
 
     // Events
