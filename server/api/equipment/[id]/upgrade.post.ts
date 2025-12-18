@@ -3,7 +3,7 @@ import { z } from 'zod'
 import type { Equipment, TraitQuality, EquipmentRarity } from '~~/types'
 
 const upgradeSchema = z.object({
-  traitIndex: z.number().int().min(0)
+  traitIndex: z.number().int('Trait index must be an integer').min(0, 'Trait index must be non-negative')
 })
 
 type UpgradeRequest = z.infer<typeof upgradeSchema>
@@ -73,10 +73,11 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
   const parsed = upgradeSchema.safeParse(bodyData)
 
   if (!parsed.success) {
+    // Sanitize validation errors for production
+    const errorMessages = parsed.error.issues.map(issue => issue.message)
     throw createError({
       statusCode: 400,
-      message: 'Invalid request',
-      data: { errors: parsed.error.issues }
+      message: errorMessages.join(', ')
     })
   }
 

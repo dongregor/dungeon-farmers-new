@@ -3,8 +3,10 @@ import { z } from 'zod'
 import type { Equipment, Hero } from '~~/types'
 
 const equipSchema = z.object({
-  heroId: z.string().uuid(),
-  slot: z.enum(['weapon', 'armor', 'accessory'])
+  heroId: z.string().uuid('Invalid hero ID format'),
+  slot: z.enum(['weapon', 'armor', 'accessory'], {
+    errorMap: () => ({ message: 'Invalid equipment slot' })
+  })
 })
 
 type EquipRequest = z.infer<typeof equipSchema>
@@ -40,10 +42,11 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
   const parsed = equipSchema.safeParse(bodyData)
 
   if (!parsed.success) {
+    // Sanitize validation errors for production
+    const errorMessages = parsed.error.issues.map(issue => issue.message)
     throw createError({
       statusCode: 400,
-      message: 'Invalid request',
-      data: { errors: parsed.error.issues }
+      message: errorMessages.join(', ')
     })
   }
 
