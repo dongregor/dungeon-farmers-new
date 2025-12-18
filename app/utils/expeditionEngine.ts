@@ -1,4 +1,4 @@
-import type { Hero, Zone, Subzone, Expedition, ExpeditionRewards } from '~~/types'
+import type { Hero, Zone, Subzone, Expedition, ExpeditionRewards, ExpeditionEvent } from '~~/types'
 import { calculateHeroPower } from './powerCalculator'
 import { calculateEfficiency } from './efficiencyCalculator'
 import { generateExpeditionEvents } from './eventGenerator'
@@ -73,7 +73,7 @@ export function completeExpedition(
 export function calculateRewards(
   subzone: Subzone,
   efficiency: number,
-  events: any[]
+  events: ExpeditionEvent[]
 ): ExpeditionRewards {
   // Accumulate event bonuses
   const eventBonuses = events.reduce((acc, e) => ({

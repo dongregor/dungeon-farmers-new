@@ -24,8 +24,8 @@ export const useHeroStore = defineStore('heroes', {
       this.loading = true
       try {
         this.heroes = await $fetch<Hero[]>('/api/heroes')
-      } catch (e: any) {
-        this.error = e.message
+      } catch (e) {
+        this.error = getErrorMessage(e)
       } finally {
         this.loading = false
       }
