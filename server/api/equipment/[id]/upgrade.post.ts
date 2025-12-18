@@ -3,7 +3,7 @@ import { z } from 'zod'
 import type { Equipment, TraitQuality, EquipmentRarity } from '~~/types'
 
 const upgradeSchema = z.object({
-  traitIndex: z.number().int('Trait index must be an integer').min(0, 'Trait index must be non-negative')
+  traitIndex: z.number().int({ message: 'Trait index must be an integer' }).min(0, { message: 'Trait index must be non-negative' })
 })
 
 type UpgradeRequest = z.infer<typeof upgradeSchema>

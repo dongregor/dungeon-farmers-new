@@ -3,10 +3,8 @@ import { z } from 'zod'
 import type { Equipment, Hero } from '~~/types'
 
 const equipSchema = z.object({
-  heroId: z.string().uuid('Invalid hero ID format'),
-  slot: z.enum(['weapon', 'armor', 'accessory'], {
-    errorMap: () => ({ message: 'Invalid equipment slot' })
-  })
+  heroId: z.string().uuid({ message: 'Invalid hero ID format' }),
+  slot: z.enum(['weapon', 'armor', 'accessory'], { message: 'Invalid equipment slot' })
 })
 
 type EquipRequest = z.infer<typeof equipSchema>
