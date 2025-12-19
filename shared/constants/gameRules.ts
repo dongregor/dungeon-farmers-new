@@ -47,14 +47,11 @@ export const MIN_MORALE = 0
 export const MAX_MORALE = 100
 
 /**
- * Morale thresholds for state determination
+ * Minimum morale required to start an expedition
+ * Heroes must be at least "frustrated" (20+) to go on expeditions
+ * Exhausted heroes (0-19) cannot participate
  */
-export const MORALE_THRESHOLDS = {
-  exhausted: 20,  // 0-20: exhausted
-  tired: 50,      // 21-50: tired
-  neutral: 80,    // 51-80: neutral
-  // 81-100: energized
-} as const
+export const MIN_MORALE_FOR_EXPEDITION = 20
 
 /**
  * Morale penalties for various actions

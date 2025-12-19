@@ -1,6 +1,12 @@
 import { useHeroStore } from '~/stores/heroes'
 import { useZoneStore } from '~/stores/zones'
+import { MIN_MORALE_FOR_EXPEDITION } from '~~/shared/constants/gameRules'
 import type { Hero, Zone } from '~~/types'
+
+/**
+ * Re-export MIN_MORALE_FOR_EXPEDITION for use in tests and other modules
+ */
+export { MIN_MORALE_FOR_EXPEDITION }
 
 /**
  * Validation result with success flag and optional error message
@@ -17,11 +23,6 @@ export interface ValidationResult {
 export function useExpeditionValidation() {
   const heroStore = useHeroStore()
   const zoneStore = useZoneStore()
-
-  /**
-   * Minimum morale required to start an expedition
-   */
-  const MIN_MORALE_FOR_EXPEDITION = 20
 
   /**
    * Maximum and minimum party size
