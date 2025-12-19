@@ -166,7 +166,7 @@
 
 - [x] **ARCH-001**: Create shared directory structure
   - Created directories:
-    ```
+    ```text
     shared/
     ├── utils/
     │   ├── randomization.ts ✅

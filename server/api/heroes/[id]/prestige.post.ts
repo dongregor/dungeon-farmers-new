@@ -2,9 +2,7 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { prestigeHero } from '~/utils/prestigeService'
 import type { Hero } from '~~/types'
 import { MAX_HERO_LEVEL } from '~~/shared/constants/gameRules'
-import { z } from 'zod'
-
-const heroIdSchema = z.string().uuid({ message: 'Invalid hero ID format' })
+import { heroIdSchema } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)

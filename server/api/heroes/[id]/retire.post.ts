@@ -1,8 +1,6 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
-import { z } from 'zod'
-
-const heroIdSchema = z.string().uuid({ message: 'Invalid hero ID format' })
+import { heroIdSchema } from '~~/server/utils/validation'
 
 interface RetireResponse {
   success: boolean

@@ -1,11 +1,6 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { TavernSlot } from '~~/types'
-import { z } from 'zod'
-
-const indexParamSchema = z.string()
-  .regex(/^\d+$/, { message: 'Index must be a valid number' })
-  .transform(Number)
-  .pipe(z.number().int().nonnegative({ message: 'Index must be non-negative' }))
+import { indexParamSchema } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)

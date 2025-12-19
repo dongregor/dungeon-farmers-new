@@ -207,4 +207,4 @@ export const MAX_GOLD = 999_999_999
  * Gold cap warning threshold (90% of max)
  * Used for UI warnings before hitting the cap
  */
-export const GOLD_CAP_WARNING_THRESHOLD = MAX_GOLD * 0.9
+export const GOLD_CAP_WARNING_THRESHOLD = Math.floor(MAX_GOLD * 0.9)
