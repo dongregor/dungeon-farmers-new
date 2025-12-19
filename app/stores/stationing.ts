@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 
 export type StationingProgressionTier = 'early' | 'mid' | 'late'
 

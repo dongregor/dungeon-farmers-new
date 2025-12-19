@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { PartyPreset } from '~~/types/hero'
 
 export const usePresetStore = defineStore('presets', {

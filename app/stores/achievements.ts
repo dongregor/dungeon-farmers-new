@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { Achievement } from '~/data/achievements'
 import { getAllAchievements, getAchievementById, calculateTotalPoints, calculateCompletionPercentage } from '~/data/achievements'
 

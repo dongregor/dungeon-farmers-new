@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { GuildMaster, Stats, Gender, Archetype, ArchetypeTag } from '~/types'
 
 export interface TraitSlot {

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { MentorQuest } from '~/data/mentorQuests'
 import {
   getAllMentorQuests,
