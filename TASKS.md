@@ -3,8 +3,8 @@
 **Generated:** 2024-12-18
 **Last Updated:** 2024-12-19
 **Based on:** Codebase Analysis
-**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 47% (7/15)
-**Overall Progress:** 40/43 tasks (93%)
+**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 53% (8/15)
+**Overall Progress:** 41/43 tasks (95%)
 
 ---
 
@@ -261,7 +261,7 @@
 
 ---
 
-## P3: Testing & Documentation (7/15 Complete - 47%)
+## P3: Testing & Documentation (8/15 Complete - 53%)
 
 ### Unit Tests
 
@@ -302,8 +302,10 @@
   - Cover: GET /api/expeditions/[id], GET /api/expeditions/preview, POST /api/expeditions/start validation, POST /api/expeditions/[id]/cancel, POST /api/expeditions/[id]/choice
   - **Status:** Completed - 11 tests passing (8 skipped due to complex Supabase mock chains)
 
-- [ ] **TEST-008**: Add hero API tests
+- [x] **TEST-008**: Add hero API tests
   - File: `tests/server/heroes.test.ts`
+  - Cover: GET /api/heroes/[id], PATCH /api/heroes/[id], POST /api/heroes/[id]/retire, POST /api/heroes/[id]/prestige
+  - **Status:** Completed - 21 tests passing
 
 - [ ] **TEST-009**: Add equipment API tests
   - File: `tests/server/equipment.test.ts`
@@ -340,8 +342,8 @@
 | P0 Critical Bugs | 11 | 11 ✅ | 4-6h | **100% DONE** |
 | P1 High Priority | 7 | 7 ✅ | 8-12h | **100% DONE** |
 | P2 Medium Priority | 10 | 10 ✅ | 10-15h | **100% DONE** |
-| P3 Testing/Docs | 15 | 7 | 15-20h | 47% (8-11h remaining) |
-| **Total** | **43** | **40** | **37-53h** | **93% (8-11h remaining)** |
+| P3 Testing/Docs | 15 | 8 | 15-20h | 53% (7-10h remaining) |
+| **Total** | **43** | **41** | **37-53h** | **95% (6-9h remaining)** |
 
 ---
 
