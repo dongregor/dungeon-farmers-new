@@ -1,5 +1,6 @@
 import { useHeroStore } from '~/stores/heroes'
 import type { Hero } from '~~/types'
+import { MAX_HERO_LEVEL } from '~~/shared/constants/gameRules'
 
 /**
  * Composable for common hero actions
@@ -66,13 +67,9 @@ export function useHeroActions() {
   /**
    * Check if hero can prestige
    */
-import { useHeroStore } from '~/stores/heroes'
-import type { Hero } from '~~/types'
-import { MAX_HERO_LEVEL } from '~/utils/xpService'
-
-function canPrestige(hero: Hero): boolean {
-  return hero.level >= MAX_HERO_LEVEL && !hero.isOnExpedition && !hero.isStationed
-}
+  function canPrestige(hero: Hero): boolean {
+    return hero.level >= MAX_HERO_LEVEL && !hero.isOnExpedition && !hero.isStationed
+  }
 
   /**
    * Check if hero can be retired
