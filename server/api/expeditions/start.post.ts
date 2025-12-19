@@ -85,17 +85,18 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Get zone and subzone data
-    const { ZONES } = await import('~/data/zones')
-    const zone = ZONES.find(z => z.id === zoneId)
-    const subzone = zone?.subzones.find(sz => sz.id === subzoneId)
+    // Get zone and subzone data with O(1) Map lookup
+    const { getZoneAndSubzone } = await import('~/data/zones')
+    const zoneData = getZoneAndSubzone(zoneId, subzoneId)
 
-    if (!zone || !subzone) {
+    if (!zoneData) {
       throw createError({
         statusCode: 404,
         statusMessage: 'Zone or subzone not found'
       })
     }
+
+    const { zone, subzone } = zoneData
 
     // Calculate team power (needed for unlock validation)
     const teamPower = heroes.reduce((sum, hero) => sum + (hero.power ?? 0), 0)

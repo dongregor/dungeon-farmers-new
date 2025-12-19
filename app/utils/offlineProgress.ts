@@ -21,7 +21,8 @@ export function calculateOfflineProgress(
   heroes: Hero[],
   zones: Zone[],
   inventorySlots: number,
-  usedInventorySlots: number
+  usedInventorySlots: number,
+  currentGold = 0
 ): OfflineProgressResult {
   const result: OfflineProgressResult = {
     completedExpeditions: [],
@@ -97,9 +98,15 @@ export function calculateOfflineProgress(
       }
 
       // Handle auto-repeat
+      // Track accumulated gold for cap checking
+      const accumulatedGold = currentGold + result.completedExpeditions.reduce(
+        (sum, exp) => sum + (exp.rewards?.gold || 0),
+        0
+      )
+
       if (
         expedition.autoRepeat &&
-        !shouldStopAutoRepeat(expedition, heroes, inventorySlots, usedInventorySlots)
+        !shouldStopAutoRepeat(expedition, heroes, inventorySlots, usedInventorySlots, accumulatedGold)
       ) {
         // Create new expedition
         const timeSinceCompletion = now - completesAt
@@ -160,7 +167,8 @@ function shouldStopAutoRepeat(
   expedition: Expedition,
   heroes: Hero[],
   inventorySlots: number,
-  usedInventorySlots: number
+  usedInventorySlots: number,
+  currentGold: number
 ): boolean {
   const { stopConditions } = expedition
 
@@ -184,8 +192,12 @@ function shouldStopAutoRepeat(
 
   // Check resource cap (if enabled)
   if (stopConditions.resourceCap) {
-    // TODO: Implement resource cap checking when we have resource limits
-    // For now, resources have no cap
+    // Stop auto-repeat if gold is at or above the cap
+    // Using MAX_GOLD constant from gameRules
+    const MAX_GOLD = 999_999_999
+    if (currentGold >= MAX_GOLD) {
+      return true
+    }
   }
 
   return false

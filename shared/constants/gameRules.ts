@@ -194,3 +194,17 @@ export const LOCK_SLOTS_PER_10_LEVELS = 1
  * Bonus lock slots for supporters
  */
 export const SUPPORTER_LOCK_SLOT_BONUS = 2
+
+// ===== RESOURCE CAPS =====
+
+/**
+ * Maximum gold a player can hold
+ * Prevents overflow issues and provides progression gates
+ */
+export const MAX_GOLD = 999_999_999
+
+/**
+ * Gold cap warning threshold (90% of max)
+ * Used for UI warnings before hitting the cap
+ */
+export const GOLD_CAP_WARNING_THRESHOLD = MAX_GOLD * 0.9
