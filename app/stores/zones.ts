@@ -398,6 +398,7 @@ export const useZoneStore = defineStore('zones', {
         const error = toError(err)
         this.error = error.message || 'Failed to update mastery'
         console.error('Error updating mastery:', error)
+        throw error
       }
     },
 
