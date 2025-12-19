@@ -3,7 +3,7 @@ import { generateHero } from '~/utils/heroGenerator'
 import { calculateHeroPower } from '~/utils/powerCalculator'
 import { generateEquipment } from '~/utils/equipmentGenerator'
 import type { Hero, Equipment, EquipmentSlot } from '~~/types'
-import { calculateXpToNextLevel } from '~~/shared/constants/gameRules'
+import { getXpForLevel, addXp } from '~/utils/xpService'
 
 /**
  * Integration Tests: Hero Management
@@ -164,49 +164,48 @@ describe('Hero Management', () => {
   })
 
   describe('Hero Leveling', () => {
-    it('should calculate correct XP requirement per level', () => {
-      // Verify XP requirements match the centralized formula
-      // We use the actual formula here to ensure the constant stays in sync
-      for (let level = 1; level <= 10; level++) {
-        const xpRequired = calculateXpToNextLevel(level)
-
-        // Verify XP increases with level (behavioral test)
-        if (level > 1) {
-          const previousXp = calculateXpToNextLevel(level - 1)
-          expect(xpRequired).toBeGreaterThan(previousXp)
-        }
-
-        // Spot-check key levels to catch major formula changes
-        if (level === 1) expect(xpRequired).toBe(150)  // 1*100 + 1*1*50
-        if (level === 5) expect(xpRequired).toBe(1750) // 5*100 + 5*5*50
-        if (level === 10) expect(xpRequired).toBe(6000) // 10*100 + 10*10*50
-      }
+    it('should use tiered XP progression system', () => {
+      // Verify the actual tiered progression used by the game
+      expect(getXpForLevel(1)).toBe(100)   // Levels 1-10: 100 XP
+      expect(getXpForLevel(10)).toBe(100)
+      expect(getXpForLevel(11)).toBe(200)  // Levels 11-20: 200 XP
+      expect(getXpForLevel(20)).toBe(200)
+      expect(getXpForLevel(21)).toBe(350)  // Levels 21-30: 350 XP
+      expect(getXpForLevel(30)).toBe(350)
+      expect(getXpForLevel(31)).toBe(500)  // Levels 31-40: 500 XP
+      expect(getXpForLevel(40)).toBe(500)
+      expect(getXpForLevel(41)).toBe(750)  // Levels 41-50: 750 XP
+      expect(getXpForLevel(50)).toBe(750)
+      expect(getXpForLevel(51)).toBe(1000) // Levels 51-60: 1000 XP
+      expect(getXpForLevel(60)).toBe(1000)
     })
 
     it('should level up when reaching XP threshold', () => {
       testHero.level = 1
       testHero.xp = 0
+      testHero.xpToNextLevel = getXpForLevel(1) // 100 XP
 
-      // Add XP to level up
-      testHero.xp = 150
+      // Add enough XP to level up
+      const result = addXp(testHero, 150)
 
-      const newLevel = Math.floor(testHero.xp / 100) + 1
-      testHero.level = newLevel
-
-      expect(testHero.level).toBe(2)
+      expect(result.newLevel).toBe(2)
+      expect(result.levelsGained).toBe(1)
+      expect(result.hero.xp).toBe(50) // Overflow XP
+      expect(result.hero.xpToNextLevel).toBe(100) // Still 100 for level 2
     })
 
     it('should handle multiple levels in one XP gain', () => {
       testHero.level = 1
       testHero.xp = 0
+      testHero.xpToNextLevel = getXpForLevel(1)
 
-      // Massive XP gain
-      testHero.xp = 550
+      // Add enough XP for multiple levels (100*5 = 500 XP for levels 1-5)
+      const result = addXp(testHero, 550)
 
-      const newLevel = Math.floor(testHero.xp / 100) + 1
-      testHero.level = newLevel
-
-      expect(testHero.level).toBe(6)
+      expect(result.newLevel).toBe(6)
+      expect(result.levelsGained).toBe(5)
+      expect(result.hero.xp).toBe(50) // Overflow XP
+      expect(result.hero.xpToNextLevel).toBe(100) // Still in tier 1-10
     })
   })
 

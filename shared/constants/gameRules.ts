@@ -12,12 +12,16 @@
 export const MAX_HERO_LEVEL = 60
 
 /**
- * Calculate XP required to reach next level
- * Formula: level * 100 + (level * level * 50)
+ * XP progression is tiered and defined in app/utils/xpService.ts
+ * - Levels 1-10: 100 XP per level
+ * - Levels 11-20: 200 XP per level
+ * - Levels 21-30: 350 XP per level
+ * - Levels 31-40: 500 XP per level
+ * - Levels 41-50: 750 XP per level
+ * - Levels 51-60: 1000 XP per level
+ *
+ * Use getXpForLevel() from xpService.ts for XP calculations
  */
-export function calculateXpToNextLevel(currentLevel: number): number {
-  return currentLevel * 100 + currentLevel * currentLevel * 50
-}
 
 /**
  * Prestige stat bonus per prestige level

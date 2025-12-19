@@ -26,10 +26,7 @@ import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gam
 import { getGenerationStoryTraits } from '~/data/storyTraits'
 import { getRandomCulture } from '~/data/cultures'
 import { randomInt, randomElement, randomElements, weightedRandom } from '~~/shared/utils/randomization'
-import { calculateXpToNextLevel } from '~~/shared/constants/gameRules'
-
-// Random utilities (randomInt, randomElement, randomElements, weightedRandom)
-// imported from shared/utils/randomization to eliminate code duplication
+import { getXpForLevel } from '~/utils/xpService'
 
 // Generate rarity
 function generateRarity(): Rarity {
@@ -188,7 +185,7 @@ export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'i
     baseStats,
     level: 1,
     xp: 0,
-    xpToNextLevel: calculateXpToNextLevel(1),
+    xpToNextLevel: getXpForLevel(1), // Tiered XP system: 100 XP for level 1
     gameplayTraits,
     storyTraitIds,
     power,
