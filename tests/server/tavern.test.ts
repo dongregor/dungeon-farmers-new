@@ -334,7 +334,6 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots: createMockTavernSlots(),
         last_refresh_at: pastTime,
-        next_refresh_at: pastTime,
         nextRefreshAt: pastTime, // Handler uses camelCase
         updated_at: new Date().toISOString(),
       }
@@ -401,7 +400,6 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots,
         last_refresh_at: pastTime,
-        next_refresh_at: pastTime,
         nextRefreshAt: pastTime, // Handler uses camelCase
         updated_at: new Date().toISOString(),
       }
@@ -462,7 +460,6 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots: createMockTavernSlots(),
         last_refresh_at: new Date().toISOString(),
-        next_refresh_at: futureTime,
         nextRefreshAt: futureTime, // Handler uses camelCase
         updated_at: new Date().toISOString(),
       }
@@ -550,7 +547,6 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots: createMockTavernSlots(),
         last_refresh_at: new Date().toISOString(),
-        next_refresh_at: futureTime,
         nextRefreshAt: futureTime, // Handler uses camelCase
         updated_at: new Date().toISOString(),
       }

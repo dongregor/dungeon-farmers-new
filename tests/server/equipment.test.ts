@@ -106,15 +106,6 @@ describe('Equipment API Routes', () => {
       const mockEquipment = [createMockEquipment(), createMockEquipment({ id: MOCK_UUID_EQUIPMENT_2, name: 'Steel Shield' })]
       const mockPlayer = { id: 'player-1' }
 
-      vi.mocked(mockClient.from).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: mockPlayer, error: null }),
-          }),
-        }),
-      } as any)
-
-      // Second call for equipment query
       vi.mocked(mockClient.from).mockReturnValueOnce({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({

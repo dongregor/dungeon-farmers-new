@@ -36,33 +36,43 @@ import prestigeHeroHandler from '~~/server/api/heroes/[id]/prestige.post'
 
 // Test helpers
 function createMockHero(overrides: Partial<Hero> = {}): Hero {
-  return {
+  const base = {
     id: 'hero-1',
     name: 'Test Hero',
+    gender: 'male',
+    culture: 'forest-folk',
+    titles: [],
     displayTitle: 'Brave',
+    rarity: 'common',
+    archetype: 'warrior',
+    archetypeTags: ['tank'],
+    baseStats: { combat: 5, utility: 3, survival: 4 },
     level: 1,
     xp: 0,
     xpToNextLevel: 100,
-    rarity: 'common',
-    archetypeTags: ['tank'],
     gameplayTraits: [],
-    flavorTraits: [],
-    equipment: {},
+    storyTraitIds: [],
     power: 100,
+    equipment: {},
+    prestigeLevel: 0,
+    prestigeBonuses: { combat: 0, utility: 0, survival: 0 },
+    currentExpeditionId: null,
+    isFavorite: false,
     morale: 'content',
     moraleValue: 70,
     moraleLastUpdate: new Date().toISOString(),
-    prestigeLevel: 0,
-    prestigeBonuses: {},
-    isFavorite: false,
     isOnExpedition: false,
-    expeditionId: null,
     isStationed: false,
     stationedZoneId: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
   }
+  // Sync isOnExpedition with is_on_expedition for database compatibility
+  return {
+    ...base,
+    is_on_expedition: base.isOnExpedition,
+  } as Hero
 }
 
 function createMockSupabaseClient(): SupabaseClient {
@@ -379,7 +389,7 @@ describe('Hero API Routes', () => {
 
   describe('POST /api/heroes/[id]/prestige', () => {
     it('should prestige a max-level hero successfully', async () => {
-      const mockHero = createMockHero({ level: MAX_HERO_LEVEL, is_on_expedition: false })
+      const mockHero = createMockHero({ level: MAX_HERO_LEVEL, isOnExpedition: false })
       const mockPlayer = { id: 'player-1' }
       const prestigeResult = {
         hero: {
@@ -388,7 +398,7 @@ describe('Hero API Routes', () => {
           xp: 0,
           xpToNextLevel: 100,
           prestigeLevel: 1,
-          prestigeBonuses: { power: 5 },
+          prestigeBonuses: { combat: 5, utility: 0, survival: 0 },
           equipment: {},
         },
         statBonusGained: 5,
@@ -454,7 +464,7 @@ describe('Hero API Routes', () => {
     })
 
     it('should throw 400 if hero is on expedition', async () => {
-      const mockHero = createMockHero({ level: MAX_HERO_LEVEL, is_on_expedition: true })
+      const mockHero = createMockHero({ level: MAX_HERO_LEVEL, isOnExpedition: true })
       const mockPlayer = { id: 'player-1' }
 
       vi.mocked(mockClient.from).mockReturnValue({
