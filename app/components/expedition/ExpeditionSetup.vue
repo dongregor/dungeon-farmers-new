@@ -186,6 +186,7 @@ import { ref, computed, watch } from 'vue'
 import { useHeroStore } from '~/stores/heroes'
 import { useExpeditionStore } from '~/stores/expeditions'
 import type { Zone, Subzone } from '~~/types'
+import { toError } from '~~/shared/utils/errorHandler'
 
 interface Props {
   zone: Zone
@@ -252,8 +253,9 @@ watch(selectedHeroIds, async (newIds) => {
           heroIds: newIds.join(',')
         }
       })
-    } catch (err: any) {
-      console.error('Failed to fetch preview:', err)
+    } catch (err: unknown) {
+      const e = toError(err)
+      console.error('Failed to fetch preview:', e)
       previewError.value = 'Could not load preview'
       preview.value = null
     }
@@ -281,8 +283,9 @@ async function startExpedition() {
     } else {
       throw new Error('Invalid response from server')
     }
-  } catch (err: any) {
-    error.value = err.message || 'Failed to start expedition'
+  } catch (err: unknown) {
+    const e = toError(err)
+    error.value = e.message || 'Failed to start expedition'
   } finally {
     loading.value = false
   }

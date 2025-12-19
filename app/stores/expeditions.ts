@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Expedition, ExpeditionSettings } from '~~/types'
+import { toError } from '~~/shared/utils/errorHandler'
 
 export const useExpeditionStore = defineStore('expeditions', {
   state: () => ({
@@ -75,10 +76,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         const data = await $fetch<{ active: Expedition[], completed: Expedition[] }>('/api/expeditions')
         this.activeExpeditions = data.active
         this.completedExpeditions = data.completed
-      } catch (e: any) {
-        this.error = e.message || 'Failed to fetch expeditions'
-        console.error('Error fetching expeditions:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to fetch expeditions'
+        console.error('Error fetching expeditions:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -99,10 +101,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         this.completedExpeditions = data.completed
 
         return data.completed
-      } catch (e: any) {
-        this.error = e.message || 'Failed to sync offline progress'
-        console.error('Error syncing offline progress:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to sync offline progress'
+        console.error('Error syncing offline progress:', error)
+        throw error
       }
     },
 
@@ -135,10 +138,11 @@ export const useExpeditionStore = defineStore('expeditions', {
 
         this.activeExpeditions.push(data.expedition)
         return data.expedition
-      } catch (e: any) {
-        this.error = e.message || 'Failed to start expedition'
-        console.error('Error starting expedition:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to start expedition'
+        console.error('Error starting expedition:', error)
+        throw error
       }
     },
 
@@ -169,10 +173,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         }
 
         return data.expedition
-      } catch (e: any) {
-        this.error = e.message || 'Failed to complete expedition'
-        console.error('Error completing expedition:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to complete expedition'
+        console.error('Error completing expedition:', error)
+        throw error
       }
     },
 
@@ -200,10 +205,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         }
 
         return data.expedition
-      } catch (e: any) {
-        this.error = e.message || 'Failed to resolve choice'
-        console.error('Error resolving choice:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to resolve choice'
+        console.error('Error resolving choice:', error)
+        throw error
       }
     },
 
@@ -234,10 +240,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         })
 
         return data.estimatedRewards
-      } catch (e: any) {
-        this.error = e.message || 'Failed to preview expedition'
-        console.error('Error previewing expedition:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to preview expedition'
+        console.error('Error previewing expedition:', error)
+        throw error
       }
     },
 
@@ -255,10 +262,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         if (index !== -1) {
           this.activeExpeditions.splice(index, 1)
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to cancel expedition'
-        console.error('Error canceling expedition:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to cancel expedition'
+        console.error('Error canceling expedition:', error)
+        throw error
       }
     },
 
@@ -279,10 +287,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         }
 
         return data.expedition
-      } catch (e: any) {
-        this.error = e.message || 'Failed to update expedition settings'
-        console.error('Error updating expedition settings:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to update expedition settings'
+        console.error('Error updating expedition settings:', error)
+        throw error
       }
     },
 
@@ -315,10 +324,11 @@ export const useExpeditionStore = defineStore('expeditions', {
         if (index !== -1) {
           this.completedExpeditions.splice(index, 1)
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to claim rewards'
-        console.error('Error claiming rewards:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to claim rewards'
+        console.error('Error claiming rewards:', error)
+        throw error
       }
     },
 
