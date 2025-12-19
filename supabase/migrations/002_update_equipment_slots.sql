@@ -122,6 +122,48 @@ BEGIN
 END $$;
 
 -- ============================================================================
+-- STEP 7: Do the same for tavern_heroes table
+-- ============================================================================
+DO $$
+DECLARE
+  tavern_record RECORD;
+  new_equipment JSONB;
+BEGIN
+  FOR tavern_record IN SELECT id, equipment FROM tavern_heroes WHERE equipment IS NOT NULL AND equipment != '{}'::jsonb
+  LOOP
+    new_equipment := tavern_record.equipment;
+
+    -- Rename helmet -> head
+    IF new_equipment ? 'helmet' THEN
+      new_equipment := new_equipment - 'helmet' || jsonb_build_object('head', new_equipment->'helmet');
+    END IF;
+
+    -- Rename armor -> chest
+    IF new_equipment ? 'armor' THEN
+      new_equipment := new_equipment - 'armor' || jsonb_build_object('chest', new_equipment->'armor');
+    END IF;
+
+    -- Rename boots -> feet
+    IF new_equipment ? 'boots' THEN
+      new_equipment := new_equipment - 'boots' || jsonb_build_object('feet', new_equipment->'boots');
+    END IF;
+
+    -- Rename accessory1 -> accessory
+    IF new_equipment ? 'accessory1' THEN
+      new_equipment := new_equipment - 'accessory1' || jsonb_build_object('accessory', new_equipment->'accessory1');
+    END IF;
+
+    -- Remove accessory2
+    IF new_equipment ? 'accessory2' THEN
+      new_equipment := new_equipment - 'accessory2';
+    END IF;
+
+    -- Update the tavern hero with new equipment structure
+    UPDATE tavern_heroes SET equipment = new_equipment, updated_at = NOW() WHERE id = tavern_record.id;
+  END LOOP;
+END $$;
+
+-- ============================================================================
 -- VERIFICATION: Check for any unmigrated data
 -- ============================================================================
 -- This query should return 0 rows if migration was successful
