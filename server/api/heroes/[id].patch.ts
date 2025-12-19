@@ -5,7 +5,7 @@ import type { Hero } from '~~/types'
 // Schema for hero PATCH requests (database field names)
 const heroPatchSchema = z.object({
   display_title: z.string().nullable().optional(),
-  equipment: z.record(z.string(), z.string()).optional(),
+  equipment: z.record(z.string(), z.string()).nullable().optional(),
   is_favorite: z.boolean().optional(),
   stationed_zone_id: z.string().nullable().optional(),
 }).strict() // Reject unknown fields
