@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Hero } from '~~/types'
 import { applyMoraleChange } from '~/utils/moraleService'
+import { MORALE_PENALTIES } from '~~/shared/constants/gameRules'
 
 export default defineEventHandler(async (event) => {
   // Auth check
@@ -71,7 +72,7 @@ export default defineEventHandler(async (event) => {
     const updatedHeroes: Hero[] = []
     for (const hero of heroes as Hero[]) {
       // Calculate new morale (larger penalty for canceling)
-      const newMorale = applyMoraleChange(hero.moraleValue, -20)
+      const newMorale = applyMoraleChange(hero.moraleValue, MORALE_PENALTIES.expeditionCancel)
 
       const { data: updatedHero, error: updateHeroError } = await supabase
         .from('heroes')

@@ -2,6 +2,7 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Expedition, ExpeditionRewards, ExpeditionLog, Hero, Equipment } from '~~/types'
 import { generateExpeditionLog } from '~/utils/logGenerator'
 import { applyMoraleChange } from '~/utils/moraleService'
+import { MORALE_PENALTIES } from '~~/shared/constants/gameRules'
 
 export default defineEventHandler(async (event) => {
   // Auth check
@@ -113,7 +114,7 @@ export default defineEventHandler(async (event) => {
       const leveledUp = newLevel > hero.level
 
       // Calculate new morale
-      const newMorale = applyMoraleChange(hero.moraleValue, -10)
+      const newMorale = applyMoraleChange(hero.moraleValue, MORALE_PENALTIES.expeditionComplete)
 
       const { data: updatedHero, error: updateHeroError } = await supabase
         .from('heroes')
