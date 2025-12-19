@@ -25,16 +25,19 @@ const MOCK_UUID_EQUIPMENT_2 = '550e8400-e29b-41d4-a716-446655440002'
 function createMockEquipment(overrides: Partial<Equipment> = {}): Equipment {
   return {
     id: MOCK_UUID_EQUIPMENT,
+    playerId: 'player-1',
     name: 'Iron Sword',
+    description: 'A basic iron sword',
     slot: 'weapon',
     rarity: 'common',
+    baseStats: { combat: 5, utility: 0, survival: 0 },
     itemLevel: 1,
-    basePower: 10,
+    gearScore: 10,
     traits: [
       { traitId: 'strength', quality: 'normal' as TraitQuality, rolledValue: 5 },
     ],
+    maxTraits: 3,
     isEquipped: false,
-    equippedBy: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
