@@ -36,7 +36,7 @@ export function levelUpHero(hero: Hero, xpGain: number, equipment: Equipment[] =
 export function levelUpParty(
   heroes: Hero[],
   xpGain: number,
-  equipmentMap: Record<string, any[]> = {}
+  equipmentMap: Record<string, Equipment[]> = {}
 ): Map<string, LevelUpResult> {
   const results = new Map<string, LevelUpResult>()
 

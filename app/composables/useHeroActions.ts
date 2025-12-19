@@ -31,10 +31,16 @@ export function useHeroActions() {
       method: 'POST'
     })
 
-    // Update hero in store
+    // Update hero in store using $patch to preserve reactivity
     const index = heroStore.heroes.findIndex(h => h.id === heroId)
     if (index !== -1) {
-      heroStore.heroes[index] = prestaged
+      heroStore.$patch({
+        heroes: [
+          ...heroStore.heroes.slice(0, index),
+          prestaged,
+          ...heroStore.heroes.slice(index + 1)
+        ]
+      })
     }
 
     return prestaged
@@ -53,7 +59,7 @@ export function useHeroActions() {
   async function updateDisplayTitle(heroId: string, displayTitle: string | null) {
     await heroStore.updateHero({
       id: heroId,
-      display_title: displayTitle
+      displayTitle
     })
   }
 
