@@ -95,8 +95,9 @@ export default defineEventHandler(async (event) => {
         duration: subzone.baseDuration
       }
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
+  } catch (err: unknown) {
+    const error = toError(err)
+    if (error.statusCode) throw err
 
     throw createError({
       statusCode: 500,

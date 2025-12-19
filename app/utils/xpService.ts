@@ -1,4 +1,5 @@
 import type { Hero } from '~~/types'
+import { MAX_HERO_LEVEL } from '~~/shared/constants/gameRules'
 
 // Tiered linear XP curve
 export function getXpForLevel(level: number): number {
@@ -30,14 +31,14 @@ export function addXp(hero: Hero, xpGain: number): {
   let levelsGained = 0
 
   // Process level ups
-  while (currentXp >= hero.xpToNextLevel && currentLevel < 60) {
+  while (currentXp >= hero.xpToNextLevel && currentLevel < MAX_HERO_LEVEL) {
     currentXp -= hero.xpToNextLevel
     currentLevel++
     levelsGained++
   }
 
   // Calculate new XP to next level
-  const xpToNextLevel = currentLevel >= 60 ? 0 : getXpForLevel(currentLevel)
+  const xpToNextLevel = currentLevel >= MAX_HERO_LEVEL ? 0 : getXpForLevel(currentLevel)
 
   return {
     hero: {
@@ -53,7 +54,7 @@ export function addXp(hero: Hero, xpGain: number): {
 
 // Check if hero can prestige
 export function canPrestige(hero: Hero): boolean {
-  return hero.level >= 60
+  return hero.level >= MAX_HERO_LEVEL
 }
 
 // Get XP progress percentage

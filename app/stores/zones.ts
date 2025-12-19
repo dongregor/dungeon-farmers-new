@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Zone, Subzone } from '~~/types'
 import { ZONE_FAMILIARITY_BENEFITS, SUBZONE_MASTERY_BENEFITS } from '~~/types'
+import { toError } from '~~/shared/utils/errorHandler'
 
 /**
  * Zone progress tracking (persisted per player)
@@ -142,7 +143,8 @@ export const useZoneStore = defineStore('zones', {
       if (!progress) return []
 
       const familiarity = progress.familiarity
-      const benefits: Array<{ threshold: number; benefit: any }> = []
+      type ZoneBenefit = typeof ZONE_FAMILIARITY_BENEFITS[keyof typeof ZONE_FAMILIARITY_BENEFITS]
+      const benefits: Array<{ threshold: number; benefit: ZoneBenefit }> = []
 
       // Check each threshold
       for (const [threshold, benefit] of Object.entries(ZONE_FAMILIARITY_BENEFITS)) {
@@ -163,7 +165,8 @@ export const useZoneStore = defineStore('zones', {
       if (!progress) return []
 
       const mastery = progress.mastery
-      const benefits: Array<{ threshold: number; benefit: any }> = []
+      type SubzoneBenefit = typeof SUBZONE_MASTERY_BENEFITS[keyof typeof SUBZONE_MASTERY_BENEFITS]
+      const benefits: Array<{ threshold: number; benefit: SubzoneBenefit }> = []
 
       // Check each threshold
       for (const [threshold, benefit] of Object.entries(SUBZONE_MASTERY_BENEFITS)) {
@@ -255,10 +258,11 @@ export const useZoneStore = defineStore('zones', {
         for (const sp of data.progress.subzones) {
           this.subzoneProgress[sp.subzoneId] = sp
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to load zones'
-        console.error('Error loading zones:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to load zones'
+        console.error('Error loading zones:', error)
+        throw error
       } finally {
         this.loading = false
       }
@@ -296,10 +300,11 @@ export const useZoneStore = defineStore('zones', {
             await this.discoverSubzone(zoneId, firstSubzone.id)
           }
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to unlock zone'
-        console.error('Error unlocking zone:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to unlock zone'
+        console.error('Error unlocking zone:', error)
+        throw error
       }
     },
 
@@ -327,10 +332,11 @@ export const useZoneStore = defineStore('zones', {
             isMastered: false,
           }
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to discover subzone'
-        console.error('Error discovering subzone:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to discover subzone'
+        console.error('Error discovering subzone:', error)
+        throw error
       }
     },
 
@@ -360,10 +366,11 @@ export const useZoneStore = defineStore('zones', {
         if (newFamiliarity >= 100 && !progress.isMastered) {
           progress.isMastered = true
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to update familiarity'
-        console.error('Error updating familiarity:', e)
-        throw e
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to update familiarity'
+        console.error('Error updating familiarity:', error)
+        throw error
       }
     },
 
@@ -389,9 +396,11 @@ export const useZoneStore = defineStore('zones', {
         if (newMastery >= 100 && !progress.isMastered) {
           progress.isMastered = true
         }
-      } catch (e: any) {
-        this.error = e.message || 'Failed to update mastery'
-        console.error('Error updating mastery:', e)
+      } catch (err: unknown) {
+        const error = toError(err)
+        this.error = error.message || 'Failed to update mastery'
+        console.error('Error updating mastery:', error)
+        throw error
       }
     },
 

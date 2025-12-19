@@ -4,6 +4,7 @@ import { generateExpeditionLog } from '~/utils/logGenerator'
 import { calculateEfficiency, calculateTeamPower } from '~/utils/efficiencyCalculator'
 import { generateExpeditionLoot, calculateExpectedLootQuality } from '~/utils/lootGenerator'
 import type { Hero, Zone, Subzone, Expedition } from '~~/types'
+import { MIN_MORALE_FOR_EXPEDITION } from '~~/shared/constants/gameRules'
 
 /**
  * Integration Tests: Expedition Flow
@@ -124,7 +125,7 @@ describe('Expedition Flow', () => {
       exhaustedHero.moraleValue = 10
       exhaustedHero.morale = 'exhausted'
 
-      const canStart = exhaustedHero.moraleValue >= 20
+      const canStart = exhaustedHero.moraleValue >= MIN_MORALE_FOR_EXPEDITION
 
       expect(canStart).toBe(false)
     })

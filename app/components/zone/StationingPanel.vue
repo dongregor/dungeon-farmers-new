@@ -3,6 +3,7 @@ import { useStationingStore } from '~/stores/stationing'
 import { useHeroStore } from '~/stores/heroes'
 import { storeToRefs } from 'pinia'
 import type { Hero } from '~/types'
+import { toError } from '~~/shared/utils/errorHandler'
 
 interface Props {
   zoneId: string
@@ -83,7 +84,8 @@ const handleStationHero = async () => {
     await stationingStore.stationHero(selectedHeroId.value, props.zoneId)
     showStationModal.value = false
     selectedHeroId.value = null
-  } catch (error: any) {
+  } catch (err: unknown) {
+      const error = toError(err)
     alert(error.message)
   } finally {
     processing.value = false
@@ -96,7 +98,8 @@ const handleRecallHero = async (heroId: string) => {
     const data = await stationingStore.recallHero(heroId)
     lastRewards.value = data.rewards
     showRewardsModal.value = true
-  } catch (error: any) {
+  } catch (err: unknown) {
+      const error = toError(err)
     alert(error.message)
   } finally {
     processing.value = false
@@ -113,7 +116,8 @@ const handleCollectRewards = async (heroId: string) => {
     if (data.autoRecalled) {
       alert(`Hero was recalled due to low morale (${data.heroMoraleStatus})`)
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+      const error = toError(err)
     alert(error.message)
   } finally {
     processing.value = false
@@ -132,7 +136,8 @@ const handleCollectAll = async () => {
         alert(`${data.autoRecalled.length} hero(es) were recalled due to low morale`)
       }
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+      const error = toError(err)
     alert(error.message)
   } finally {
     processing.value = false

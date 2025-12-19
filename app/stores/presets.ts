@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { PartyPreset } from '~~/types/hero'
 
 export const usePresetStore = defineStore('presets', {
@@ -64,7 +65,8 @@ export const usePresetStore = defineStore('presets', {
       try {
         const data = await $fetch<PartyPreset[]>('/api/presets')
         this.presets = data
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to fetch presets'
         console.error('Error fetching presets:', error)
       } finally {
@@ -87,10 +89,11 @@ export const usePresetStore = defineStore('presets', {
 
         this.presets.push(data)
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to create preset'
         console.error('Error creating preset:', error)
-        throw error
+        throw err
       } finally {
         this.loading = false
       }
@@ -118,10 +121,11 @@ export const usePresetStore = defineStore('presets', {
         }
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to update preset'
         console.error('Error updating preset:', error)
-        throw error
+        throw err
       } finally {
         this.loading = false
       }
@@ -140,10 +144,11 @@ export const usePresetStore = defineStore('presets', {
         })
 
         this.presets = this.presets.filter(p => p.id !== id)
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to delete preset'
         console.error('Error deleting preset:', error)
-        throw error
+        throw err
       } finally {
         this.loading = false
       }

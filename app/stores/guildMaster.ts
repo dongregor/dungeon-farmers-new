@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { GuildMaster, Stats, Gender, Archetype, ArchetypeTag } from '~/types'
 
 export interface TraitSlot {
@@ -126,7 +127,8 @@ export const useGuildMasterStore = defineStore('guildMaster', {
 
         this.guildMaster = data.guildMaster
         this.availableTraits = data.availableTraits
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         this.error = error.message || 'Failed to fetch guild master'
         console.error('Error fetching guild master:', error)
       } finally {
@@ -146,9 +148,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
 
         this.guildMaster = data
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error initializing guild master:', error)
-        throw error
+        throw err
       }
     },
 
@@ -165,9 +168,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
         })
 
         this.guildMaster.name = name
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error updating guild master name:', error)
-        throw error
+        throw err
       }
     },
 
@@ -190,9 +194,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
         this.guildMaster.archetype = data.archetype
         this.guildMaster.archetypeTags = data.archetypeTags
         this.guildMaster.baseStats = data.statsAdjusted
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error selecting archetype:', error)
-        throw error
+        throw err
       }
     },
 
@@ -226,9 +231,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
         })
 
         this.guildMaster.equippedTraitIds = data.equippedTraitIds
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error equipping trait:', error)
-        throw error
+        throw err
       }
     },
 
@@ -251,9 +257,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
         })
 
         this.guildMaster.equippedTraitIds = data.equippedTraitIds
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error unequipping trait:', error)
-        throw error
+        throw err
       }
     },
 
@@ -276,9 +283,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
         })
 
         this.guildMaster.unlockedTraitIds = data.unlockedTraitIds
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error unlocking trait:', error)
-        throw error
+        throw err
       }
     },
 
@@ -300,9 +308,10 @@ export const useGuildMasterStore = defineStore('guildMaster', {
         this.guildMaster.level = data.level
         this.guildMaster.baseStats = data.baseStats
         this.guildMaster.maxEquippedTraits = data.maxEquippedTraits
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error leveling up guild master:', error)
-        throw error
+        throw err
       }
     },
 

@@ -163,6 +163,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useExpeditionStore } from '~/stores/expeditions'
 import { useHeroStore } from '~/stores/heroes'
 import type { Expedition, Zone, Subzone, Hero } from '~~/types'
+import { toError } from '~~/shared/utils/errorHandler'
 
 interface Props {
   expedition: Expedition
@@ -233,8 +234,9 @@ async function completeExpedition() {
   try {
     await expeditionStore.completeExpedition(props.expedition.id)
     emit('completed')
-  } catch (err: any) {
-    error.value = err.message || 'Failed to complete expedition'
+  } catch (err: unknown) {
+    const e = toError(err)
+    error.value = e.message || 'Failed to complete expedition'
   } finally {
     loading.value = false
   }
@@ -250,8 +252,9 @@ async function cancelExpedition() {
       method: 'POST'
     })
     emit('canceled')
-  } catch (err: any) {
-    error.value = err.message || 'Failed to cancel expedition'
+  } catch (err: unknown) {
+    const e = toError(err)
+    error.value = e.message || 'Failed to cancel expedition'
   } finally {
     loading.value = false
   }

@@ -1,21 +1,35 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { TavernSlot, Hero, TavernHero } from '~~/types'
 import { v4 as uuid } from 'uuid'
+import { z } from 'zod'
+
+const recruitSchema = z.object({
+  slotIndex: z.number()
+    .int({ message: 'Slot index must be an integer' })
+    .min(0, { message: 'Slot index must be non-negative' })
+})
+
+type RecruitRequest = z.infer<typeof recruitSchema>
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
-  const body = await readBody<{ slotIndex: number }>(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
-  const { slotIndex } = body
+  const body = await readBody(event)
+  const parseResult = recruitSchema.safeParse(body)
 
-  if (slotIndex === undefined || slotIndex < 0) {
-    throw createError({ statusCode: 400, message: 'Valid slot index required' })
+  if (!parseResult.success) {
+    throw createError({
+      statusCode: 400,
+      message: parseResult.error.errors[0]?.message || 'Invalid request data'
+    })
   }
+
+  const { slotIndex } = parseResult.data
 
   // Get player
   const { data: player, error: playerError } = await client
@@ -179,7 +193,8 @@ export default defineEventHandler(async (event) => {
       hero: createdHero,
       remainingGold: updatedPlayer.gold,
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = toError(err)
     console.error('Recruit error:', error)
     throw createError({
       statusCode: 400,

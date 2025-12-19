@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toError } from '~~/shared/utils/errorHandler'
 import type { Achievement } from '~/data/achievements'
 import { getAllAchievements, getAchievementById, calculateTotalPoints, calculateCompletionPercentage } from '~/data/achievements'
 
@@ -131,7 +132,8 @@ export const useAchievementStore = defineStore('achievements', {
         this.unlocked = data.unlocked
         this.progress = data.progress
         this.showcased = data.showcased
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to fetch achievements'
         console.error('Error fetching achievements:', error)
       } finally {
@@ -159,7 +161,8 @@ export const useAchievementStore = defineStore('achievements', {
         }
 
         return data.newlyUnlocked
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         console.error('Error checking achievements:', error)
         return []
       }
@@ -206,9 +209,10 @@ export const useAchievementStore = defineStore('achievements', {
         })
 
         this.showcased = achievementIds
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         console.error('Error updating showcased achievements:', error)
-        throw error
+        throw err
       }
     },
 
@@ -224,9 +228,10 @@ export const useAchievementStore = defineStore('achievements', {
 
         this.unlocked.push(data)
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         console.error('Error unlocking achievement:', error)
-        throw error
+        throw err
       }
     },
   },

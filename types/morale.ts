@@ -12,8 +12,8 @@ export const MORALE_THRESHOLDS = {
   excited: { min: 80, max: 100 },
   content: { min: 50, max: 79 },
   tired: { min: 30, max: 49 },
-  frustrated: { min: 15, max: 29 },
-  exhausted: { min: 0, max: 14 },
+  frustrated: { min: 20, max: 29 },
+  exhausted: { min: 0, max: 19 },
 }
 
 // Morale changes by action

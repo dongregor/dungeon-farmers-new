@@ -4,6 +4,7 @@ import { calculateHeroPower } from '~/utils/powerCalculator'
 import { generateEquipment } from '~/utils/equipmentGenerator'
 import type { Hero, Equipment, EquipmentSlot } from '~~/types'
 import { getXpForLevel, addXp } from '~/utils/xpService'
+import { MIN_MORALE_FOR_EXPEDITION } from '~~/shared/constants/gameRules'
 
 /**
  * Integration Tests: Hero Management
@@ -317,7 +318,7 @@ describe('Hero Management', () => {
         testHero.morale = 'excited'
       } else if (testHero.moraleValue >= 50) {
         testHero.morale = 'content'
-      } else if (testHero.moraleValue >= 20) {
+      } else if (testHero.moraleValue >= MIN_MORALE_FOR_EXPEDITION) {
         testHero.morale = 'tired'
       } else {
         testHero.morale = 'exhausted'
@@ -331,7 +332,7 @@ describe('Hero Management', () => {
       testHero.moraleValue = 10
       testHero.morale = 'exhausted'
 
-      const canStartExpedition = testHero.moraleValue >= 20
+      const canStartExpedition = testHero.moraleValue >= MIN_MORALE_FOR_EXPEDITION
 
       expect(canStartExpedition).toBe(false)
     })
@@ -348,7 +349,7 @@ describe('Hero Management', () => {
         testHero.morale = 'energized'
       } else if (testHero.moraleValue >= 50) {
         testHero.morale = 'content'
-      } else if (testHero.moraleValue >= 20) {
+      } else if (testHero.moraleValue >= MIN_MORALE_FOR_EXPEDITION) {
         testHero.morale = 'tired'
       }
 
