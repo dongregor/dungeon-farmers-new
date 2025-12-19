@@ -28,7 +28,8 @@ import { getRandomCulture } from '~/data/cultures'
 import { randomInt, randomElement, randomElements, weightedRandom } from '~~/shared/utils/randomization'
 import { calculateXpToNextLevel } from '~~/shared/constants/gameRules'
 
-// Helper functions now imported from shared/utils/randomization
+// Random utilities (randomInt, randomElement, randomElements, weightedRandom)
+// imported from shared/utils/randomization to eliminate code duplication
 
 // Generate rarity
 function generateRarity(): Rarity {

@@ -32,7 +32,7 @@ export function calculateEfficiency (
   // Calculate threat counter result if not provided
   const threatResult = threatCounterResult ?? checkThreatCounters(heroes, subzone)
 
-  // Bonus for countered threats (THREAT_BASE_PENALTY% per countered threat)
+  // Bonus for countered threats (THREAT_BASE_PENALTY percentage points per countered threat)
   efficiency += threatResult.counteredThreats.length * THREAT_BASE_PENALTY
 
   // Penalty for uncountered threats (scaled by difficulty)
