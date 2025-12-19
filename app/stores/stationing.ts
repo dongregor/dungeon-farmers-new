@@ -174,7 +174,8 @@ export const useStationingStore = defineStore('stationing', {
 
         this.stationed = data.stationed
         this.progressionTier = data.progressionTier
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         this.error = error.message || 'Failed to fetch stationed heroes'
         console.error('Error fetching stationed heroes:', error)
       } finally {
@@ -207,9 +208,10 @@ export const useStationingStore = defineStore('stationing', {
 
         this.stationed.push(data)
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error stationing hero:', error)
-        throw error
+        throw err
       }
     },
 
@@ -238,9 +240,10 @@ export const useStationingStore = defineStore('stationing', {
         }
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error recalling hero:', error)
-        throw error
+        throw err
       }
     },
 
@@ -275,9 +278,10 @@ export const useStationingStore = defineStore('stationing', {
         }
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error collecting rewards:', error)
-        throw error
+        throw err
       }
     },
 
@@ -314,9 +318,10 @@ export const useStationingStore = defineStore('stationing', {
         })
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error collecting all rewards:', error)
-        throw error
+        throw err
       }
     },
 
@@ -338,9 +343,10 @@ export const useStationingStore = defineStore('stationing', {
 
         this.stationed = []
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error recalling all heroes:', error)
-        throw error
+        throw err
       }
     },
 
@@ -372,9 +378,10 @@ export const useStationingStore = defineStore('stationing', {
         })
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+    const error = toError(err)
         console.error('Error checking morale thresholds:', error)
-        throw error
+        throw err
       }
     },
   },

@@ -35,7 +35,8 @@ const handleEquipTrait = async (traitId: string) => {
     await guildMasterStore.equipTrait(traitId, selectedSlotIndex.value ?? undefined)
     showTraitModal.value = false
     selectedSlotIndex.value = null
-  } catch (error: any) {
+  } catch (err: unknown) {
+      const error = toError(err)
     alert(error.message)
   } finally {
     processing.value = false
@@ -46,7 +47,8 @@ const handleUnequipTrait = async (traitId: string) => {
   processing.value = true
   try {
     await guildMasterStore.unequipTrait(traitId)
-  } catch (error: any) {
+  } catch (err: unknown) {
+      const error = toError(err)
     alert(error.message)
   } finally {
     processing.value = false
