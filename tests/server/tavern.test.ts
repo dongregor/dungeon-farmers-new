@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type { TavernSlot, TavernHero } from '~~/types'
+import { TAVERN_REFRESH_HOURS } from '~~/types/recruitment'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 // Mock hero generator
@@ -67,7 +68,7 @@ function createMockTavernHero(overrides: Partial<TavernHero> = {}): TavernHero {
     prestigeBonuses: { combat: 0, utility: 0, survival: 0 },
     recruitCost: 100,
     isLocked: false,
-    expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+    expiresAt: new Date(Date.now() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000).toISOString(),
     ...overrides,
   }
 }
@@ -169,7 +170,7 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots: createMockTavernSlots(),
         last_refresh_at: new Date().toISOString(),
-        next_refresh_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+        next_refresh_at: new Date(Date.now() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000).toISOString(),
       }
 
       vi.mocked(serverSupabaseUser).mockResolvedValue(mockUser as any)
@@ -200,7 +201,7 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots: createMockTavernSlots(),
         last_refresh_at: new Date().toISOString(),
-        next_refresh_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+        next_refresh_at: new Date(Date.now() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000).toISOString(),
       }
 
       vi.mocked(serverSupabaseUser).mockResolvedValue(mockUser as any)
@@ -227,7 +228,7 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots: createMockTavernSlots(),
         last_refresh_at: new Date().toISOString(),
-        next_refresh_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+        next_refresh_at: new Date(Date.now() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000).toISOString(),
       }
 
       vi.mocked(serverSupabaseUser).mockResolvedValue(mockUser as any)
@@ -258,7 +259,7 @@ describe('Tavern API', () => {
       const mockTavernState = {
         slots,
         last_refresh_at: new Date().toISOString(),
-        next_refresh_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+        next_refresh_at: new Date(Date.now() + TAVERN_REFRESH_HOURS * 60 * 60 * 1000).toISOString(),
       }
 
       vi.mocked(serverSupabaseUser).mockResolvedValue(mockUser as any)
