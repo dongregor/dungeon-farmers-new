@@ -364,9 +364,10 @@ export const useTutorialStore = defineStore('tutorial', {
         progress.claimedAt = new Date().toISOString()
 
         return quest.reward
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         console.error('Error claiming quest reward:', error)
-        throw error
+        throw err
       }
     },
 
@@ -480,7 +481,8 @@ export const useTutorialStore = defineStore('tutorial', {
 
         // For now, load from localStorage
         this.loadTutorialState()
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to fetch tutorial state'
         console.error('Error fetching tutorial state:', error)
       } finally {

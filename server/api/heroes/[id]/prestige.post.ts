@@ -98,7 +98,8 @@ export default defineEventHandler(async (event) => {
         newPrestigeLevel: result.newPrestigeLevel,
       },
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = toError(err)
     console.error('Prestige error:', error)
     throw createError({
       statusCode: 400,

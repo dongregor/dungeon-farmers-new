@@ -94,8 +94,9 @@ export default defineEventHandler(async (event) => {
       heroesFreed: updatedHeroes,
       penaltyApplied: 'Heroes lost 20 morale for abandoning the expedition'
     }
-  } catch (error: any) {
-    if (error.statusCode) throw error
+  } catch (err: unknown) {
+    const error = toError(err)
+    if (error.statusCode) throw err
 
     throw createError({
       statusCode: 500,

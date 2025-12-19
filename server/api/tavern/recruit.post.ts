@@ -193,7 +193,8 @@ export default defineEventHandler(async (event) => {
       hero: createdHero,
       remainingGold: updatedPlayer.gold,
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = toError(err)
     console.error('Recruit error:', error)
     throw createError({
       statusCode: 400,

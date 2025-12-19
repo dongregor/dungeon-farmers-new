@@ -157,11 +157,12 @@ export default defineEventHandler(async (event) => {
         })),
       },
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = toError(err)
     console.error('Offline sync error:', error)
     throw createError({
       statusCode: 500,
-      message: 'Failed to sync offline progress',
+      message: error.message || 'Failed to sync offline progress',
     })
   }
 })

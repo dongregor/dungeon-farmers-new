@@ -52,7 +52,8 @@ export default defineEventHandler(async (event) => {
       active: activeExpeditions,
       completed: completedExpeditions
     }
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = toError(err)
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to fetch expeditions',

@@ -159,7 +159,8 @@ export const useChallengeStore = defineStore('challenges', {
 
         this.currentChallenges = data.challenges
         this.progress = data.progress
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         this.error = error.message || 'Failed to fetch challenges'
         console.error('Error fetching challenges:', error)
       } finally {
@@ -214,9 +215,10 @@ export const useChallengeStore = defineStore('challenges', {
         progress.claimed = true
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         console.error('Error claiming challenge reward:', error)
-        throw error
+        throw err
       }
     },
 
@@ -242,9 +244,10 @@ export const useChallengeStore = defineStore('challenges', {
         })
 
         return data
-      } catch (error: any) {
+      } catch (err: unknown) {
+        const error = toError(err)
         console.error('Error claiming all rewards:', error)
-        throw error
+        throw err
       }
     },
 
