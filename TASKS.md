@@ -3,8 +3,8 @@
 **Generated:** 2024-12-18
 **Last Updated:** 2024-12-19
 **Based on:** Codebase Analysis
-**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 20% (3/15)
-**Overall Progress:** 36/43 tasks (84%)
+**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 33% (5/15)
+**Overall Progress:** 38/43 tasks (88%)
 
 ---
 
@@ -261,7 +261,7 @@
 
 ---
 
-## P3: Testing & Documentation (3/15 Complete - 20%)
+## P3: Testing & Documentation (5/15 Complete - 33%)
 
 ### Unit Tests
 
@@ -280,13 +280,15 @@
   - Cover: Threat counters, difficulty scaling, bounds (60-150%)
   - **Status:** Completed - 32 tests passing
 
-- [ ] **TEST-004**: Add offline progress tests
+- [x] **TEST-004**: Add offline progress tests
   - File: `tests/unit/utils/offlineProgress.test.ts`
   - Cover: Multiple expedition completion, morale recovery, auto-repeat
+  - **Status:** Completed - 23 tests passing
 
-- [ ] **TEST-005**: Add morale service tests
+- [x] **TEST-005**: Add morale service tests
   - File: `tests/unit/utils/moraleService.test.ts`
   - Cover: State transitions, recovery calculations
+  - **Status:** Completed - 35 tests passing
 
 ### Server Route Tests
 
@@ -334,8 +336,8 @@
 | P0 Critical Bugs | 11 | 11 ✅ | 4-6h | **100% DONE** |
 | P1 High Priority | 7 | 7 ✅ | 8-12h | **100% DONE** |
 | P2 Medium Priority | 10 | 10 ✅ | 10-15h | **100% DONE** |
-| P3 Testing/Docs | 15 | 3 | 15-20h | 20% (12-16h remaining) |
-| **Total** | **43** | **36** | **37-53h** | **84% (12-16h remaining)** |
+| P3 Testing/Docs | 15 | 5 | 15-20h | 33% (10-13h remaining) |
+| **Total** | **43** | **38** | **37-53h** | **88% (10-13h remaining)** |
 
 ---
 
