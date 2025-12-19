@@ -1,11 +1,21 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { z } from 'zod'
 import type { Hero } from '~~/types'
+
+// Schema for hero PATCH requests (database field names)
+const heroPatchSchema = z.object({
+  display_title: z.string().nullable().optional(),
+  equipment: z.record(z.string(), z.string()).optional(),
+  is_favorite: z.boolean().optional(),
+  stationed_zone_id: z.string().nullable().optional(),
+}).strict() // Reject unknown fields
+
+type HeroPatchRequest = z.infer<typeof heroPatchSchema>
 
 export default defineEventHandler(async (event): Promise<Hero> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const heroId = getRouterParam(event, 'id')
-  const body = await readBody(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -14,6 +24,19 @@ export default defineEventHandler(async (event): Promise<Hero> => {
   if (!heroId) {
     throw createError({ statusCode: 400, message: 'Hero ID required' })
   }
+
+  // Validate request body
+  const body = await readBody(event)
+  const parseResult = heroPatchSchema.safeParse(body)
+
+  if (!parseResult.success) {
+    throw createError({
+      statusCode: 400,
+      message: parseResult.error.errors[0]?.message || 'Invalid request data'
+    })
+  }
+
+  const validatedBody = parseResult.data
 
   // Get player
   const { data: player, error: playerError } = await client
@@ -42,25 +65,13 @@ export default defineEventHandler(async (event): Promise<Hero> => {
     throw createError({ statusCode: 404, message: 'Hero not found' })
   }
 
-  // Define allowed fields for direct updates
-  const allowedFields = [
-    'display_title',
-    'equipment',
-    'is_favorite',
-    'stationed_zone_id',
-  ]
-
-  // Filter body to only include allowed fields
-  const updates: Record<string, any> = {}
-  for (const field of allowedFields) {
-    if (field in body) {
-      updates[field] = body[field]
-    }
+  // Check if any fields were provided
+  if (Object.keys(validatedBody).length === 0) {
+    throw createError({ statusCode: 400, message: 'No fields to update' })
   }
 
-  if (Object.keys(updates).length === 0) {
-    throw createError({ statusCode: 400, message: 'No valid fields to update' })
-  }
+  // Prepare updates from validated body
+  const updates: Record<string, unknown> = { ...validatedBody }
 
   // Add updated_at timestamp
   updates.updated_at = new Date().toISOString()
