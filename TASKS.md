@@ -3,8 +3,8 @@
 **Generated:** 2024-12-18
 **Last Updated:** 2024-12-19
 **Based on:** Codebase Analysis
-**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 0% (0/15)
-**Overall Progress:** 33/43 tasks (77%)
+**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 20% (3/15)
+**Overall Progress:** 36/43 tasks (84%)
 
 ---
 
@@ -261,21 +261,24 @@
 
 ---
 
-## P3: Testing & Documentation (0/15 Complete - 0%)
+## P3: Testing & Documentation (3/15 Complete - 20%)
 
 ### Unit Tests
 
-- [ ] **TEST-001**: Add randomization utility tests
+- [x] **TEST-001**: Add randomization utility tests
   - File: `tests/unit/utils/randomization.test.ts`
   - Cover: Fisher-Yates uniformity, weighted distribution, seeded reproducibility
+  - **Status:** Completed - 38 tests passing
 
-- [ ] **TEST-002**: Add power calculator tests
+- [x] **TEST-002**: Add power calculator tests
   - File: `tests/unit/utils/powerCalculator.test.ts`
   - Cover: Edge cases, trait interactions, prestige bonuses
+  - **Status:** Completed - 23 tests passing
 
-- [ ] **TEST-003**: Add efficiency calculator tests
+- [x] **TEST-003**: Add efficiency calculator tests
   - File: `tests/unit/utils/efficiencyCalculator.test.ts`
   - Cover: Threat counters, difficulty scaling, bounds (60-150%)
+  - **Status:** Completed - 32 tests passing
 
 - [ ] **TEST-004**: Add offline progress tests
   - File: `tests/unit/utils/offlineProgress.test.ts`
@@ -331,8 +334,8 @@
 | P0 Critical Bugs | 11 | 11 ✅ | 4-6h | **100% DONE** |
 | P1 High Priority | 7 | 7 ✅ | 8-12h | **100% DONE** |
 | P2 Medium Priority | 10 | 10 ✅ | 10-15h | **100% DONE** |
-| P3 Testing/Docs | 15 | 0 | 15-20h | 0% (15-20h remaining) |
-| **Total** | **43** | **33** | **37-53h** | **77% (15-20h remaining)** |
+| P3 Testing/Docs | 15 | 3 | 15-20h | 20% (12-16h remaining) |
+| **Total** | **43** | **36** | **37-53h** | **84% (12-16h remaining)** |
 
 ---
 
