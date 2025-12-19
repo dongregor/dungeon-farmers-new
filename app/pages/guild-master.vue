@@ -2,6 +2,7 @@
 import { useGuildMasterStore } from '~/stores/guildMaster'
 import { storeToRefs } from 'pinia'
 import type { GuildMasterTraitSelection } from '~/stores/guildMaster'
+import { toError } from '~~/shared/utils/errorHandler'
 
 definePageMeta({
   title: 'Guild Master',

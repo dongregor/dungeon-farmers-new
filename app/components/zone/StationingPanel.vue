@@ -3,6 +3,7 @@ import { useStationingStore } from '~/stores/stationing'
 import { useHeroStore } from '~/stores/heroes'
 import { storeToRefs } from 'pinia'
 import type { Hero } from '~/types'
+import { toError } from '~~/shared/utils/errorHandler'
 
 interface Props {
   zoneId: string
