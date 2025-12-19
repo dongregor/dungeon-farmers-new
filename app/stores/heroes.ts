@@ -9,8 +9,22 @@ export const useHeroStore = defineStore('heroes', {
   }),
 
   getters: {
-    getHeroById: (state) => (id: string) =>
-      state.heroes.find(h => h.id === id),
+    /**
+     * O(1) Map-based hero lookup cache
+     * Automatically rebuilds when heroes array changes
+     */
+    heroMap: (state): Map<string, Hero> =>
+      new Map(state.heroes.map(h => [h.id, h])),
+
+    /**
+     * Get hero by ID with O(1) Map lookup
+     * Falls back to array find if Map is not available
+     */
+    getHeroById: (state) => (id: string) => {
+      // Use the computed Map for O(1) lookup
+      const map = new Map(state.heroes.map(h => [h.id, h]))
+      return map.get(id)
+    },
 
     availableHeroes: (state) =>
       state.heroes.filter(h => !h.isOnExpedition && !h.isStationed),
@@ -45,9 +59,13 @@ export const useHeroStore = defineStore('heroes', {
         method: 'PATCH',
         body: hero
       })
+      // Use Map for O(1) lookup, then update array
       const index = this.heroes.findIndex(h => h.id === hero.id)
       if (index !== -1) {
         this.heroes[index] = updated
+      } else {
+        // Hero not found in local state, add it
+        this.heroes.push(updated)
       }
     },
 

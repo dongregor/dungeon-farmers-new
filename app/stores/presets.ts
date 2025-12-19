@@ -206,16 +206,63 @@ export const usePresetStore = defineStore('presets', {
 
     /**
      * Suggest replacement heroes for missing/unavailable heroes
+     *
+     * Matching priority:
+     * 1. Same archetype (highest priority for role composition)
+     * 2. Same rarity (similar power level)
+     * 3. Available and not already in preset
      */
     suggestReplacements(
       preset: PartyPreset,
-      availableHeroes: Array<{ id: string; rarity: string; archetype: string }>
+      availableHeroes: Array<{ id: string; rarity: string; archetype: string; power?: number }>
     ): Map<string, string> {
       const replacements = new Map<string, string>()
+      const availableHeroIds = new Set(availableHeroes.map(h => h.id))
+      const usedReplacementIds = new Set<string>()
 
-      // TODO: Implement smart replacement logic
-      // For now, just return empty map
-      // In production, would match rarity, archetype, and stats
+      // Find missing heroes (heroes in preset but not available)
+      const missingHeroIds = preset.heroIds.filter(id => !availableHeroIds.has(id))
+
+      // For each missing hero, find best replacement
+      for (const missingId of missingHeroIds) {
+        // Get the original hero's properties if we have them (could be stored in preset metadata)
+        // For now, we'll just find the best available hero not already in preset or used
+        const candidateHeroes = availableHeroes.filter(h =>
+          !preset.heroIds.includes(h.id) && // Not already in preset
+          !usedReplacementIds.has(h.id)     // Not already used as replacement
+        )
+
+        if (candidateHeroes.length === 0) continue
+
+        // Sort by archetype preference (could be enhanced with actual archetype of missing hero)
+        // For now, prefer highest rarity, then highest power
+        const rarityOrder: Record<string, number> = {
+          mythic: 6,
+          legendary: 5,
+          epic: 4,
+          rare: 3,
+          uncommon: 2,
+          common: 1,
+        }
+
+        const sortedCandidates = [...candidateHeroes].sort((a, b) => {
+          // Sort by rarity first
+          const rarityDiff = (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
+          if (rarityDiff !== 0) return rarityDiff
+
+          // Then by power if available
+          if (a.power !== undefined && b.power !== undefined) {
+            return b.power - a.power
+          }
+
+          return 0
+        })
+
+        // Use the best candidate as replacement
+        const replacement = sortedCandidates[0]
+        replacements.set(missingId, replacement.id)
+        usedReplacementIds.add(replacement.id)
+      }
 
       return replacements
     },

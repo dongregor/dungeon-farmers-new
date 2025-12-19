@@ -2,19 +2,26 @@ import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { prestigeHero } from '~/utils/prestigeService'
 import type { Hero } from '~~/types'
 import { MAX_HERO_LEVEL } from '~~/shared/constants/gameRules'
+import { heroIdSchema } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
-  const heroId = getRouterParam(event, 'id')
+  const heroIdParam = getRouterParam(event, 'id')
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
-  if (!heroId) {
-    throw createError({ statusCode: 400, message: 'Hero ID required' })
+  const parseResult = heroIdSchema.safeParse(heroIdParam)
+  if (!parseResult.success) {
+    throw createError({
+      statusCode: 400,
+      message: parseResult.error.errors[0]?.message || 'Hero ID required'
+    })
   }
+
+  const heroId = parseResult.data
 
   // Get player
   const { data: player } = await client

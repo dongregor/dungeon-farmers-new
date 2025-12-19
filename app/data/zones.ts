@@ -184,13 +184,46 @@ export const ZONES: Zone[] = [
   }
 ]
 
+/**
+ * O(1) lookup cache for zones by ID
+ * Auto-imported across client and server
+ */
+export const ZONE_BY_ID = new Map<string, Zone>(
+  ZONES.map(zone => [zone.id, zone])
+)
+
+/**
+ * O(1) lookup cache for subzones by composite key "zoneId:subzoneId"
+ * Auto-imported across client and server
+ */
+export const SUBZONE_BY_ID = new Map<string, { zone: Zone; subzone: Subzone }>(
+  ZONES.flatMap(zone =>
+    zone.subzones.map(subzone => [
+      `${zone.id}:${subzone.id}`,
+      { zone, subzone }
+    ])
+  )
+)
+
+/**
+ * Get zone by ID with O(1) Map lookup
+ */
 export function getZoneById(id: string): Zone | undefined {
-  return ZONES.find(zone => zone.id === id)
+  return ZONE_BY_ID.get(id)
 }
 
+/**
+ * Get subzone by IDs with O(1) Map lookup
+ */
 export function getSubzoneById(zoneId: string, subzoneId: string): Subzone | undefined {
-  const zone = getZoneById(zoneId)
-  return zone?.subzones.find(subzone => subzone.id === subzoneId)
+  return SUBZONE_BY_ID.get(`${zoneId}:${subzoneId}`)?.subzone
+}
+
+/**
+ * Get both zone and subzone together with O(1) Map lookup
+ */
+export function getZoneAndSubzone(zoneId: string, subzoneId: string): { zone: Zone; subzone: Subzone } | undefined {
+  return SUBZONE_BY_ID.get(`${zoneId}:${subzoneId}`)
 }
 
 export function getAvailableZones(playerPower: number): Zone[] {
