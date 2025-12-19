@@ -14,6 +14,9 @@ export function randomInt(min: number, max: number): number {
  * Select random element from array
  */
 export function randomElement<T>(arr: T[]): T {
+  if (arr.length === 0) {
+    throw new Error('randomElement: Cannot select from empty array')
+  }
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
