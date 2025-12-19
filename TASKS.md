@@ -3,8 +3,8 @@
 **Generated:** 2024-12-18
 **Last Updated:** 2024-12-19
 **Based on:** Codebase Analysis
-**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 53% (8/15)
-**Overall Progress:** 41/43 tasks (95%)
+**Status:** P0 Complete (11/11) ✅, P1 Complete (7/7) ✅, P2 Complete (10/10) ✅, P3 60% (9/15)
+**Overall Progress:** 42/43 tasks (98%)
 
 ---
 
@@ -261,7 +261,7 @@
 
 ---
 
-## P3: Testing & Documentation (8/15 Complete - 53%)
+## P3: Testing & Documentation (9/15 Complete - 60%)
 
 ### Unit Tests
 
@@ -307,8 +307,10 @@
   - Cover: GET /api/heroes/[id], PATCH /api/heroes/[id], POST /api/heroes/[id]/retire, POST /api/heroes/[id]/prestige
   - **Status:** Completed - 21 tests passing
 
-- [ ] **TEST-009**: Add equipment API tests
+- [x] **TEST-009**: Add equipment API tests
   - File: `tests/server/equipment.test.ts`
+  - Cover: GET /api/equipment, POST /api/equipment/[id]/equip, POST /api/equipment/[id]/upgrade
+  - **Status:** Completed - 17 tests passing
 
 ### E2E Tests
 
@@ -342,8 +344,8 @@
 | P0 Critical Bugs | 11 | 11 ✅ | 4-6h | **100% DONE** |
 | P1 High Priority | 7 | 7 ✅ | 8-12h | **100% DONE** |
 | P2 Medium Priority | 10 | 10 ✅ | 10-15h | **100% DONE** |
-| P3 Testing/Docs | 15 | 8 | 15-20h | 53% (7-10h remaining) |
-| **Total** | **43** | **41** | **37-53h** | **95% (6-9h remaining)** |
+| P3 Testing/Docs | 15 | 9 | 15-20h | 60% (6-8h remaining) |
+| **Total** | **43** | **42** | **37-53h** | **98% (5-7h remaining)** |
 
 ---
 
