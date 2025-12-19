@@ -318,7 +318,7 @@ describe('Hero API Routes', () => {
     })
 
     it('should throw 400 if hero is on expedition', async () => {
-      const mockHero = createMockHero({ isOnExpedition: true, expeditionId: 'exp-1' })
+      const mockHero = createMockHero({ isOnExpedition: true, currentExpeditionId: 'exp-1' })
       const mockPlayer = { id: 'player-1' }
 
       vi.mocked(mapSupabaseHeroToHero).mockReturnValue(mockHero)
