@@ -1,8 +1,10 @@
 # Dungeon Farmers - Task List
 
 **Generated:** 2024-12-18
+**Last Updated:** 2024-12-19
 **Based on:** Codebase Analysis
-**Status:** Phase 1 Complete, Ready for Bug Fixes & Improvements
+**Status:** P0 Complete (11/11), P1 25% (2/8), P2 50% (5/10), P3 0% (0/15)
+**Overall Progress:** 18/44 tasks (41%)
 
 ---
 
@@ -15,82 +17,93 @@
 
 ---
 
-## P0: Critical Bugs
+## P0: Critical Bugs ✅ (11/11 Complete)
 
 ### Type & Export Errors
 
-- [ ] **BUG-001**: Fix invalid expedition status type
+- [x] **BUG-001**: Fix invalid expedition status type
   - File: `app/utils/expeditionEngine.ts:64`
   - Issue: Sets `status: 'waiting_choices'` but type only allows `'idle' | 'in_progress' | 'completed' | 'failed'`
   - Fix: Add `'waiting_choices'` to `ExpeditionStatus` type or use valid status
+  - **Status:** Fixed in previous session
 
-- [ ] **BUG-002**: Export missing `calculateRewards` function
+- [x] **BUG-002**: Export missing `calculateRewards` function
   - File: `app/utils/expeditionEngine.ts:73`
   - Issue: Function defined but not exported
   - Impact: Runtime crash in offlineProgress.ts
+  - **Status:** Fixed in previous session
 
-- [ ] **BUG-003**: Fix `calculateRewards` parameter mismatch
+- [x] **BUG-003**: Fix `calculateRewards` parameter mismatch
   - File: `app/utils/offlineProgress.ts:45-48`
   - Issue: Calls `calculateRewards(expedition, teamPower, durationMinutes)` but signature requires `(subzone, efficiency, events)`
   - Fix: Pass correct parameters or refactor function signature
+  - **Status:** Fixed in previous session
 
 ### Morale Type Mismatches
 
-- [ ] **BUG-004**: Fix morale arithmetic in expedition complete
+- [x] **BUG-004**: Fix morale arithmetic in expedition complete
   - File: `server/api/expeditions/[id]/complete.post.ts:120`
   - Issue: `Math.max(0, hero.morale - 10)` treats MoraleState (string) as number
   - Fix: Use `moraleValue` (number) instead of `morale` (string)
+  - **Status:** Fixed in previous session
 
-- [ ] **BUG-005**: Fix morale arithmetic in expedition cancel
+- [x] **BUG-005**: Fix morale arithmetic in expedition cancel
   - File: `server/api/expeditions/[id]/cancel.post.ts:76`
   - Issue: Same as BUG-004
   - Fix: Use `moraleValue` instead of `morale`
+  - **Status:** Fixed in previous session
 
 ### Property Name Errors
 
-- [ ] **BUG-006**: Fix choice event property name
+- [x] **BUG-006**: Fix choice event property name
   - File: `server/api/expeditions/[id]/choice.post.ts:85,93`
   - Issue: Uses `choiceEvent.data.choices` but type defines `data.options`
   - Fix: Change `choices` to `options`
+  - **Status:** Fixed in previous session
 
 ### Database Schema Issues
 
-- [ ] **BUG-007**: Fix inconsistent timestamp field names
+- [x] **BUG-007**: Fix inconsistent timestamp field names
   - Files:
     - `server/api/expeditions/start.post.ts:210` uses `end_time`
     - `server/api/sync.post.ts:113` uses `completes_at`
     - `server/api/expeditions/[id]/complete.post.ts:43` reads `end_time`
   - Fix: Standardize on one field name across all files
+  - **Status:** Fixed in previous session
 
-- [ ] **BUG-008**: Fix array length check on object
+- [x] **BUG-008**: Fix array length check on object
   - File: `server/api/tavern/recruit.post.ts:165`
   - Issue: `if (!tavernUpdateResult || tavernUpdateResult.length === 0)` checks `.length` on object
   - Fix: Use proper object check or verify return type
+  - **Status:** Fixed in previous session
 
-- [ ] **BUG-009**: Fix pending_loot schema mismatch
+- [x] **BUG-009**: Fix pending_loot schema mismatch
   - File: `server/api/sync.post.ts:129-136`
   - Issue: Inserts `id`, `materials`, `createdAt` but type only has `expeditionId`, `items`, `expiresAt`
   - Fix: Align insert fields with PendingLoot type
+  - **Status:** Fixed in previous session
 
-- [ ] **BUG-010**: Remove undeclared `playerId` from Hero mapper
+- [x] **BUG-010**: Remove undeclared `playerId` from Hero mapper
   - File: `server/utils/mappers.ts:107`
   - Issue: Adds `playerId: data.player_id` but Hero interface doesn't define this field
   - Fix: Remove or add to Hero type
+  - **Status:** Fixed in previous session
 
 ### Algorithm Issues
 
-- [ ] **BUG-011**: Replace biased shuffle in heroGenerator
+- [x] **BUG-011**: Replace biased shuffle in heroGenerator
   - File: `app/utils/heroGenerator.ts:50`
   - Issue: Uses `.sort(() => Math.random() - 0.5)` which is biased
   - Fix: Use Fisher-Yates shuffle (already implemented in challenges.ts)
+  - **Status:** Fixed in previous session
 
 ---
 
-## P1: High Priority Improvements
+## P1: High Priority Improvements (2/8 Complete - 25%)
 
 ### Type Safety
 
-- [ ] **TYPE-001**: Eliminate `any` types across codebase
+- [x] **TYPE-001**: Eliminate `any` types across codebase
   - Files affected: 20+ files
   - Examples:
     - `app/utils/levelUpHandler.ts` - `equipment: any[] = []`
@@ -98,6 +111,7 @@
     - `app/components/zone/StationingPanel.vue` - Multiple `error: any`
     - `app/stores/zones.ts` - `benefit: any`
   - Fix: Create specific types for each use case
+  - **Status:** Completed in previous session (commit a4bb5b5)
 
 ### Server Validation
 
@@ -138,12 +152,13 @@
 
 ### Error Handling
 
-- [ ] **ERR-001**: Create centralized error handling utility
+- [x] **ERR-001**: Create centralized error handling utility
   - Create: `shared/utils/errorHandler.ts`
   - Functions:
     - `handleError(error, context): { message, statusCode, shouldRetry }`
     - `createAppError(type, message, data)`
   - Update 15+ files with consistent pattern
+  - **Status:** Completed in previous session (commit b2dd808, 18 catch blocks updated)
 
 ### Missing Shared Directory
 
@@ -163,11 +178,11 @@
 
 ---
 
-## P2: Medium Priority Refactoring
+## P2: Medium Priority Refactoring (5/10 Complete - 50%)
 
 ### Game Rules Constants
 
-- [ ] **CONST-001**: Extract magic numbers to constants
+- [x] **CONST-001**: Extract magic numbers to constants
   - Create: `shared/constants/gameRules.ts`
   - Values to extract:
     - Max hero level: `60`
@@ -175,20 +190,25 @@
     - Threat penalty: `5 * basePenalty * difficultyMultiplier`
     - Morale recovery: `1 per minute`
     - XP formula: `level * 100 + (level * level * 50)`
+  - **Status:** Completed in previous session (commit fb03e92) + extended in current session (commit c39815d for MIN_MORALE_FOR_EXPEDITION)
 
 ### Missing Composables
 
-- [ ] **COMP-001**: Create `useHeroActions` composable
+- [x] **COMP-001**: Create `useHeroActions` composable
   - Functions: level up, retire, prestige, toggle favorite
+  - **Status:** Completed in previous session (commit 51aa60b) + fixed in current session (commit 4460312 for canPrestige encapsulation)
 
-- [ ] **COMP-002**: Create `useExpeditionValidation` composable
+- [x] **COMP-002**: Create `useExpeditionValidation` composable
   - Functions: validate party, check morale, verify requirements
+  - **Status:** Completed by background agent (commit ddefcc4) + updated in current session (commit c39815d for MIN_MORALE_FOR_EXPEDITION)
 
-- [ ] **COMP-003**: Create `usePowerCalculation` composable
+- [x] **COMP-003**: Create `usePowerCalculation` composable
   - Reactive power updates when equipment/level changes
+  - **Status:** Completed by background agent (commit b36c6ea)
 
-- [ ] **COMP-004**: Create `useInventoryManagement` composable
+- [x] **COMP-004**: Create `useInventoryManagement` composable
   - Equipment slot management, overflow handling
+  - **Status:** Completed by background agent (commit c5c5964)
 
 ### Performance
 
@@ -219,7 +239,7 @@
 
 ---
 
-## P3: Testing & Documentation
+## P3: Testing & Documentation (0/15 Complete - 0%)
 
 ### Unit Tests
 
@@ -284,13 +304,13 @@
 
 ## Effort Estimates
 
-| Priority | Tasks | Est. Hours |
-|----------|-------|------------|
-| P0 Critical Bugs | 11 | 4-6h |
-| P1 High Priority | 8 | 8-12h |
-| P2 Medium Priority | 10 | 10-15h |
-| P3 Testing/Docs | 15 | 15-20h |
-| **Total** | **44** | **37-53h** |
+| Priority | Tasks | Completed | Est. Hours | Status |
+|----------|-------|-----------|------------|--------|
+| P0 Critical Bugs | 11 | 11 ✅ | 4-6h | **100% DONE** |
+| P1 High Priority | 8 | 2 | 8-12h | 25% (6h remaining) |
+| P2 Medium Priority | 10 | 5 | 10-15h | 50% (5-8h remaining) |
+| P3 Testing/Docs | 15 | 0 | 15-20h | 0% (15-20h remaining) |
+| **Total** | **44** | **18** | **37-53h** | **41% (26-34h remaining)** |
 
 ---
 
