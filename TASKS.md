@@ -261,7 +261,7 @@
 
 ---
 
-## P3: Testing & Documentation (5/15 Complete - 33%)
+## P3: Testing & Documentation (6/15 Complete - 40%)
 
 ### Unit Tests
 
@@ -292,8 +292,10 @@
 
 ### Server Route Tests
 
-- [ ] **TEST-006**: Add tavern API tests
+- [x] **TEST-006**: Add tavern API tests
   - File: `tests/server/tavern.test.ts`
+  - Cover: GET /api/tavern, POST /api/tavern/refresh, POST /api/tavern/recruit, POST /api/tavern/lock/[index], POST /api/tavern/unlock/[index]
+  - **Status:** Completed - 23 tests passing
 
 - [ ] **TEST-007**: Add expedition API tests
   - File: `tests/server/expeditions.test.ts`
@@ -336,8 +338,8 @@
 | P0 Critical Bugs | 11 | 11 ✅ | 4-6h | **100% DONE** |
 | P1 High Priority | 7 | 7 ✅ | 8-12h | **100% DONE** |
 | P2 Medium Priority | 10 | 10 ✅ | 10-15h | **100% DONE** |
-| P3 Testing/Docs | 15 | 5 | 15-20h | 33% (10-13h remaining) |
-| **Total** | **43** | **38** | **37-53h** | **88% (10-13h remaining)** |
+| P3 Testing/Docs | 15 | 6 | 15-20h | 40% (9-12h remaining) |
+| **Total** | **43** | **39** | **37-53h** | **91% (9-12h remaining)** |
 
 ---
 
