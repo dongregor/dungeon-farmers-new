@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     include: ['tests/**/*.test.ts'],
+    setupFiles: ['./tests/setup.ts'],
   },
   resolve: {
     alias: {
@@ -15,6 +16,7 @@ export default defineConfig({
       '~~': resolve(__dirname, './'),
       '@': resolve(__dirname, './app'),
       '~~/': resolve(__dirname, './'),
+      '#supabase/server': resolve(__dirname, './tests/__mocks__/supabase-server.ts'),
     },
   },
 })
