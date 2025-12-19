@@ -56,7 +56,7 @@ function createTestEquipment(overrides: Partial<Equipment> = {}): Equipment {
     gearScore: 10,
     traits: [],
     maxTraits: 1,
-    equippedBy: null,
+    isEquipped: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
