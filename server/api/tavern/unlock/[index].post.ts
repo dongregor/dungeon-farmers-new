@@ -1,5 +1,11 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { TavernSlot } from '~~/types'
+import { z } from 'zod'
+
+const indexParamSchema = z.string()
+  .regex(/^\d+$/, { message: 'Index must be a valid number' })
+  .transform(Number)
+  .pipe(z.number().int().nonnegative({ message: 'Index must be non-negative' }))
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
@@ -10,10 +16,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
-  const index = parseInt(slotIndex || '', 10)
-  if (isNaN(index) || index < 0) {
-    throw createError({ statusCode: 400, message: 'Valid slot index required' })
+  const parseResult = indexParamSchema.safeParse(slotIndex)
+  if (!parseResult.success) {
+    throw createError({
+      statusCode: 400,
+      message: parseResult.error.errors[0]?.message || 'Valid slot index required'
+    })
   }
+
+  const index = parseResult.data
 
   // Get player
   const { data: player, error: playerError } = await client

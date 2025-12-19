@@ -1,5 +1,8 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
+import { z } from 'zod'
+
+const heroIdSchema = z.string().uuid({ message: 'Invalid hero ID format' })
 
 interface RetireResponse {
   success: boolean
@@ -9,15 +12,21 @@ interface RetireResponse {
 export default defineEventHandler(async (event): Promise<RetireResponse> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
-  const heroId = getRouterParam(event, 'id')
+  const heroIdParam = getRouterParam(event, 'id')
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
-  if (!heroId) {
-    throw createError({ statusCode: 400, message: 'Hero ID required' })
+  const parseResult = heroIdSchema.safeParse(heroIdParam)
+  if (!parseResult.success) {
+    throw createError({
+      statusCode: 400,
+      message: parseResult.error.errors[0]?.message || 'Hero ID required'
+    })
   }
+
+  const heroId = parseResult.data
 
   // Get player
   const { data: player, error: playerError } = await client
