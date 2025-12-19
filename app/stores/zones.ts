@@ -143,7 +143,8 @@ export const useZoneStore = defineStore('zones', {
       if (!progress) return []
 
       const familiarity = progress.familiarity
-      const benefits: Array<{ threshold: number; benefit: any }> = []
+      type ZoneBenefit = typeof ZONE_FAMILIARITY_BENEFITS[keyof typeof ZONE_FAMILIARITY_BENEFITS]
+      const benefits: Array<{ threshold: number; benefit: ZoneBenefit }> = []
 
       // Check each threshold
       for (const [threshold, benefit] of Object.entries(ZONE_FAMILIARITY_BENEFITS)) {
@@ -164,7 +165,8 @@ export const useZoneStore = defineStore('zones', {
       if (!progress) return []
 
       const mastery = progress.mastery
-      const benefits: Array<{ threshold: number; benefit: any }> = []
+      type SubzoneBenefit = typeof SUBZONE_MASTERY_BENEFITS[keyof typeof SUBZONE_MASTERY_BENEFITS]
+      const benefits: Array<{ threshold: number; benefit: SubzoneBenefit }> = []
 
       // Check each threshold
       for (const [threshold, benefit] of Object.entries(SUBZONE_MASTERY_BENEFITS)) {

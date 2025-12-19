@@ -1,4 +1,4 @@
-import type { Hero } from '~~/types'
+import type { Hero, Equipment } from '~~/types'
 import { addXp, canPrestige } from './xpService'
 import { calculateHeroPower } from './powerCalculator'
 
@@ -11,7 +11,7 @@ export interface LevelUpResult {
 }
 
 // Handle level up for a hero
-export function levelUpHero(hero: Hero, xpGain: number, equipment: any[] = []): LevelUpResult {
+export function levelUpHero(hero: Hero, xpGain: number, equipment: Equipment[] = []): LevelUpResult {
   const oldPower = calculateHeroPower(hero, equipment).total
 
   // Add XP and process level ups
