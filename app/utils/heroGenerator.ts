@@ -26,6 +26,7 @@ import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gam
 import { getGenerationStoryTraits } from '~/data/storyTraits'
 import { getRandomCulture } from '~/data/cultures'
 import { randomInt, randomElement, randomElements, weightedRandom } from '~~/shared/utils/randomization'
+import { calculateXpToNextLevel } from '~~/shared/constants/gameRules'
 
 // Helper functions now imported from shared/utils/randomization
 

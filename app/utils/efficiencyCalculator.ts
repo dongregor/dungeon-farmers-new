@@ -5,7 +5,7 @@ import {
   MAX_EFFICIENCY,
   BASE_EFFICIENCY,
   THREAT_BASE_PENALTY,
-  calculateThreatPenalty as calcThreatPenalty,
+  calculateThreatPenalty,
 } from '~~/shared/constants/gameRules'
 
 /**
@@ -36,7 +36,7 @@ export function calculateEfficiency (
   efficiency += threatResult.counteredThreats.length * THREAT_BASE_PENALTY
 
   // Penalty for uncountered threats (scaled by difficulty)
-  const threatPenalty = calcThreatPenalty(threatResult.uncounteredThreats.length, subzone.difficulty)
+  const threatPenalty = calculateThreatPenalty(threatResult.uncounteredThreats.length, subzone.difficulty)
   efficiency -= threatPenalty
 
   // Cap efficiency at MIN_EFFICIENCY-MAX_EFFICIENCY
@@ -151,13 +151,13 @@ function threatCounters(tag: string, threat: string): boolean {
 
 /**
  * Calculate efficiency penalty for uncountered threats
- * @deprecated Use calcThreatPenalty from shared/constants/gameRules instead
+ * @deprecated Use calculateThreatPenalty from shared/constants/gameRules instead
  */
-export function calculateThreatPenalty(
+export function calculateThreatPenaltyLegacy(
   subzone: Subzone,
   uncounteredThreats: string[]
 ): number {
-  return calcThreatPenalty(uncounteredThreats.length, subzone.difficulty)
+  return calculateThreatPenalty(uncounteredThreats.length, subzone.difficulty)
 }
 
 /**

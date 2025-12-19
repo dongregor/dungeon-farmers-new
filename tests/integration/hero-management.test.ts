@@ -3,6 +3,7 @@ import { generateHero } from '~/utils/heroGenerator'
 import { calculateHeroPower } from '~/utils/powerCalculator'
 import { generateEquipment } from '~/utils/equipmentGenerator'
 import type { Hero, Equipment, EquipmentSlot } from '~~/types'
+import { calculateXpToNextLevel } from '~~/shared/constants/gameRules'
 
 /**
  * Integration Tests: Hero Management
@@ -165,9 +166,9 @@ describe('Hero Management', () => {
   describe('Hero Leveling', () => {
     it('should calculate correct XP requirement per level', () => {
       for (let level = 1; level <= 10; level++) {
-        const xpRequired = level * 100 // Simple formula: level * 100
+        const xpRequired = calculateXpToNextLevel(level)
 
-        expect(xpRequired).toBe(level * 100)
+        expect(xpRequired).toBe(level * 100 + level * level * 50)
       }
     })
 
