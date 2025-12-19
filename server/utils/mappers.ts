@@ -1,9 +1,10 @@
 import type { Expedition, Hero } from '~~/types'
+import type { SupabaseExpeditionRow, SupabaseHeroRow } from '~~/types/supabase'
 
 /**
  * Maps Supabase expedition (snake_case) to TypeScript Expedition type (camelCase)
  */
-export function mapSupabaseExpeditionToExpedition(data: any): Expedition {
+export function mapSupabaseExpeditionToExpedition(data: SupabaseExpeditionRow): Expedition {
   return {
     id: data.id,
     playerId: data.player_id,
@@ -18,8 +19,8 @@ export function mapSupabaseExpeditionToExpedition(data: any): Expedition {
 
     // Timing
     startedAt: data.started_at,
-    completesAt: data.end_time,
-    durationMinutes: data.duration || 0,
+    completesAt: data.completes_at,
+    durationMinutes: data.duration_minutes || 0,
     status: data.status,
 
     // Events
@@ -49,7 +50,7 @@ export function mapSupabaseExpeditionToExpedition(data: any): Expedition {
 /**
  * Maps Supabase hero (snake_case) to TypeScript Hero type (camelCase)
  */
-export function mapSupabaseHeroToHero(data: any): Hero {
+export function mapSupabaseHeroToHero(data: SupabaseHeroRow): Hero {
   return {
     id: data.id,
 
@@ -101,9 +102,6 @@ export function mapSupabaseHeroToHero(data: any): Hero {
 
     // Timestamps
     createdAt: data.created_at,
-    updatedAt: data.updated_at,
-
-    // Player ownership
-    playerId: data.player_id
+    updatedAt: data.updated_at
   }
 }

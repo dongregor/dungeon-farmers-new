@@ -12,6 +12,7 @@ import type {
   ChallengeRequirement,
   ChallengeReward,
 } from '~/stores/challenges'
+import { createSeededRandom, seededShuffle } from '~~/shared/utils/randomization'
 
 // ===== DAILY CHALLENGES =====
 
@@ -348,30 +349,7 @@ export const WEEKLY_CHALLENGE_POOL: Omit<Challenge, 'id' | 'type'>[] = [
   },
 ]
 
-/**
- * Create a seeded PRNG (Linear Congruential Generator)
- * Uses the same parameters as the MINSTD Lehmer RNG
- */
-function createSeededRandom(seed?: number): () => number {
-  let currentSeed = seed ?? Math.floor(Math.random() * 233280)
-  return () => {
-    currentSeed = (currentSeed * 9301 + 49297) % 233280
-    return currentSeed / 233280
-  }
-}
-
-/**
- * Fisher-Yates shuffle algorithm for unbiased randomization
- * Supports both seeded (deterministic) and unseeded (random) shuffling
- */
-function fisherYatesShuffle<T>(array: T[], randomFn: () => number): T[] {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(randomFn() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
+// Helper functions now imported from shared/utils/randomization
 
 /**
  * Generate random daily challenges
@@ -379,7 +357,7 @@ function fisherYatesShuffle<T>(array: T[], randomFn: () => number): T[] {
 export function generateDailyChallenges(count: number = 3, seed?: number): Challenge[] {
   const randomFn = seed !== undefined ? createSeededRandom(seed) : Math.random
 
-  const shuffled = fisherYatesShuffle(DAILY_CHALLENGE_POOL, randomFn)
+  const shuffled = seededShuffle(DAILY_CHALLENGE_POOL, randomFn)
 
   return shuffled.slice(0, count).map((challenge, index) => ({
     id: `daily_${new Date().toISOString().split('T')[0]}_${index}`,
@@ -394,7 +372,7 @@ export function generateDailyChallenges(count: number = 3, seed?: number): Chall
 export function generateWeeklyChallenges(count: number = 5, seed?: number): Challenge[] {
   const randomFn = seed !== undefined ? createSeededRandom(seed) : Math.random
 
-  const shuffled = fisherYatesShuffle(WEEKLY_CHALLENGE_POOL, randomFn)
+  const shuffled = seededShuffle(WEEKLY_CHALLENGE_POOL, randomFn)
 
   return shuffled.slice(0, count).map((challenge, index) => ({
     id: `weekly_${getWeekNumber()}_${index}`,

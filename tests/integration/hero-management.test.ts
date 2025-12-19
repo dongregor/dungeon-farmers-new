@@ -3,6 +3,7 @@ import { generateHero } from '~/utils/heroGenerator'
 import { calculateHeroPower } from '~/utils/powerCalculator'
 import { generateEquipment } from '~/utils/equipmentGenerator'
 import type { Hero, Equipment, EquipmentSlot } from '~~/types'
+import { getXpForLevel, addXp } from '~/utils/xpService'
 
 /**
  * Integration Tests: Hero Management
@@ -16,8 +17,7 @@ describe('Hero Management', () => {
   beforeEach(() => {
     testPlayerId = 'test-player-456'
     testHero = generateHero({
-      playerId: testPlayerId,
-      rarity: 'rare',
+      forceRarity: 'rare',
     })
   })
 
@@ -26,7 +26,7 @@ describe('Hero Management', () => {
       const archetypes = ['tank', 'melee_dps', 'healer', 'caster'] as const
 
       archetypes.forEach(archetype => {
-        const hero = generateHero({ playerId: testPlayerId, archetype })
+        const hero = generateHero({ forceArchetype: archetype })
 
         expect(hero.archetype).toBe(archetype)
         expect(hero.archetypeTags).toBeDefined()
@@ -38,7 +38,7 @@ describe('Hero Management', () => {
       const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'] as const
 
       rarities.forEach(rarity => {
-        const hero = generateHero({ playerId: testPlayerId, rarity })
+        const hero = generateHero({ forceRarity: rarity })
 
         expect(hero.rarity).toBe(rarity)
         expect(hero.gameplayTraits).toBeDefined()
@@ -46,9 +46,9 @@ describe('Hero Management', () => {
     })
 
     it('should assign appropriate base stats based on archetype', () => {
-      const tank = generateHero({ playerId: testPlayerId, archetype: 'tank' })
-      const dps = generateHero({ playerId: testPlayerId, archetype: 'dps' })
-      const support = generateHero({ playerId: testPlayerId, archetype: 'support' })
+      const tank = generateHero({ forceArchetype: 'tank' })
+      const dps = generateHero({ forceArchetype: 'melee_dps' })
+      const support = generateHero({ forceArchetype: 'healer' })
 
       // Each archetype should excel in their primary stat
       const tankTotal = tank.baseStats.combat + tank.baseStats.survival + tank.baseStats.utility
@@ -164,38 +164,48 @@ describe('Hero Management', () => {
   })
 
   describe('Hero Leveling', () => {
-    it('should calculate correct XP requirement per level', () => {
-      for (let level = 1; level <= 10; level++) {
-        const xpRequired = level * 100 // Simple formula: level * 100
-
-        expect(xpRequired).toBe(level * 100)
-      }
+    it('should use tiered XP progression system', () => {
+      // Verify the actual tiered progression used by the game
+      expect(getXpForLevel(1)).toBe(100)   // Levels 1-10: 100 XP
+      expect(getXpForLevel(10)).toBe(100)
+      expect(getXpForLevel(11)).toBe(200)  // Levels 11-20: 200 XP
+      expect(getXpForLevel(20)).toBe(200)
+      expect(getXpForLevel(21)).toBe(350)  // Levels 21-30: 350 XP
+      expect(getXpForLevel(30)).toBe(350)
+      expect(getXpForLevel(31)).toBe(500)  // Levels 31-40: 500 XP
+      expect(getXpForLevel(40)).toBe(500)
+      expect(getXpForLevel(41)).toBe(750)  // Levels 41-50: 750 XP
+      expect(getXpForLevel(50)).toBe(750)
+      expect(getXpForLevel(51)).toBe(1000) // Levels 51-60: 1000 XP
+      expect(getXpForLevel(60)).toBe(1000)
     })
 
     it('should level up when reaching XP threshold', () => {
       testHero.level = 1
       testHero.xp = 0
+      testHero.xpToNextLevel = getXpForLevel(1) // 100 XP
 
-      // Add XP to level up
-      testHero.xp = 150
+      // Add enough XP to level up
+      const result = addXp(testHero, 150)
 
-      const newLevel = Math.floor(testHero.xp / 100) + 1
-      testHero.level = newLevel
-
-      expect(testHero.level).toBe(2)
+      expect(result.newLevel).toBe(2)
+      expect(result.levelsGained).toBe(1)
+      expect(result.hero.xp).toBe(50) // Overflow XP
+      expect(result.hero.xpToNextLevel).toBe(100) // Still 100 for level 2
     })
 
     it('should handle multiple levels in one XP gain', () => {
       testHero.level = 1
       testHero.xp = 0
+      testHero.xpToNextLevel = getXpForLevel(1)
 
-      // Massive XP gain
-      testHero.xp = 550
+      // Add enough XP for multiple levels (100*5 = 500 XP for levels 1-5)
+      const result = addXp(testHero, 550)
 
-      const newLevel = Math.floor(testHero.xp / 100) + 1
-      testHero.level = newLevel
-
-      expect(testHero.level).toBe(6)
+      expect(result.newLevel).toBe(6)
+      expect(result.levelsGained).toBe(5)
+      expect(result.hero.xp).toBe(50) // Overflow XP
+      expect(result.hero.xpToNextLevel).toBe(100) // Still in tier 1-10
     })
   })
 
@@ -262,13 +272,11 @@ describe('Hero Management', () => {
 
     it('should transfer story trait to another hero on retirement', () => {
       const heroToRetire = generateHero({
-        playerId: testPlayerId,
-        rarity: 'legendary',
+        forceRarity: 'legendary',
       })
 
       const recipientHero = generateHero({
-        playerId: testPlayerId,
-        rarity: 'common',
+        forceRarity: 'common',
       })
 
       // Give hero a story trait
@@ -283,11 +291,20 @@ describe('Hero Management', () => {
   })
 
   describe('Hero Morale System', () => {
-    it('should start with content morale', () => {
-      const newHero = generateHero({ playerId: testPlayerId })
+    it('should generate hero without morale fields (set by server on creation)', () => {
+      // generateHero omits id, morale, moraleValue, moraleLastUpdate
+      // These fields are set when the hero is persisted to the database
+      const newHero = generateHero({})
 
-      expect(newHero.morale).toBe('content')
-      expect(newHero.moraleValue).toBe(50)
+      // Verify fields that ARE returned by generateHero
+      expect(newHero.level).toBe(1)
+      expect(newHero.xp).toBe(0)
+      expect(newHero.prestigeLevel).toBe(0)
+
+      // Verify omitted fields are undefined (as per the return type)
+      expect((newHero as any).id).toBeUndefined()
+      expect((newHero as any).morale).toBeUndefined()
+      expect((newHero as any).moraleValue).toBeUndefined()
     })
 
     it('should decrease morale after expeditions', () => {
@@ -343,8 +360,7 @@ describe('Hero Management', () => {
   describe('Hero Power Calculation', () => {
     it('should calculate base power from stats', () => {
       const hero = generateHero({
-        playerId: testPlayerId,
-        rarity: 'common',
+        forceRarity: 'common',
       })
 
       const powerBreakdown = calculateHeroPower(hero)
@@ -370,8 +386,8 @@ describe('Hero Management', () => {
     })
 
     it('should include prestige bonuses in power calculation', () => {
-      const hero1 = generateHero({ playerId: testPlayerId, rarity: 'uncommon' })
-      const hero2 = generateHero({ playerId: testPlayerId, rarity: 'uncommon' })
+      const hero1 = generateHero({ forceRarity: 'uncommon' })
+      const hero2 = generateHero({ forceRarity: 'uncommon' })
 
       // Same base stats, but hero2 has prestige
       hero2.prestigeLevel = 2

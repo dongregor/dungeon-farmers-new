@@ -1,6 +1,6 @@
-import type { Hero, Expedition, PendingLoot } from '~~/types'
+import type { Hero, Expedition, PendingLoot, Zone, Subzone } from '~~/types'
 import { calculateMoraleRecovery } from './moraleService'
-import { calculateRewards } from './expeditionEngine'
+import { completeExpedition } from './expeditionEngine'
 
 export interface OfflineProgressResult {
   completedExpeditions: Expedition[]
@@ -19,6 +19,7 @@ export function calculateOfflineProgress(
   lastOnlineTime: Date,
   activeExpeditions: Expedition[],
   heroes: Hero[],
+  zones: Zone[],
   inventorySlots: number,
   usedInventorySlots: number
 ): OfflineProgressResult {
@@ -38,15 +39,29 @@ export function calculateOfflineProgress(
     const completesAt = new Date(expedition.completesAt).getTime()
 
     if (completesAt <= now) {
-      // Expedition completed while offline
-      result.completedExpeditions.push(expedition)
+      // Find zone and subzone for this expedition
+      const zone = zones.find(z => z.id === expedition.zoneId)
+      if (!zone) continue
 
-      // Process rewards and morale
-      const rewards = calculateRewards(
+      const subzone = zone.subzones.find(s => s.id === expedition.subzoneId)
+      if (!subzone) continue
+
+      // Get heroes for this expedition
+      const expeditionHeroes = expedition.heroIds
+        .map(id => heroMap.get(id))
+        .filter((h): h is Hero => h !== undefined)
+
+      // Complete the expedition properly
+      const completedExpedition = completeExpedition(
         expedition,
-        expedition.teamPower,
-        expedition.durationMinutes
+        expeditionHeroes,
+        zone,
+        subzone
       )
+
+      result.completedExpeditions.push(completedExpedition)
+
+      const rewards = completedExpedition.rewards!
 
       // Check inventory space
       const availableSlots = inventorySlots - usedInventorySlots - result.pendingLoot.length

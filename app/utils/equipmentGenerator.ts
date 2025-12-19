@@ -2,6 +2,7 @@ import type { Equipment, EquipmentSlot, EquipmentRarity, Stats, EquipmentTrait, 
 import { EQUIPMENT_TRAITS, getEquipmentTraitById } from '~/data/equipmentTraits'
 import { QUALITY_MULTIPLIERS } from '~~/types/base'
 import { calculateGearScore } from '~~/types/equipment'
+import { randomInt, randomElement, weightedRandom } from '~~/shared/utils/randomization'
 
 // Slot stat tendencies
 const SLOT_STAT_WEIGHTS: Record<EquipmentSlot, { primary: keyof Stats; secondary: keyof Stats; rare: keyof Stats }> = {
@@ -34,29 +35,7 @@ const QUALITY_WEIGHTS_BY_RARITY: Record<EquipmentRarity, Record<TraitQuality, nu
   mythic: { normal: 0.0, magic: 0.4, perfect: 0.6 },
 }
 
-// Helper: Random int in range
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-// Helper: Weighted random selection
-function weightedRandom<T extends string>(weights: Record<T, number>): T {
-  const entries = Object.entries(weights) as [T, number][]
-  const total = entries.reduce((sum, [, w]) => sum + w, 0)
-  let random = Math.random() * total
-
-  for (const [key, weight] of entries) {
-    random -= weight
-    if (random <= 0) return key
-  }
-
-  return entries[0][0]
-}
-
-// Helper: Random element
-function randomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
+// Helper functions now imported from shared/utils/randomization
 
 // Generate equipment stats based on slot and item level
 function generateStats(slot: EquipmentSlot, itemLevel: number, rarity: EquipmentRarity): Stats {

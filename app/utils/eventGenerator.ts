@@ -2,6 +2,7 @@ import type { Hero, Subzone, ExpeditionEvent, StoryHook, HeroInjury, ArchetypeTa
 import { getGameplayTraitById } from '~/data/gameplayTraits'
 import { getStoryTraitById } from '~/data/storyTraits'
 import { THREATS } from '~~/types/threats'
+import { randomInt, randomElement } from '~~/shared/utils/randomization'
 
 // Event count by expedition duration
 const EVENTS_BY_DURATION = {
@@ -90,14 +91,7 @@ function getDurationCategory(durationMinutes: number): keyof typeof EVENTS_BY_DU
   return 'extended'
 }
 
-// ✅ FIXED: Correct random int implementation
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-function randomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
+// Helper functions now imported from shared/utils/randomization
 
 function weightedRandom(weights: Record<string, number>): string {
   const entries = Object.entries(weights)

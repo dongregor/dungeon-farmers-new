@@ -149,6 +149,7 @@ export default defineEventHandler(async (event) => {
       .eq('player_id', player.id)
       .eq('updated_at', tavernState.updated_at)  // Version check
       .select('updated_at')
+      .maybeSingle()
 
     if (tavernError) {
       console.error('Error updating tavern state:', tavernError)
@@ -162,7 +163,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Check if tavern update affected any rows (optimistic lock succeeded)
-    if (!tavernUpdateResult || tavernUpdateResult.length === 0) {
+    if (!tavernUpdateResult) {
       console.error('Tavern state conflict - concurrent modification detected')
       // Rollback hero creation and gold deduction
       await client.from('heroes').delete().eq('id', newHero.id)

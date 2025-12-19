@@ -25,36 +25,8 @@ import { getRandomName } from '~/data/names'
 import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gameplayTraits'
 import { getGenerationStoryTraits } from '~/data/storyTraits'
 import { getRandomCulture } from '~/data/cultures'
-
-// Weighted random selection
-function weightedRandom<T extends string>(weights: Record<T, number>): T {
-  const entries = Object.entries(weights) as [T, number][]
-  const total = entries.reduce((sum, [, w]) => sum + w, 0)
-  let random = Math.random() * total
-
-  for (const [key, weight] of entries) {
-    random -= weight
-    if (random <= 0) return key
-  }
-
-  return entries[0][0]
-}
-
-// Random array element
-function randomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-// Random elements without replacement
-function randomElements<T>(arr: T[], count: number): T[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, Math.min(count, arr.length))
-}
-
-// Random int in range
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
+import { randomInt, randomElement, randomElements, weightedRandom } from '~~/shared/utils/randomization'
+import { getXpForLevel } from '~/utils/xpService'
 
 // Generate rarity
 function generateRarity(): Rarity {
@@ -171,11 +143,6 @@ function generateStoryTraits(): string[] {
   return randomElements(available, count).map(t => t.id)
 }
 
-// Calculate XP to next level
-function calculateXpToNextLevel(currentLevel: number): number {
-  return currentLevel * 100 + (currentLevel * currentLevel * 50)
-}
-
 // Calculate hero power
 function calculatePower(stats: Stats, gameplayTraits: GameplayTrait[]): number {
   // Base power from stats
@@ -218,7 +185,7 @@ export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'i
     baseStats,
     level: 1,
     xp: 0,
-    xpToNextLevel: calculateXpToNextLevel(1),
+    xpToNextLevel: getXpForLevel(1), // Tiered XP system: 100 XP for level 1
     gameplayTraits,
     storyTraitIds,
     power,

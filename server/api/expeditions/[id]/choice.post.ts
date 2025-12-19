@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    if (!choiceEvent.data.choices || choiceId >= choiceEvent.data.choices.length) {
+    if (!choiceEvent.data.options || choiceId >= choiceEvent.data.options.length) {
       throw createError({
         statusCode: 400,
         statusMessage: 'Invalid choice ID'
@@ -90,7 +90,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Resolve the choice
-    const choice = choiceEvent.data.choices[choiceId]
+    const choice = choiceEvent.data.options[choiceId]
     const resolvedEvent: ExpeditionEvent = {
       ...choiceEvent,
       data: {

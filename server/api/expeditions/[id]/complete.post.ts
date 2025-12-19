@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import type { Expedition, ExpeditionRewards, ExpeditionLog, Hero, Equipment } from '~~/types'
 import { generateExpeditionLog } from '~/utils/logGenerator'
+import { applyMoraleChange } from '~/utils/moraleService'
 
 export default defineEventHandler(async (event) => {
   // Auth check
@@ -40,7 +41,7 @@ export default defineEventHandler(async (event) => {
 
     // Check if expedition is ready to complete
     const now = new Date()
-    const endTime = new Date(expedition.end_time)
+    const endTime = new Date(expedition.completes_at)
     if (now < endTime) {
       throw createError({
         statusCode: 400,
@@ -111,13 +112,18 @@ export default defineEventHandler(async (event) => {
       const newLevel = Math.floor(newXp / 100) + 1 // Simple leveling formula
       const leveledUp = newLevel > hero.level
 
+      // Calculate new morale
+      const newMorale = applyMoraleChange(hero.moraleValue, -10)
+
       const { data: updatedHero, error: updateHeroError } = await supabase
         .from('heroes')
         .update({
           xp: newXp,
           level: Math.min(newLevel, 50), // Cap at level 50
           status: 'idle',
-          morale: Math.max(0, hero.morale - 10), // Lose morale
+          morale: newMorale.morale,
+          morale_value: newMorale.moraleValue,
+          morale_last_update: now.toISOString(),
           updated_at: now.toISOString()
         })
         .eq('id', hero.id)

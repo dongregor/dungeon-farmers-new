@@ -1,10 +1,13 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
-import type { Equipment, Hero, EquipmentSlot } from '~~/types'
+import { z } from 'zod'
+import type { Equipment, Hero } from '~~/types'
 
-interface EquipRequest {
-  heroId: string
-  slot: EquipmentSlot
-}
+const equipSchema = z.object({
+  heroId: z.string().uuid({ message: 'Invalid hero ID format' }),
+  slot: z.enum(['weapon', 'armor', 'accessory'], { message: 'Invalid equipment slot' })
+})
+
+type EquipRequest = z.infer<typeof equipSchema>
 
 interface EquipResponse {
   equipment: Equipment
@@ -23,7 +26,6 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const equipmentId = getRouterParam(event, 'id')
-  const body = await readBody<EquipRequest>(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -33,9 +35,20 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
     throw createError({ statusCode: 400, message: 'Equipment ID required' })
   }
 
-  if (!body.heroId || !body.slot) {
-    throw createError({ statusCode: 400, message: 'Hero ID and slot required' })
+  // Validate request body with Zod
+  const bodyData = await readBody(event)
+  const parsed = equipSchema.safeParse(bodyData)
+
+  if (!parsed.success) {
+    // Sanitize validation errors for production
+    const errorMessages = parsed.error.issues.map(issue => issue.message)
+    throw createError({
+      statusCode: 400,
+      message: errorMessages.join(', ')
+    })
   }
+
+  const body = parsed.data
 
   // Get player
   const { data: player, error: playerError } = await client

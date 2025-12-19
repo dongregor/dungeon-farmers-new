@@ -1,5 +1,12 @@
 import type { Hero, Subzone, ZoneDifficulty } from '~~/types'
 import { DIFFICULTY_MULTIPLIERS } from '~~/types/base'
+import {
+  MIN_EFFICIENCY,
+  MAX_EFFICIENCY,
+  BASE_EFFICIENCY,
+  THREAT_BASE_PENALTY,
+  calculateThreatPenalty,
+} from '~~/shared/constants/gameRules'
 
 /**
  * Calculate expedition efficiency based on team power vs required power
@@ -19,20 +26,21 @@ export function calculateEfficiency (
 
   // Base efficiency from power ratio
   const powerRatio = teamPower / requiredPower
-  let efficiency = 60 + (powerRatio * 40) // 60-100% base range
+  const baseRange = BASE_EFFICIENCY - MIN_EFFICIENCY
+  let efficiency = MIN_EFFICIENCY + (powerRatio * baseRange) // MIN_EFFICIENCY to BASE_EFFICIENCY range
 
   // Calculate threat counter result if not provided
   const threatResult = threatCounterResult ?? checkThreatCounters(heroes, subzone)
 
-  // Bonus for countered threats (+5% per countered threat)
-  efficiency += threatResult.counteredThreats.length * 5
+  // Bonus for countered threats (THREAT_BASE_PENALTY percentage points per countered threat)
+  efficiency += threatResult.counteredThreats.length * THREAT_BASE_PENALTY
 
   // Penalty for uncountered threats (scaled by difficulty)
-  const threatPenalty = calculateThreatPenalty(subzone, threatResult.uncounteredThreats)
+  const threatPenalty = calculateThreatPenalty(threatResult.uncounteredThreats.length, subzone.difficulty)
   efficiency -= threatPenalty
 
-  // Cap efficiency at 60-150%
-  return Math.max(60, Math.min(150, Math.round(efficiency)))
+  // Cap efficiency at MIN_EFFICIENCY-MAX_EFFICIENCY
+  return Math.max(MIN_EFFICIENCY, Math.min(MAX_EFFICIENCY, Math.round(efficiency)))
 }
 
 /**
@@ -143,15 +151,13 @@ function threatCounters(tag: string, threat: string): boolean {
 
 /**
  * Calculate efficiency penalty for uncountered threats
+ * @deprecated Use calculateThreatPenalty from shared/constants/gameRules instead
  */
-export function calculateThreatPenalty(
+export function calculateThreatPenaltyLegacy(
   subzone: Subzone,
   uncounteredThreats: string[]
 ): number {
-  const basePenalty = 5 // 5% penalty per uncountered threat
-  const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[subzone.difficulty]
-
-  return Math.round(uncounteredThreats.length * basePenalty * difficultyMultiplier)
+  return calculateThreatPenalty(uncounteredThreats.length, subzone.difficulty)
 }
 
 /**

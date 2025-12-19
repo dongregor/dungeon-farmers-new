@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { prestigeHero } from '~/utils/prestigeService'
 import type { Hero } from '~~/types'
+import { MAX_HERO_LEVEL } from '~~/shared/constants/gameRules'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
@@ -39,10 +40,10 @@ export default defineEventHandler(async (event) => {
   }
 
   // Check if hero can prestige
-  if (hero.level < 60) {
+  if (hero.level < MAX_HERO_LEVEL) {
     throw createError({
       statusCode: 400,
-      message: 'Hero must be level 60 to prestige',
+      message: `Hero must be level ${MAX_HERO_LEVEL} to prestige`,
     })
   }
 

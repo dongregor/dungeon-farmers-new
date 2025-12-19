@@ -1,9 +1,12 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { z } from 'zod'
 import type { Equipment, TraitQuality, EquipmentRarity } from '~~/types'
 
-interface UpgradeRequest {
-  traitIndex: number
-}
+const upgradeSchema = z.object({
+  traitIndex: z.number().int({ message: 'Trait index must be an integer' }).min(0, { message: 'Trait index must be non-negative' })
+})
+
+type UpgradeRequest = z.infer<typeof upgradeSchema>
 
 interface UpgradeResponse {
   equipment: Equipment
@@ -56,7 +59,6 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
   const equipmentId = getRouterParam(event, 'id')
-  const body = await readBody<UpgradeRequest>(event)
 
   if (!user) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
@@ -66,9 +68,20 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
     throw createError({ statusCode: 400, message: 'Equipment ID required' })
   }
 
-  if (body.traitIndex === undefined) {
-    throw createError({ statusCode: 400, message: 'Trait index required' })
+  // Validate request body with Zod
+  const bodyData = await readBody(event)
+  const parsed = upgradeSchema.safeParse(bodyData)
+
+  if (!parsed.success) {
+    // Sanitize validation errors for production
+    const errorMessages = parsed.error.issues.map(issue => issue.message)
+    throw createError({
+      statusCode: 400,
+      message: errorMessages.join(', ')
+    })
   }
+
+  const body = parsed.data
 
   // Get player
   const { data: player, error: playerError } = await client
@@ -164,10 +177,18 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
   if (updateError || !updatedEquipment) {
     console.error('Error updating equipment:', updateError)
     // Rollback: refund the gold since equipment upgrade failed
-    await client
+    const { error: rollbackError } = await client
       .from('players')
       .update({ gold: player.gold })
       .eq('id', player.id)
+
+    if (rollbackError) {
+      console.error('CRITICAL: Failed to rollback gold after equipment upgrade failure', {
+        playerId: player.id,
+        goldToRefund: upgradeCost,
+        rollbackError
+      })
+    }
     throw createError({ statusCode: 500, message: 'Failed to upgrade equipment' })
   }
 
