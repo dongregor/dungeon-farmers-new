@@ -160,7 +160,7 @@ const handleCancel = async (expeditionId: string) => {
         <div v-if="!selectedZoneId" class="space-y-4">
           <h2 class="text-2xl font-bold text-gray-800 mb-4">Select Zone</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ZoneCard
+            <ExpeditionZoneCard
               v-for="zone in zones"
               :key="zone.id"
               :zone="zone"
@@ -173,7 +173,7 @@ const handleCancel = async (expeditionId: string) => {
         <div v-else-if="!selectedSubzoneId" class="space-y-4">
           <h2 class="text-2xl font-bold text-gray-800 mb-4">Select Subzone</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SubzoneCard
+            <ExpeditionSubzoneCard
               v-for="subzone in selectedZone?.subzones"
               :key="subzone.id"
               :subzone="subzone"
