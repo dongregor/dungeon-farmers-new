@@ -83,13 +83,13 @@ const collectibleStats = ref({
         <!-- Content -->
         <div class="p-6 min-h-[600px]">
           <!-- Monsters Tab -->
-          <MonsterCollection v-if="activeTab === 'monsters'" />
+          <CollectionMonster v-if="activeTab === 'monsters'" />
 
           <!-- Collectibles Tab -->
-          <CollectibleCollection v-if="activeTab === 'collectibles'" />
+          <CollectionCollectible v-if="activeTab === 'collectibles'" />
 
           <!-- Sets Tab -->
-          <SetCollection v-if="activeTab === 'sets'" />
+          <CollectionSet v-if="activeTab === 'sets'" />
         </div>
       </div>
     </div>
