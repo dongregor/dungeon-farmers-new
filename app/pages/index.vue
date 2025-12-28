@@ -17,7 +17,7 @@ const { activeExpeditions } = storeToRefs(expeditionStore)
 onMounted(async () => {
   await Promise.all([
     heroStore.fetchHeroes(),
-    expeditionStore.fetchActiveExpeditions(),
+    expeditionStore.fetchExpeditions(),
   ])
 })
 
