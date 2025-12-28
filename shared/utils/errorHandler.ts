@@ -3,11 +3,7 @@
  * Auto-imported across client and server
  */
 
-export interface AppError {
-  message: string
-  statusCode?: number
-  cause?: unknown
-}
+import type { AppError } from '~~/shared/types/errors'
 
 /**
  * Type-safe error handling for catch blocks

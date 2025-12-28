@@ -21,7 +21,7 @@ export function calculateEfficiency (
   subzone: Subzone,
   threatCounterResult?: ReturnType<typeof checkThreatCounters>
 ): number {
-  const teamPower = calculateTeamPower(heroes)
+  const teamPower = sumHeroPower(heroes)
   const requiredPower = calculateRequiredPower(subzone)
 
   // Base efficiency from power ratio
@@ -44,9 +44,10 @@ export function calculateEfficiency (
 }
 
 /**
- * Calculate total team power
+ * Sum pre-calculated hero power values
+ * Use calculateTeamPower from powerCalculator.ts for full calculation with equipment
  */
-export function calculateTeamPower(heroes: Hero[]): number {
+function sumHeroPower(heroes: Hero[]): number {
   return heroes.reduce((total, hero) => total + hero.power, 0)
 }
 

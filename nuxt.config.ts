@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  ssr: false, // Temporarily disable SSR to isolate Pinia issue
   devtools: { enabled: true },
   modules: [
     '@pinia/nuxt',
