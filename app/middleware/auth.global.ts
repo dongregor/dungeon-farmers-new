@@ -1,17 +1,20 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const user = useSupabaseUser()
+export default defineNuxtRouteMiddleware(async (to) => {
+  const supabase = useSupabaseClient()
+
+  // Wait for session restoration to complete
+  const { data: { session } } = await supabase.auth.getSession()
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/register', '/auth/']
-  const isPublicRoute = publicRoutes.some(route => to.path === route || to.path.startsWith(route))
+  const publicPaths = ['/login', '/register', '/auth/']
+  const isPublicRoute = publicPaths.some(path => to.path.startsWith(path))
 
   // If not authenticated and not on a public route, redirect to login
-  if (!user.value && !isPublicRoute) {
+  if (!session && !isPublicRoute) {
     return navigateTo('/login')
   }
 
-  // If authenticated and on login/register page, redirect to home
-  if (user.value && (to.path === '/login' || to.path === '/register')) {
+  // If authenticated and on auth pages, redirect to home
+  if (session && (to.path.startsWith('/login') || to.path.startsWith('/register'))) {
     return navigateTo('/')
   }
 })
