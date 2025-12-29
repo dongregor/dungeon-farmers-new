@@ -1,5 +1,12 @@
 <script setup lang="ts">
 const gameStore = useGameStore()
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
+async function logout() {
+  await supabase.auth.signOut()
+  navigateTo('/login')
+}
 </script>
 
 <template>
@@ -10,6 +17,13 @@ const gameStore = useGameStore()
         <span class="text-guild-gold font-semibold">
           {{ gameStore.gold }} Gold
         </span>
+        <button
+          v-if="user"
+          class="text-sm text-gray-400 hover:text-white transition-colors"
+          @click="logout"
+        >
+          Logout
+        </button>
       </div>
     </div>
   </header>
