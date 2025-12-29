@@ -5,8 +5,6 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
 
 const email = ref('')
 const password = ref('')
