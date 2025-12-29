@@ -6,19 +6,30 @@ definePageMeta({
 const user = useSupabaseUser()
 
 // Wait for auth to complete then redirect
+const timeoutId = ref<ReturnType<typeof setTimeout> | null>(null)
+
 watch(user, (newUser) => {
   if (newUser) {
+    if (timeoutId.value) {
+      clearTimeout(timeoutId.value)
+    }
     navigateTo('/')
   }
 }, { immediate: true })
 
 // Fallback redirect after timeout
 onMounted(() => {
-  setTimeout(() => {
+  timeoutId.value = setTimeout(() => {
     if (!user.value) {
       navigateTo('/login')
     }
   }, 5000)
+})
+
+onUnmounted(() => {
+  if (timeoutId.value) {
+    clearTimeout(timeoutId.value)
+  }
 })
 </script>
 
