@@ -5,13 +5,14 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
-const config = useRuntimeConfig()
 
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 const loading = ref(false)
 const googleLoading = ref(false)
 const error = ref('')
+const success = ref('')
 
 // Redirect if already logged in
 watch(user, (newUser) => {
@@ -21,16 +22,23 @@ watch(user, (newUser) => {
 }, { immediate: true })
 
 async function handleSubmit() {
+  // Validate passwords match
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Passwords do not match'
+    return
+  }
+
   loading.value = true
   error.value = ''
+  success.value = ''
 
   try {
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signUpError } = await supabase.auth.signUp({
       email: email.value,
       password: password.value,
     })
-    if (signInError) throw signInError
-    navigateTo('/')
+    if (signUpError) throw signUpError
+    success.value = 'Check your email to confirm your account!'
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'An error occurred'
   } finally {
@@ -38,7 +46,7 @@ async function handleSubmit() {
   }
 }
 
-async function signInWithGoogle() {
+async function signUpWithGoogle() {
   googleLoading.value = true
   error.value = ''
 
@@ -66,12 +74,20 @@ async function signInWithGoogle() {
           Dungeon Farmers
         </h1>
         <p class="text-gray-400">
-          Welcome back, Guild Master
+          Create your Guild Master account
         </p>
       </div>
 
       <!-- Form -->
       <div class="bg-gray-800 rounded-lg shadow-xl p-8">
+        <!-- Success message -->
+        <div
+          v-if="success"
+          class="mb-4 p-3 rounded-lg text-sm bg-green-900/50 text-green-300"
+        >
+          {{ success }}
+        </div>
+
         <!-- Error message -->
         <div
           v-if="error"
@@ -80,12 +96,12 @@ async function signInWithGoogle() {
           {{ error }}
         </div>
 
-        <!-- Google Sign In -->
+        <!-- Google Sign Up -->
         <button
           type="button"
           :disabled="googleLoading"
           class="w-full py-3 px-4 bg-white hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed text-gray-800 font-medium rounded-lg transition-colors flex items-center justify-center gap-3 mb-6"
-          @click="signInWithGoogle"
+          @click="signUpWithGoogle"
         >
           <svg class="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -93,7 +109,7 @@ async function signInWithGoogle() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          <span v-if="googleLoading">Signing in...</span>
+          <span v-if="googleLoading">Creating account...</span>
           <span v-else>Continue with Google</span>
         </button>
 
@@ -103,7 +119,7 @@ async function signInWithGoogle() {
             <div class="w-full border-t border-gray-600" />
           </div>
           <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-gray-800 text-gray-400">or sign in with email</span>
+            <span class="px-2 bg-gray-800 text-gray-400">or register with email</span>
           </div>
         </div>
 
@@ -125,7 +141,7 @@ async function signInWithGoogle() {
           </div>
 
           <!-- Password -->
-          <div class="mb-6">
+          <div class="mb-4">
             <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
               Password
             </label>
@@ -134,8 +150,25 @@ async function signInWithGoogle() {
               v-model="password"
               type="password"
               required
+              minlength="6"
               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your password"
+              placeholder="At least 6 characters"
+            >
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="mb-6">
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              v-model="confirmPassword"
+              type="password"
+              required
+              minlength="6"
+              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Confirm your password"
             >
           </div>
 
@@ -143,20 +176,20 @@ async function signInWithGoogle() {
           <button
             type="submit"
             :disabled="loading"
-            class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+            class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
           >
-            <span v-if="loading">Signing in...</span>
-            <span v-else>Sign In</span>
+            <span v-if="loading">Creating account...</span>
+            <span v-else>Create Account</span>
           </button>
         </form>
 
-        <!-- Link to register -->
+        <!-- Link to login -->
         <div class="mt-6 text-center">
           <NuxtLink
-            to="/register"
+            to="/login"
             class="text-blue-400 hover:text-blue-300 text-sm"
           >
-            Don't have an account? Create one
+            Already have an account? Sign in
           </NuxtLink>
         </div>
       </div>
