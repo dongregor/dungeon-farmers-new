@@ -39,6 +39,10 @@ async function handleSubmit() {
     })
     if (signUpError) throw signUpError
     success.value = 'Check your email to confirm your account!'
+    // Clear form after successful registration
+    email.value = ''
+    password.value = ''
+    confirmPassword.value = ''
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'An error occurred'
   } finally {

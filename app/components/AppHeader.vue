@@ -4,7 +4,10 @@ const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
 async function logout() {
-  await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    console.error('Logout failed:', error.message)
+  }
   navigateTo('/login')
 }
 </script>
