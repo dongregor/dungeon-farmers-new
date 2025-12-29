@@ -23,6 +23,7 @@ The API design follows RESTful conventions with Nuxt 4 file-based routing patter
 | [02-dungeon-building-api.md](./02-dungeon-building-api.md) | Monsters, Schematics, Dungeons | ~30 endpoints |
 | [03-progression-economy-api.md](./03-progression-economy-api.md) | Player, Zones, Quests, Shop | ~35 endpoints |
 | [04-auth-realtime-api.md](./04-auth-realtime-api.md) | Auth, Onboarding, Sync, SSE | ~27 endpoints |
+| [ANALYSIS.md](./ANALYSIS.md) | Performance, Cost, Maintainability, JSON Content | N/A |
 
 ---
 
