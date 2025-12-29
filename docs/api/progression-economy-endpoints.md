@@ -4,7 +4,17 @@
 **Based on:** User Stories (US-PM-XXX, US-OB-XXX)
 **Tech Stack:** Nuxt 4 Server Routes + Supabase + Stripe
 
-> **Note:** This document contains extended implementation details and Nuxt 4 file structure examples. The canonical API specification is [docs/api-breakdown/03-progression-economy-api.md](../api-breakdown/03-progression-economy-api.md).
+> ## Document Relationship & Maintenance Protocol
+>
+> | Document | Purpose | Authority |
+> |----------|---------|-----------|
+> | [03-progression-economy-api.md](../api-breakdown/03-progression-economy-api.md) | **Canonical API Spec** - endpoint contracts, request/response schemas | Source of truth for API design |
+> | This file | **Implementation Guide** - Nuxt 4 patterns, file structure, middleware | Source of truth for implementation details |
+>
+> **Maintenance Rules:**
+> - API contract changes (endpoints, schemas) → Update canonical spec first, then sync here
+> - Implementation details (file structure, middleware) → Update this file only
+> - When in doubt, canonical spec wins for API design decisions
 >
 > **Nuxt 4 File Structure:** See the [Nuxt 4 File Structure](#nuxt-4-file-structure) section at the end of this document for implementation reference.
 

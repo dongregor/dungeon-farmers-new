@@ -10,7 +10,7 @@
 
 This document defines all main navigation pages for Dungeon Farmers, organized around the core gameplay loop:
 
-```
+```text
 Manage Heroes -> Send on Expeditions -> Collect Loot -> Build Dungeons -> Farm Dungeons
 ```
 

@@ -51,7 +51,7 @@ The API design follows RESTful conventions with Nuxt 4 file-based routing patter
 
 ### File Naming (Nuxt 4)
 
-```
+```plaintext
 server/api/
 ├── heroes/
 │   ├── index.get.ts          # GET /api/heroes
@@ -156,7 +156,7 @@ The following endpoints are already implemented in `server/api/`:
 
 ## API Architecture
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────────┐
 │                      Client (Nuxt App)                       │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
@@ -351,7 +351,8 @@ supabase
 
 Key tables (managed by Supabase):
 
-```
+```sql
+-- players table
 players
 ├── id (uuid, PK)
 ├── email
@@ -363,6 +364,7 @@ players
     INDEX: (email) UNIQUE
     INDEX: (deleted_at) WHERE deleted_at IS NULL
 
+-- heroes table
 heroes
 ├── id (uuid, PK)
 ├── player_id (FK)
@@ -375,6 +377,7 @@ heroes
     INDEX: (player_id, rarity)
     INDEX: (player_id, power_score DESC)
 
+-- expeditions table
 expeditions
 ├── id (uuid, PK)
 ├── player_id (FK)
@@ -385,6 +388,7 @@ expeditions
     INDEX: (player_id, status)
     INDEX: (completes_at) WHERE status = 'active'
 
+-- items table
 items
 ├── id (uuid, PK)
 ├── player_id (FK)
@@ -397,6 +401,7 @@ items
     INDEX: (player_id, rarity)
     INDEX: (player_id, power_score DESC)
 
+-- monsters table
 monsters
 ├── id (uuid, PK)
 ├── player_id (FK)
@@ -406,6 +411,7 @@ monsters
     INDEX: (player_id, assigned_dungeon)
     INDEX: (player_id, template_id)
 
+-- dungeons table
 dungeons
 ├── id (uuid, PK)
 ├── player_id (FK)
