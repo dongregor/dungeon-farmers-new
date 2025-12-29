@@ -587,7 +587,7 @@ View collected dungeon schematics and identify buildable dungeons.
 
 ## 12. Dungeon Builder
 
-**Route:** `/dungeons/build/:schematicId` or `/dungeons/edit/:dungeonId`
+**Route:** `/dungeons/build/:schematicId` (new) or `/dungeons/:dungeonId/edit` (existing)
 **Priority:** Phase 2
 
 ### Purpose
@@ -846,17 +846,19 @@ Guide new players through first-time experience.
 |---|------|-------|-------|-----------------|
 | 1 | Dashboard | `/` | 1 | OB-018, OB-019, OB-023, PM-007, PM-008 |
 | 2 | Heroes Roster | `/heroes` | 1 | HM-001 to HM-005, HM-028 to HM-030 |
-| 3 | Hero Detail | `/heroes/:id` | 1 | HM-004, HM-011 to HM-027, EQ-009 to EQ-011 |
+| 3 | Hero Detail | `/heroes/:heroId` | 1 | HM-004, HM-011 to HM-027, EQ-009 to EQ-011 |
 | 4 | Tavern | `/tavern` | 1 | HM-006 to HM-010, PM-005, PM-006 |
 | 5 | Expeditions Hub | `/expeditions` | 1 | EX-001, EX-006, EX-010, PM-001 to PM-004 |
 | 6 | Team Formation | `/expeditions/team` | 1 | EX-002 to EX-004, EX-007, EX-011 |
 | 7 | Active Expeditions | `/expeditions/active` | 1 | EX-005, EX-013 to EX-021 |
-| 8 | Expedition Results | `/expeditions/results/:id` | 1 | EX-022 to EX-030, DB-005, DB-007 |
+| 8 | Expedition Results | `/expeditions/results/:expeditionId` | 1 | EX-022 to EX-030, DB-005, DB-007 |
 | 9 | Inventory | `/inventory` | 1 | EQ-001 to EQ-008, EQ-016, EQ-022 to EQ-027 |
 | 10 | Monster Collection | `/monsters` | 2 | DB-001 to DB-004, DB-006, DB-009 |
 | 11 | Schematic Collection | `/schematics` | 2 | DB-010 to DB-013 |
-| 12 | Dungeon Builder | `/dungeons/build/:id` | 2 | DB-014 to DB-024 |
+| 12 | Dungeon Builder | `/dungeons/build/:schematicId` | 2 | DB-014 to DB-024 |
 | 13 | My Dungeons | `/dungeons` | 2 | DB-025 to DB-033 |
 | 14 | Shop | `/shop` | 2 | PM-013, PM-015 to PM-019, PM-027 to PM-029 |
 | 15 | Settings | `/settings` | 1-2 | PM-020 to PM-026, PM-037, OB-009, OB-021 |
 | 16 | Onboarding | `/welcome` | 1 | OB-001 to OB-017, PM-036 |
+
+> **Note on Route Parameters:** All route parameters use descriptive names (e.g., `:heroId`, `:expeditionId`, `:schematicId`) rather than generic `:id` to improve code clarity and prevent confusion when multiple IDs are present.

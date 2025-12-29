@@ -4,6 +4,10 @@
 **Based on:** User Stories (US-PM-XXX, US-OB-XXX)
 **Tech Stack:** Nuxt 4 Server Routes + Supabase + Stripe
 
+> **Note:** This document contains extended implementation details and Nuxt 4 file structure examples. The canonical API specification is [docs/api-breakdown/03-progression-economy-api.md](../api-breakdown/03-progression-economy-api.md).
+>
+> **Nuxt 4 File Structure:** See the [Nuxt 4 File Structure](#nuxt-4-file-structure) section at the end of this document for implementation reference.
+
 ---
 
 ## Table of Contents

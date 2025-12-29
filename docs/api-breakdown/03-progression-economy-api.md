@@ -4,6 +4,8 @@
 **Total Endpoints:** ~35
 **Priority:** Phase 1-3
 
+> **See Also:** [docs/api/progression-economy-endpoints.md](../api/progression-economy-endpoints.md) contains extended implementation details including Nuxt 4 file structure examples and additional notes. This file is the canonical API specification.
+
 ---
 
 ## 1. Player API
@@ -420,6 +422,17 @@ interface Achievement {
 
   secret: boolean  // Hidden until conditions met
   hint?: string    // For secret achievements
+
+  // Hint evolution: hints become more specific as players approach unlock
+  hintEvolution?: {
+    level: 'vague' | 'moderate' | 'specific'
+    thresholds: [25, 50, 75]  // Percent progress for hint upgrades
+    hints: {
+      vague: string      // e.g., "Recruit many heroes..."
+      moderate: string   // e.g., "Recruit 50+ heroes..."
+      specific: string   // e.g., "Recruit 3 more heroes to complete!"
+    }
+  }
 }
 
 interface AchievementTier {
@@ -634,6 +647,16 @@ Base path: `/api/shop`
 
 ### US-PM-034 to US-PM-040: Shop & Monetization
 
+#### Monetization Philosophy
+
+> **Long-term Strategy:** The Supporter Pack is a one-time purchase that provides convenience, not power. All core content remains accessible to free players. Future monetization will follow these principles:
+>
+> 1. **No Power Creep:** Supporters progress faster, not further
+> 2. **Cosmetics Only:** Any future purchases will be cosmetic
+> 3. **No Paywalls:** All zones, monsters, and dungeons accessible to everyone
+> 4. **No FOMO:** No time-limited exclusive gameplay content
+> 5. **Transparent Value:** Clear benefit descriptions, no gambling/lootboxes
+
 #### GET /api/shop
 Get shop inventory and offers.
 
@@ -660,7 +683,9 @@ Get shop inventory and offers.
         "Supporter Badge",
         "Priority Support"
       ],
-      purchased: false
+      purchased: false,
+      // Explicit: No power advantages
+      noPowerAdvantage: true
     },
 
     // Cosmetics (gems or real money)

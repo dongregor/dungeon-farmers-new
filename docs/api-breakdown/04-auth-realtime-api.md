@@ -669,6 +669,43 @@ event: heartbeat
 data: {"timestamp": 1704067260000}
 ```
 
+#### Event Types by Phase
+
+**Phase 1 (MVP) - Required:**
+- `connected` - Connection established confirmation
+- `expedition_complete` - Expedition finished, rewards available
+- `daily_reset` - Daily quests/rewards reset
+- `heartbeat` - Keep-alive ping (every 30 seconds)
+
+**Phase 2 - Extended:**
+- `expedition_event` - Choice/event during expedition
+- `tavern_refresh` - Tavern auto-refreshed
+- `achievement_unlocked` - Achievement earned
+- `notification` - General notifications
+- `dungeon_run_complete` - Dungeon farming finished
+
+#### Connection Management
+
+```typescript
+// Client-side reconnection strategy
+const connectSSE = () => {
+  const eventSource = new EventSource('/api/events/subscribe')
+
+  eventSource.onerror = () => {
+    eventSource.close()
+    // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
+    setTimeout(connectSSE, Math.min(retryDelay * 2, 30000))
+  }
+
+  eventSource.addEventListener('heartbeat', () => {
+    lastHeartbeat = Date.now()
+  })
+}
+
+// Server sends heartbeat every 30 seconds
+// Client should reconnect if no heartbeat received in 60 seconds
+```
+
 **Related User Stories:** US-OB-022, US-EX-004
 **Priority:** Phase 1 (basic), Phase 2 (full)
 
@@ -971,10 +1008,13 @@ Check maintenance status.
 
 ### Security Notes
 
+> **See Also:** [Centralized Security Specification](../README.md#security-considerations) for complete rate-limiting tables and security policies across all API endpoints.
+
 1. **Rate Limiting:**
    - Auth endpoints: 5 requests/minute
    - Guest creation: 3/hour per IP
    - General API: 100 requests/minute
+   - SSE connections: 1 per user (older connections closed)
 
 2. **Token Management:**
    - Access tokens: 1 hour expiry
@@ -990,3 +1030,4 @@ Check maintenance status.
    - Device fingerprinting for guest accounts
    - IP-based rate limiting
    - Suspicious activity detection
+   - Failed login lockout (5 attempts, 15 min cooldown)

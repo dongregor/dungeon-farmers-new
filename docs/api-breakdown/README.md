@@ -173,10 +173,15 @@ The following endpoints are already implemented in `server/api/`:
         │                    │                    │
 ┌───────▼───────┐   ┌───────▼───────┐   ┌───────▼───────┐
 │  Auth Layer   │   │  Rate Limiter │   │  Validation   │
-│  (Supabase)   │   │               │   │  (Zod)        │
+│  (Supabase)   │   │  (per-route)  │   │  (Zod)        │
 └───────┬───────┘   └───────┬───────┘   └───────┬───────┘
         │                    │                    │
         └────────────────────┼────────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Input Sanitize │◄─── XSS/Injection Protection
+                    │  (server/utils) │
+                    └────────┬────────┘
                              │
                     ┌────────▼────────┐
                     │  Business Logic │
@@ -184,10 +189,29 @@ The following endpoints are already implemented in `server/api/`:
                     └────────┬────────┘
                              │
                     ┌────────▼────────┐
+                    │  Error Handler  │◄─── Transforms errors to safe responses
+                    │  (middleware)   │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Audit Logger   │◄─── Logs sensitive operations
+                    │  (async)        │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
                     │    Supabase     │
                     │   PostgreSQL    │
                     └─────────────────┘
 ```
+
+### Security Layers Explained
+
+1. **Auth Layer (Supabase):** JWT validation, session management
+2. **Rate Limiter:** Per-route limits, IP tracking, abuse prevention
+3. **Validation (Zod):** Schema validation, type checking
+4. **Input Sanitize:** XSS prevention, SQL injection protection
+5. **Error Handler:** Safe error responses (no stack traces in production)
+6. **Audit Logger:** Logs purchases, account changes, admin actions
 
 ---
 
@@ -334,15 +358,22 @@ players
 ├── display_name
 ├── gold, gems (resources)
 ├── supporter_status
+├── deleted_at (nullable)     -- Soft delete for GDPR grace period
 └── created_at, last_login
+    INDEX: (email) UNIQUE
+    INDEX: (deleted_at) WHERE deleted_at IS NULL
 
 heroes
 ├── id (uuid, PK)
 ├── player_id (FK)
 ├── name, rarity, level
+├── power_score (computed)    -- Denormalized for sorting
 ├── traits (jsonb)
 ├── stats (jsonb)
 └── equipped_items (FK[])
+    INDEX: (player_id, status)
+    INDEX: (player_id, rarity)
+    INDEX: (player_id, power_score DESC)
 
 expeditions
 ├── id (uuid, PK)
@@ -351,14 +382,20 @@ expeditions
 ├── zone_id, type, status
 ├── started_at, completes_at
 └── events, rewards (jsonb)
+    INDEX: (player_id, status)
+    INDEX: (completes_at) WHERE status = 'active'
 
 items
 ├── id (uuid, PK)
 ├── player_id (FK)
 ├── template_id, rarity
+├── power_score (computed)
 ├── stats (jsonb)
 ├── equipped_by (FK, nullable)
 └── locked (boolean)
+    INDEX: (player_id, slot)
+    INDEX: (player_id, rarity)
+    INDEX: (player_id, power_score DESC)
 
 monsters
 ├── id (uuid, PK)
@@ -366,6 +403,8 @@ monsters
 ├── template_id, rarity
 ├── power, traits
 └── assigned_dungeon (FK, nullable)
+    INDEX: (player_id, assigned_dungeon)
+    INDEX: (player_id, template_id)
 
 dungeons
 ├── id (uuid, PK)
@@ -374,7 +413,30 @@ dungeons
 ├── slots (jsonb)
 ├── synergy_bonuses (jsonb)
 └── created_at, last_run
+    INDEX: (player_id, status)
 ```
+
+### Data Retention & GDPR Compliance
+
+1. **Soft Delete Strategy:**
+   - Account deletion sets `deleted_at` timestamp
+   - Data retained for 30-day grace period (account recovery)
+   - Automated job permanently deletes after 30 days
+   - Anonymization alternative available (keeps gameplay stats, removes PII)
+
+2. **Data Export:**
+   - `GET /api/player/export` returns all player data as JSON
+   - Includes: profile, heroes, items, monsters, dungeons, statistics
+   - GDPR Article 20 compliant (data portability)
+
+3. **Right to Erasure:**
+   - `DELETE /api/auth/account` initiates deletion
+   - Cascades to all player-owned data
+   - Third-party integrations notified (Stripe customer deleted)
+
+4. **Audit Trail:**
+   - Login attempts, purchases, and account changes logged
+   - Logs retained 90 days for security, then purged
 
 ---
 

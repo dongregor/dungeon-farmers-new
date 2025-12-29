@@ -1302,7 +1302,7 @@ GET /api/equipment/compare?ids=item1,item2,item3&heroId=hero123
       attack: [85, 78, 92]
     },
     recommendation: "item3",  // Best for hero
-    reasonmation: "Highest power increase (+70)"
+    reasoning: "Highest power increase (+70)"
   }
 }
 ```
@@ -1467,6 +1467,127 @@ Get detailed set information.
 
 ---
 
+#### GET /api/sets/:id/farm-locations
+Get optimal farming locations for missing set pieces.
+
+```typescript
+// Response
+{
+  success: true,
+  data: {
+    setId: "forest_set",
+    missingPieces: [
+      {
+        slot: "boots",
+        name: "Guardian's Treads",
+        locations: [
+          {
+            type: "zone",
+            id: "whispering_woods",
+            name: "Whispering Woods",
+            dropRate: 0.08,
+            recommended: true,
+            reasoning: "Highest drop rate, matches biome bonus"
+          },
+          {
+            type: "dungeon",
+            id: "forest_dungeon_1",
+            name: "My Forest Dungeon",
+            dropRate: 0.12,
+            ownedByPlayer: true
+          }
+        ]
+      }
+    ],
+    suggestions: [
+      "Build a forest-type dungeon for +50% drop rates",
+      "Assign heroes with 'Forest Guide' trait for bonus efficiency"
+    ]
+  }
+}
+```
+
+**Related User Stories:** US-EQ-014, US-EQ-015
+**Priority:** Phase 2
+
+---
+
+#### POST /api/sets/plan
+Plan set allocation across heroes (optimizer).
+
+```typescript
+// Request
+POST /api/sets/plan
+{
+  "heroIds": ["hero1", "hero2", "hero3"],
+  "strategy": "maximize_bonuses"  // or "balance", "focus_hero"
+}
+
+// Response
+{
+  success: true,
+  data: {
+    currentState: {
+      totalActiveBonuses: 3,
+      heroBreakdown: [...]
+    },
+    proposedPlan: {
+      totalActiveBonuses: 7,
+      changes: [
+        {
+          itemId: "item123",
+          from: { heroId: "hero1", heroName: "Sir Bumblefoot" },
+          to: { heroId: "hero2", heroName: "Lady Swift" },
+          reason: "Completes Forest Guardian 4pc on Lady Swift"
+        }
+      ],
+      heroBreakdown: [
+        {
+          heroId: "hero1",
+          heroName: "Sir Bumblefoot",
+          sets: [{ setId: "iron_set", pieces: 2, bonuses: 1 }]
+        }
+      ]
+    },
+    canApply: true,
+    applyToken: "plan_abc123"
+  }
+}
+```
+
+**Related User Stories:** US-EQ-013, US-EQ-016
+**Priority:** Phase 3
+
+---
+
+#### POST /api/sets/plan/apply
+Apply a set allocation plan.
+
+```typescript
+// Request
+POST /api/sets/plan/apply
+{
+  "applyToken": "plan_abc123"
+}
+
+// Response
+{
+  success: true,
+  data: {
+    applied: true,
+    changesApplied: 5,
+    newBonusCount: 7,
+    canRevert: true,
+    revertToken: "revert_xyz789"
+  }
+}
+```
+
+**Related User Stories:** US-EQ-013, US-EQ-016
+**Priority:** Phase 3
+
+---
+
 ## Summary
 
 ### Endpoint Count by Category
@@ -1475,22 +1596,30 @@ Get detailed set information.
 - **Expeditions:** 7 endpoints
 - **Zones:** 4 endpoints
 - **Equipment:** 13 endpoints
-- **Sets:** 2 endpoints
+- **Sets:** 5 endpoints
 
-**Total:** 37 endpoints
+**Total:** 40 endpoints
 
 ### Implementation Priority
 
-**Phase 1 (MVP):**
-- All Heroes endpoints
-- All Tavern endpoints
-- All Expeditions endpoints (except complex events)
-- GET /api/zones, GET /api/zones/:id
-- Equipment: list, detail, equip, unequip, sell, lock
+> **Note:** Phase 1 focuses on the critical path for a playable game loop. Scope was intentionally reduced to accelerate time-to-playable.
+
+**Phase 1 (MVP) - Critical Path Only (~20 endpoints):**
+- Heroes: GET list, GET detail, POST level-up, POST retire
+- Tavern: GET state, POST recruit, POST refresh
+- Expeditions: GET list, GET detail, POST start, POST complete
+- Zones: GET list, GET detail
+- Equipment: GET list, GET detail, POST equip, POST unequip
+
+**Phase 1b (MVP Polish):**
+- Heroes: PATCH update, POST prestige
+- Tavern: POST lock/unlock
+- Expeditions: POST cancel, POST choice, GET log
+- Equipment: POST sell, POST lock/unlock
 
 **Phase 2:**
 - Zone assignments (passive income)
-- Equipment: compare, auto-equip, salvage
+- Equipment: compare, auto-equip, salvage, bulk operations
 - All Sets endpoints
 - Complex expedition events
 
