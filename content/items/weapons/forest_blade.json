@@ -1,0 +1,82 @@
+{
+  "$schema": "../../schemas/item.schema.json",
+  "id": "forest_blade",
+  "name": "Blade of the Woods",
+  "description": "A curved sword forged from enchanted wood and steel. It hums with natural energy.",
+  "flavor": "The forest provides for those who protect it.",
+
+  "slot": "weapon",
+  "category": "sword",
+
+  "baseStats": {
+    "attack": 35,
+    "speed": 8,
+    "critChance": 3
+  },
+
+  "statRolls": {
+    "attack": { "min": 0.85, "max": 1.15 },
+    "speed": { "min": 0.90, "max": 1.10 },
+    "critChance": { "min": 0.80, "max": 1.20 },
+    "bonusStats": [
+      { "stat": "critDamage", "chance": 0.25, "rangeMin": 5, "rangeMax": 15 },
+      { "stat": "nature_damage", "chance": 0.15, "rangeMin": 3, "rangeMax": 10 }
+    ]
+  },
+
+  "possibleEffects": [
+    {
+      "id": "natures_wrath",
+      "name": "Nature's Wrath",
+      "description": "5% chance to deal bonus nature damage on hit",
+      "minRarity": "epic",
+      "effect": {
+        "trigger": "on_hit",
+        "chance": 0.05,
+        "damage": { "type": "nature", "multiplier": 0.5 }
+      }
+    },
+    {
+      "id": "forest_blessing",
+      "name": "Forest Blessing",
+      "description": "+20% efficiency in forest zones",
+      "minRarity": "legendary",
+      "effect": {
+        "trigger": "passive",
+        "zoneEfficiency": { "biome": "forest", "value": 0.20 }
+      }
+    }
+  ],
+
+  "setId": "forest_set",
+
+  "sources": [
+    { "type": "zone", "id": "zone_forest", "dropRate": 0.08 },
+    { "type": "zone", "id": "zone_dark_forest", "dropRate": 0.12 }
+  ],
+
+  "sellValue": {
+    "common": 50,
+    "uncommon": 100,
+    "rare": 250,
+    "epic": 500,
+    "legendary": 1000
+  },
+
+  "salvageValue": {
+    "common": { "material": "wood", "amount": 1 },
+    "uncommon": { "material": "wood", "amount": 2 },
+    "rare": { "material": "enchanted_wood", "amount": 1 },
+    "epic": { "material": "enchanted_wood", "amount": 2 },
+    "legendary": { "material": "primordial_wood", "amount": 1 }
+  },
+
+  "visuals": {
+    "icon": "/images/items/forest_blade.webp",
+    "equipped": "/images/items/forest_blade_equipped.webp"
+  },
+
+  "requirements": {
+    "level": 5
+  }
+}

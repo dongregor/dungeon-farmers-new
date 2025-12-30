@@ -1,0 +1,71 @@
+{
+  "$schema": "../../schemas/set.schema.json",
+  "id": "forest_set",
+  "name": "Forest Guardian",
+  "description": "Worn by the ancient protectors of the Whispering Woods. Each piece resonates with natural energy.",
+  "lore": "The Forest Guardians were an order of rangers who swore to protect the ancient groves. Though the order has long since disbanded, their equipment remains, imbued with the essence of the forest itself.",
+
+  "pieces": {
+    "weapon": {
+      "templateId": "forest_blade",
+      "name": "Guardian's Blade"
+    },
+    "armor": {
+      "templateId": "forest_mail",
+      "name": "Guardian's Mail"
+    },
+    "accessory": {
+      "templateId": "forest_amulet",
+      "name": "Guardian's Amulet"
+    },
+    "trinket": {
+      "templateId": "forest_charm",
+      "name": "Guardian's Charm"
+    }
+  },
+
+  "bonuses": [
+    {
+      "pieces": 2,
+      "name": "Nature's Touch",
+      "description": "+10% efficiency in forest zones",
+      "effects": [
+        { "type": "zone_efficiency", "biome": "forest", "value": 0.10 }
+      ]
+    },
+    {
+      "pieces": 3,
+      "name": "Forest Attunement",
+      "description": "+15 defense, +5% nature damage resistance",
+      "effects": [
+        { "type": "stat", "stat": "defense", "value": 15 },
+        { "type": "resistance", "damageType": "nature", "value": 0.05 }
+      ]
+    },
+    {
+      "pieces": 4,
+      "name": "Guardian's Might",
+      "description": "+25 defense, +15% nature damage, forest monsters +20% loot",
+      "effects": [
+        { "type": "stat", "stat": "defense", "value": 25 },
+        { "type": "damage_bonus", "damageType": "nature", "value": 0.15 },
+        { "type": "monster_loot", "biome": "forest", "value": 0.20 }
+      ]
+    }
+  ],
+
+  "farmingTips": [
+    "All pieces drop from Whispering Woods and Dark Forest",
+    "Higher efficiency increases drop rates",
+    "The Guardian's Charm has the lowest drop rate - try Nightmare difficulty"
+  ],
+
+  "visuals": {
+    "icon": "/images/sets/forest_guardian.webp",
+    "preview": "/images/sets/forest_guardian_preview.webp",
+    "colors": {
+      "primary": "#228B22",
+      "accent": "#90EE90"
+    }
+  }
+}

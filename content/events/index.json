@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/event-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "eventsByBiome": {
+    "forest": ["mysterious_chest", "ancient_tree", "lost_traveler", "fairy_ring"],
+    "caves": ["mysterious_chest", "underground_stream", "crystal_formation", "cave_in"],
+    "grassland": ["mysterious_chest", "lost_traveler", "wandering_merchant", "picnic_spot"],
+    "ruins": ["mysterious_chest", "ancient_mechanism", "ghostly_apparition", "hidden_vault"]
+  },
+  "globalEvents": ["mysterious_chest", "lost_traveler", "wandering_merchant"],
+  "events": [
+    { "id": "mysterious_chest", "file": "mysterious_chest.json" },
+    { "id": "ancient_tree", "file": "ancient_tree.json" },
+    { "id": "lost_traveler", "file": "lost_traveler.json" }
+  ],
+  "outcomeTypes": [
+    { "id": "success", "color": "#00FF00", "icon": "check" },
+    { "id": "partial", "color": "#FFFF00", "icon": "warning" },
+    { "id": "failure", "color": "#FF0000", "icon": "x" },
+    { "id": "neutral", "color": "#888888", "icon": "minus" }
+  ]
+}

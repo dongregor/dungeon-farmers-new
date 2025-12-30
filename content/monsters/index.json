@@ -1,0 +1,35 @@
+{
+  "$schema": "../schemas/monster-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "monsters": [
+    { "id": "forest_sprite", "file": "forest_sprite.json", "biome": "forest", "category": "spirit" },
+    { "id": "wild_boar", "file": "wild_boar.json", "biome": "forest", "category": "beast" },
+    { "id": "treant", "file": "treant.json", "biome": "forest", "category": "plant" },
+    { "id": "cave_bat", "file": "cave_bat.json", "biome": "caves", "category": "beast" },
+    { "id": "rock_golem", "file": "rock_golem.json", "biome": "caves", "category": "elemental" },
+    { "id": "meadow_slime", "file": "meadow_slime.json", "biome": "grassland", "category": "slime" }
+  ],
+  "rarityDistribution": {
+    "common": 0.60,
+    "uncommon": 0.25,
+    "rare": 0.10,
+    "epic": 0.04,
+    "legendary": 0.01
+  },
+  "rarityScaling": {
+    "common": { "statMultiplier": 1.0, "traitSlots": 1 },
+    "uncommon": { "statMultiplier": 1.3, "traitSlots": 1 },
+    "rare": { "statMultiplier": 1.6, "traitSlots": 2 },
+    "epic": { "statMultiplier": 2.0, "traitSlots": 2 },
+    "legendary": { "statMultiplier": 2.5, "traitSlots": 3 }
+  },
+  "categories": [
+    { "id": "beast", "name": "Beast", "description": "Natural creatures of the wild" },
+    { "id": "spirit", "name": "Spirit", "description": "Ethereal beings of magic" },
+    { "id": "elemental", "name": "Elemental", "description": "Manifestations of raw elements" },
+    { "id": "plant", "name": "Plant", "description": "Animated flora" },
+    { "id": "undead", "name": "Undead", "description": "Creatures of death and decay" },
+    { "id": "slime", "name": "Slime", "description": "Amorphous creatures" }
+  ]
+}
