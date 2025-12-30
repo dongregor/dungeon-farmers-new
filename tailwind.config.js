@@ -14,7 +14,15 @@ module.exports = {
         'epic': '#A855F7',
         'legendary': '#F59E0B',
         'mythic': '#EF4444',
-      }
+      },
+      keyframes: {
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 2s infinite',
+      },
     },
   },
   plugins: [],
