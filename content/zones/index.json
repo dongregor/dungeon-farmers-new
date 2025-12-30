@@ -1,0 +1,56 @@
+{
+  "$schema": "../schemas/zone-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "zones": [
+    {
+      "id": "zone_meadow",
+      "file": "meadow.json",
+      "biome": "grassland",
+      "difficulty": 1,
+      "order": 1
+    },
+    {
+      "id": "zone_forest",
+      "file": "forest.json",
+      "biome": "forest",
+      "difficulty": 2,
+      "order": 2
+    },
+    {
+      "id": "zone_caves",
+      "file": "caves.json",
+      "biome": "caves",
+      "difficulty": 3,
+      "order": 3
+    },
+    {
+      "id": "zone_ruins",
+      "file": "ruins.json",
+      "biome": "ruins",
+      "difficulty": 4,
+      "order": 4
+    },
+    {
+      "id": "zone_dark_forest",
+      "file": "dark-forest.json",
+      "biome": "forest",
+      "difficulty": 5,
+      "order": 5
+    }
+  ],
+  "biomes": [
+    { "id": "grassland", "name": "Grassland", "color": "#90EE90" },
+    { "id": "forest", "name": "Forest", "color": "#228B22" },
+    { "id": "caves", "name": "Caves", "color": "#696969" },
+    { "id": "ruins", "name": "Ruins", "color": "#8B4513" },
+    { "id": "desert", "name": "Desert", "color": "#F4A460" },
+    { "id": "mountains", "name": "Mountains", "color": "#A0A0A0" }
+  ],
+  "difficulties": [
+    { "tier": 1, "name": "Easy", "powerMultiplier": 1.0 },
+    { "tier": 2, "name": "Normal", "powerMultiplier": 1.5 },
+    { "tier": 3, "name": "Hard", "powerMultiplier": 2.0 },
+    { "tier": 4, "name": "Nightmare", "powerMultiplier": 3.0 }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "$schema": "../schemas/event.schema.json",
+  "id": "mysterious_chest",
+  "name": "Mysterious Chest",
+
+  "biomes": ["forest", "caves", "ruins", "grassland"],
+  "baseChance": 0.15,
+
+  "trigger": {
+    "type": "random",
+    "minProgress": 0.25,
+    "maxProgress": 0.75,
+    "cooldown": null,
+    "maxOccurrences": 2
+  },
+
+  "introduction": {
+    "text": "Your party stumbles upon an ornate chest half-buried in the undergrowth. Ancient runes glow faintly on its surface.",
+    "traitVariants": [
+      {
+        "trait": "cautious",
+        "text": "{{hero.name}} eyes the chest warily. \"Could be trapped,\" they mutter."
+      },
+      {
+        "trait": "greedy",
+        "text": "{{hero.name}}'s eyes light up with gold-fever. \"Open it! Open it now!\""
+      },
+      {
+        "trait": "scholarly",
+        "text": "{{hero.name}} leans in to study the runes. \"Fascinating... this is pre-Cataclysm script.\""
+      }
+    ]
+  },
+
+  "choices": [
+    {
+      "id": "open_carefully",
+      "label": "Open Carefully",
+      "description": "Take your time to check for traps",
+      "requirements": null,
+      "outcomes": [
+        {
+          "weight": 60,
+          "type": "success",
+          "narrative": "Your caution pays off. The chest clicks open safely, revealing glittering treasures within!",
+          "rewards": {
+            "gold": { "base": 100, "variance": 0.3 },
+            "items": [
+              { "type": "random_equipment", "chance": 0.30, "rarityBoost": 1.0 }
+            ]
+          },
+          "efficiencyBonus": 5
+        },
+        {
+          "weight": 30,
+          "type": "partial",
+          "narrative": "The chest was indeed trapped, but your careful approach minimized the damage. Still, you manage to salvage some valuables.",
+          "rewards": {
+            "gold": { "base": 50, "variance": 0.2 }
+          },
+          "damage": { "type": "team", "percent": 5 }
+        },
+        {
+          "weight": 10,
+          "type": "failure",
+          "narrative": "Despite your caution, the trap triggers with a loud CLICK. Poison gas fills the air! The chest was empty anyway.",
+          "rewards": null,
+          "damage": { "type": "team", "percent": 10 }
+        }
+      ],
+      "traitModifiers": [
+        {
+          "trait": "careful",
+          "outcomeWeights": { "success": 80, "partial": 18, "failure": 2 }
+        },
+        {
+          "trait": "perceptive",
+          "outcomeWeights": { "success": 75, "partial": 22, "failure": 3 }
+        },
+        {
+          "trait": "lucky",
+          "rewardMultiplier": 1.5
+        }
+      ]
+    },
+    {
+      "id": "smash_open",
+      "label": "Smash It Open",
+      "description": "Who has time for careful? LOOT!",
+      "requirements": {
+        "anyTrait": ["strong", "reckless", "greedy"]
+      },
+      "outcomes": [
+        {
+          "weight": 40,
+          "type": "success",
+          "narrative": "{{hero.name}} smashes the chest to splinters! Gold coins scatter everywhere, and somehow the contents are unharmed!",
+          "rewards": {
+            "gold": { "base": 200, "variance": 0.5 },
+            "items": [
+              { "type": "random_equipment", "chance": 0.50, "rarityBoost": 0.8 }
+            ]
+          }
+        },
+        {
+          "weight": 40,
+          "type": "partial",
+          "narrative": "The chest breaks open, but your violent approach damages some of the contents. Still, not a total loss.",
+          "rewards": {
+            "gold": { "base": 75, "variance": 0.2 }
+          }
+        },
+        {
+          "weight": 20,
+          "type": "failure",
+          "narrative": "BOOM! The chest was rigged to explode! The party is showered with splinters and... glitter? Someone had a sense of humor.",
+          "rewards": null,
+          "damage": { "type": "team", "percent": 15 }
+        }
+      ],
+      "traitModifiers": [
+        {
+          "trait": "strong",
+          "outcomeWeights": { "success": 50, "partial": 40, "failure": 10 }
+        },
+        {
+          "trait": "reckless",
+          "outcomeWeights": { "success": 35, "partial": 35, "failure": 30 }
+        }
+      ]
+    },
+    {
+      "id": "use_magic",
+      "label": "Detect Magic",
+      "description": "Use magical senses to analyze the chest",
+      "requirements": {
+        "anyTrait": ["magical", "scholarly", "arcane_affinity"]
+      },
+      "outcomes": [
+        {
+          "weight": 70,
+          "type": "success",
+          "narrative": "{{hero.name}}'s magical senses reveal the trap mechanism clearly. With a simple gesture, it's disarmed. The chest opens to reveal its secrets.",
+          "rewards": {
+            "gold": { "base": 150, "variance": 0.2 },
+            "items": [
+              { "type": "random_equipment", "chance": 0.40, "rarityBoost": 1.2 }
+            ]
+          },
+          "efficiencyBonus": 3
+        },
+        {
+          "weight": 25,
+          "type": "partial",
+          "narrative": "The magical analysis reveals complex enchantments. {{hero.name}} safely disarms most of them, though a small shock escapes.",
+          "rewards": {
+            "gold": { "base": 100, "variance": 0.2 }
+          },
+          "damage": { "type": "hero", "heroTrait": "magical", "percent": 5 }
+        },
+        {
+          "weight": 5,
+          "type": "failure",
+          "narrative": "The chest's wards were more powerful than anticipated! Magical backlash throws {{hero.name}} backward.",
+          "rewards": null,
+          "damage": { "type": "hero", "heroTrait": "magical", "percent": 20 }
+        }
+      ]
+    },
+    {
+      "id": "leave_it",
+      "label": "Leave It Alone",
+      "description": "Not worth the risk",
+      "requirements": null,
+      "outcomes": [
+        {
+          "weight": 85,
+          "type": "neutral",
+          "narrative": "The party wisely moves on, leaving the mysterious chest undisturbed. Some mysteries are better left unsolved.",
+          "rewards": null,
+          "efficiencyBonus": 2
+        },
+        {
+          "weight": 15,
+          "type": "success",
+          "narrative": "As the party leaves, {{hero.name}} notices something glinting nearby - a coin purse dropped by whoever left the chest!",
+          "rewards": {
+            "gold": { "base": 30, "variance": 0.3 }
+          }
+        }
+      ],
+      "traitModifiers": [
+        {
+          "trait": "lucky",
+          "outcomeWeights": { "neutral": 60, "success": 40 }
+        }
+      ]
+    }
+  ],
+
+  "followUp": {
+    "chance": 0.10,
+    "eventId": "grateful_spirit",
+    "condition": { "choiceId": "leave_it", "outcomeType": "neutral" },
+    "description": "Sometimes kindness is rewarded..."
+  },
+
+  "visuals": {
+    "background": "/images/events/mysterious_chest.webp",
+    "icon": "/images/events/chest_icon.webp"
+  }
+}

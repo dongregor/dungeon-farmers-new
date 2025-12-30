@@ -1,0 +1,246 @@
+{
+  "$schema": "../schemas/trait-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "categories": [
+    { "id": "combat", "name": "Combat", "description": "Affects battle performance" },
+    { "id": "exploration", "name": "Exploration", "description": "Affects expedition efficiency" },
+    { "id": "social", "name": "Social", "description": "Affects interactions and events" },
+    { "id": "crafting", "name": "Crafting", "description": "Affects loot and crafting" },
+    { "id": "quirks", "name": "Quirks", "description": "Personality traits with mixed effects" }
+  ],
+  "rarities": {
+    "common": { "weight": 50, "color": "#9D9D9D" },
+    "uncommon": { "weight": 30, "color": "#1EFF00" },
+    "rare": { "weight": 15, "color": "#0070FF" },
+    "epic": { "weight": 4, "color": "#A335EE" },
+    "legendary": { "weight": 1, "color": "#FF8000" }
+  },
+  "traits": [
+    {
+      "id": "forest_guide",
+      "name": "Forest Guide",
+      "category": "exploration",
+      "rarity": "rare",
+      "description": "Knows the ways of the woods",
+      "flavor": "\"The trees speak to those who listen.\"",
+      "effects": [
+        {
+          "type": "zone_efficiency",
+          "biome": "forest",
+          "value": 0.15
+        }
+      ],
+      "conditionalEffects": [
+        {
+          "type": "expedition_duration",
+          "value": -0.10,
+          "condition": {
+            "type": "team_has_trait",
+            "trait": "nature_affinity",
+            "count": 2
+          },
+          "description": "-10% duration when team has 2+ nature affinity heroes"
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["forest_zone", "nature_monster", "ancient_tree_event"],
+        "phrases": [
+          "{{hero.name}} navigates the forest paths with ease.",
+          "The sprites seem to recognize {{hero.name}} as one of their own.",
+          "{{hero.name}} pauses to listen to the whispers of the trees."
+        ]
+      },
+      "synergies": {
+        "positive": ["nature_affinity", "herbalist", "tracker"],
+        "negative": ["city_dweller", "technophile"]
+      },
+      "visuals": {
+        "icon": "/images/traits/forest_guide.webp",
+        "color": "#228B22"
+      }
+    },
+    {
+      "id": "nature_affinity",
+      "name": "Nature Affinity",
+      "category": "exploration",
+      "rarity": "uncommon",
+      "description": "Has a deep connection with nature",
+      "flavor": "Plants grow wherever they walk.",
+      "effects": [
+        {
+          "type": "monster_capture",
+          "category": "spirit",
+          "value": 0.10
+        },
+        {
+          "type": "monster_capture",
+          "category": "plant",
+          "value": 0.10
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["nature_monster", "plant_encounter"],
+        "phrases": [
+          "{{hero.name}} communicates with the creature in ways others cannot understand.",
+          "The forest seems to welcome {{hero.name}} as one of its own."
+        ]
+      },
+      "synergies": {
+        "positive": ["forest_guide", "herbalist"],
+        "negative": ["fire_affinity"]
+      },
+      "visuals": {
+        "icon": "/images/traits/nature_affinity.webp",
+        "color": "#90EE90"
+      }
+    },
+    {
+      "id": "strong",
+      "name": "Strong",
+      "category": "combat",
+      "rarity": "common",
+      "description": "Exceptional physical strength",
+      "flavor": "Never skips arm day.",
+      "effects": [
+        {
+          "type": "stat_bonus",
+          "stat": "attack",
+          "value": 0.10
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["obstacle", "heavy_object", "combat"],
+        "phrases": [
+          "{{hero.name}} smashes through the obstacle with ease.",
+          "With a mighty heave, {{hero.name}} moves the boulder aside."
+        ]
+      },
+      "visuals": {
+        "icon": "/images/traits/strong.webp",
+        "color": "#FF4444"
+      }
+    },
+    {
+      "id": "careful",
+      "name": "Careful",
+      "category": "exploration",
+      "rarity": "common",
+      "description": "Methodical and thorough in their approach",
+      "flavor": "Measure twice, cut once. Then measure again.",
+      "effects": [
+        {
+          "type": "event_outcome",
+          "outcome": "trap_avoided",
+          "value": 0.25
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["trap", "chest", "suspicious_object"],
+        "phrases": [
+          "{{hero.name}} carefully examines the area for traps.",
+          "\"Wait,\" {{hero.name}} says, studying the mechanism closely."
+        ]
+      },
+      "synergies": {
+        "positive": ["patient", "perceptive"],
+        "negative": ["reckless", "impatient"]
+      },
+      "visuals": {
+        "icon": "/images/traits/careful.webp",
+        "color": "#4488FF"
+      }
+    },
+    {
+      "id": "greedy",
+      "name": "Greedy",
+      "category": "quirks",
+      "rarity": "uncommon",
+      "description": "An insatiable desire for wealth",
+      "flavor": "\"Is that GOLD?!\"",
+      "effects": [
+        {
+          "type": "gold_bonus",
+          "value": 0.15
+        }
+      ],
+      "negativeEffects": [
+        {
+          "type": "event_outcome",
+          "outcome": "trap_triggered",
+          "value": 0.10,
+          "condition": { "type": "event_has_loot" }
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["treasure", "gold", "valuable_item"],
+        "phrases": [
+          "{{hero.name}}'s eyes light up with gold-fever.",
+          "\"Mine!\" {{hero.name}} shouts, diving for the loot.",
+          "{{hero.name}} starts calculating their cut before the battle is even over."
+        ]
+      },
+      "visuals": {
+        "icon": "/images/traits/greedy.webp",
+        "color": "#FFD700"
+      }
+    },
+    {
+      "id": "lucky",
+      "name": "Lucky",
+      "category": "quirks",
+      "rarity": "rare",
+      "description": "Fortune seems to favor them",
+      "flavor": "Has found three four-leaf clovers this week alone.",
+      "effects": [
+        {
+          "type": "loot_rarity",
+          "value": 0.10
+        },
+        {
+          "type": "event_outcome",
+          "outcome": "success",
+          "value": 0.05
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["random_event", "loot_drop", "close_call"],
+        "phrases": [
+          "Against all odds, {{hero.name}} succeeds.",
+          "The arrow misses {{hero.name}} by mere inches.",
+          "{{hero.name}} trips... right onto a hidden treasure."
+        ]
+      },
+      "visuals": {
+        "icon": "/images/traits/lucky.webp",
+        "color": "#00FF88"
+      }
+    },
+    {
+      "id": "monster_tamer",
+      "name": "Monster Tamer",
+      "category": "exploration",
+      "rarity": "epic",
+      "description": "Has a gift for befriending creatures",
+      "flavor": "\"Who's a good abomination? You are!\"",
+      "effects": [
+        {
+          "type": "monster_capture",
+          "value": 0.20
+        }
+      ],
+      "narrativeHooks": {
+        "triggers": ["monster_encounter", "capture_attempt"],
+        "phrases": [
+          "{{hero.name}} approaches the creature calmly, hand extended.",
+          "The monster seems confused by {{hero.name}}'s lack of fear.",
+          "{{hero.name}} offers the creature some trail rations. It works."
+        ]
+      },
+      "visuals": {
+        "icon": "/images/traits/monster_tamer.webp",
+        "color": "#FF88FF"
+      }
+    }
+  ]
+}

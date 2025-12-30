@@ -1,0 +1,156 @@
+{
+  "$schema": "../schemas/zone.schema.json",
+  "id": "zone_forest",
+  "name": "Whispering Woods",
+  "description": "Ancient forest full of mystery and danger. Whispers of old magic echo through the trees.",
+  "lore": "Long ago, the elves called these woods home. Their spirits still linger, guiding those pure of heart and confounding those who seek only plunder.",
+
+  "biome": "forest",
+  "difficulty": {
+    "tier": 2,
+    "name": "Normal",
+    "level": 5,
+    "recommendedPower": 500
+  },
+
+  "duration": {
+    "minMinutes": 30,
+    "maxMinutes": 120,
+    "baseModifier": 1.0
+  },
+
+  "visuals": {
+    "background": "/images/zones/forest-bg.webp",
+    "icon": "/images/zones/forest-icon.webp",
+    "thumbnail": "/images/zones/forest-thumb.webp",
+    "colors": {
+      "primary": "#228B22",
+      "secondary": "#013220",
+      "accent": "#90EE90"
+    }
+  },
+
+  "lootTable": {
+    "gold": {
+      "base": 100,
+      "variance": 0.5,
+      "efficiencyScaling": 1.2
+    },
+    "experience": {
+      "base": 200,
+      "variance": 0.3,
+      "efficiencyScaling": 1.1
+    },
+    "items": [
+      {
+        "templateId": "forest_blade",
+        "weight": 100,
+        "minEfficiency": 80,
+        "rarityBoost": {
+          "common": 1.0,
+          "uncommon": 0.8,
+          "rare": 0.5,
+          "epic": 0.1,
+          "legendary": 0.01
+        }
+      },
+      {
+        "templateId": "leather_armor",
+        "weight": 80,
+        "minEfficiency": 60,
+        "rarityBoost": {
+          "common": 1.0,
+          "uncommon": 0.7,
+          "rare": 0.3,
+          "epic": 0.05,
+          "legendary": 0.005
+        }
+      },
+      {
+        "templateId": "forest_amulet",
+        "weight": 40,
+        "minEfficiency": 100,
+        "rarityBoost": {
+          "common": 0.5,
+          "uncommon": 1.0,
+          "rare": 0.6,
+          "epic": 0.15,
+          "legendary": 0.02
+        }
+      }
+    ],
+    "materials": [
+      {
+        "id": "wood",
+        "name": "Enchanted Wood",
+        "amountMin": 3,
+        "amountMax": 8,
+        "weight": 200
+      },
+      {
+        "id": "herb",
+        "name": "Forest Herb",
+        "amountMin": 1,
+        "amountMax": 4,
+        "weight": 150
+      },
+      {
+        "id": "nature_essence",
+        "name": "Nature Essence",
+        "amountMin": 1,
+        "amountMax": 2,
+        "weight": 50
+      }
+    ]
+  },
+
+  "monsters": [
+    {
+      "templateId": "forest_sprite",
+      "spawnWeight": 100,
+      "captureChance": 0.05
+    },
+    {
+      "templateId": "wild_boar",
+      "spawnWeight": 80,
+      "captureChance": 0.08
+    },
+    {
+      "templateId": "treant",
+      "spawnWeight": 30,
+      "captureChance": 0.03,
+      "minEfficiency": 90
+    }
+  ],
+
+  "events": [
+    { "templateId": "mysterious_chest", "chance": 0.15 },
+    { "templateId": "ancient_tree", "chance": 0.10, "requiresTrait": "nature_affinity" },
+    { "templateId": "lost_traveler", "chance": 0.12 },
+    { "templateId": "fairy_ring", "chance": 0.08 }
+  ],
+
+  "passiveIncome": {
+    "slots": 2,
+    "goldPerHour": 25,
+    "experiencePerHour": 12,
+    "bonusTraits": ["forest_guide", "nature_affinity"]
+  },
+
+  "unlockRequirements": {
+    "type": "zone_complete",
+    "zoneId": "zone_meadow",
+    "times": 1
+  },
+
+  "achievements": [
+    "ach_forest_explorer",
+    "ach_forest_master"
+  ],
+
+  "tips": [
+    "Heroes with the 'Forest Guide' trait gain +15% efficiency here",
+    "The Treant only appears if your efficiency is above 90%",
+    "Complete 10 expeditions to unlock the 'Forest Explorer' achievement"
+  ]
+}

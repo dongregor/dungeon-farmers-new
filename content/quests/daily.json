@@ -1,0 +1,110 @@
+{
+  "$schema": "../schemas/quest.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "type": "daily",
+  "resetSchedule": "0 0 * * *",
+  "questPool": [
+    {
+      "id": "daily_expeditions",
+      "name": "Daily Explorer",
+      "description": "Complete expeditions today",
+      "weight": 100,
+      "objectives": [
+        {
+          "id": "complete_expeditions",
+          "type": "expedition_complete",
+          "description": "Complete {{required}} expeditions",
+          "required": 3
+        }
+      ],
+      "rewards": [
+        { "type": "gold", "amount": 500 },
+        { "type": "experience", "amount": 200 }
+      ],
+      "tips": [
+        "Shorter zone expeditions count too!",
+        "Story missions give bonus progress"
+      ]
+    },
+    {
+      "id": "daily_recruiter",
+      "name": "Talent Scout",
+      "description": "Recruit new heroes from the tavern",
+      "weight": 80,
+      "objectives": [
+        {
+          "id": "recruit_heroes",
+          "type": "hero_recruit",
+          "description": "Recruit {{required}} heroes",
+          "required": 2
+        }
+      ],
+      "rewards": [
+        { "type": "gold", "amount": 300 },
+        { "type": "tavern_refresh", "amount": 1 }
+      ]
+    },
+    {
+      "id": "daily_equipper",
+      "name": "Gear Up",
+      "description": "Equip new items on your heroes",
+      "weight": 70,
+      "objectives": [
+        {
+          "id": "equip_items",
+          "type": "item_equip",
+          "description": "Equip {{required}} items",
+          "required": 3
+        }
+      ],
+      "rewards": [
+        { "type": "gold", "amount": 400 },
+        { "type": "material", "id": "common_shard", "amount": 5 }
+      ]
+    },
+    {
+      "id": "daily_monster_hunter",
+      "name": "Monster Hunter",
+      "description": "Capture monsters during expeditions",
+      "weight": 50,
+      "phase": 2,
+      "objectives": [
+        {
+          "id": "capture_monsters",
+          "type": "monster_capture",
+          "description": "Capture {{required}} monsters",
+          "required": 1
+        }
+      ],
+      "rewards": [
+        { "type": "gold", "amount": 600 },
+        { "type": "capture_boost", "duration": 3600000 }
+      ]
+    },
+    {
+      "id": "daily_dungeon_runner",
+      "name": "Dungeon Farmer",
+      "description": "Run your dungeons",
+      "weight": 60,
+      "phase": 2,
+      "objectives": [
+        {
+          "id": "run_dungeons",
+          "type": "dungeon_run",
+          "description": "Complete {{required}} dungeon runs",
+          "required": 2
+        }
+      ],
+      "rewards": [
+        { "type": "gold", "amount": 500 },
+        { "type": "experience", "amount": 300 }
+      ]
+    }
+  ],
+  "dailySelection": {
+    "count": 5,
+    "guaranteedTypes": ["expedition_complete"],
+    "preventDuplicates": true
+  }
+}

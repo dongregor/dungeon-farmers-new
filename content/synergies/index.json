@@ -1,0 +1,90 @@
+{
+  "$schema": "../schemas/synergy-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "synergyTypes": [
+    { "id": "pair", "name": "Pair Synergy", "description": "Bonus when two specific monsters are together" },
+    { "id": "tribe", "name": "Tribe Synergy", "description": "Bonus for having multiple monsters of the same tribe" },
+    { "id": "biome", "name": "Biome Synergy", "description": "Bonus for matching monster biomes with dungeon" },
+    { "id": "category", "name": "Category Synergy", "description": "Bonus for having multiple monsters of the same category" }
+  ],
+  "pairSynergies": [
+    {
+      "id": "forest_harmony",
+      "name": "Forest Harmony",
+      "monster1": "forest_sprite",
+      "monster2": "treant",
+      "bonus": {
+        "type": "power",
+        "value": 0.15,
+        "description": "+15% power for both monsters"
+      },
+      "flavor": "The sprite dances around the treant, empowering its ancient magic."
+    },
+    {
+      "id": "pack_hunters",
+      "name": "Pack Hunters",
+      "monster1": "wild_boar",
+      "monster2": "wild_boar",
+      "bonus": {
+        "type": "attack",
+        "value": 0.10,
+        "description": "+10% attack when boars are together"
+      },
+      "flavor": "Two boars are more than twice as dangerous as one."
+    }
+  ],
+  "tribeSynergies": [
+    {
+      "id": "nature_tribe",
+      "tribe": "nature",
+      "tiers": [
+        { "count": 2, "bonus": { "type": "loot", "value": 0.05 }, "name": "Nature's Gift" },
+        { "count": 4, "bonus": { "type": "loot", "value": 0.15 }, "name": "Nature's Bounty" },
+        { "count": 6, "bonus": { "type": "loot", "value": 0.30 }, "name": "Nature's Blessing" }
+      ]
+    },
+    {
+      "id": "spirit_tribe",
+      "tribe": "spirit",
+      "tiers": [
+        { "count": 2, "bonus": { "type": "speed", "value": 0.10 }, "name": "Ethereal Speed" },
+        { "count": 4, "bonus": { "type": "speed", "value": 0.25 }, "name": "Spirit Rush" }
+      ]
+    }
+  ],
+  "biomeSynergies": [
+    {
+      "biome": "forest",
+      "matchBonus": {
+        "type": "loot",
+        "value": 0.10,
+        "description": "+10% loot for each forest monster in a forest dungeon"
+      }
+    },
+    {
+      "biome": "caves",
+      "matchBonus": {
+        "type": "gold",
+        "value": 0.15,
+        "description": "+15% gold for each cave monster in a cave dungeon"
+      }
+    }
+  ],
+  "categorySynergies": [
+    {
+      "category": "beast",
+      "tiers": [
+        { "count": 3, "bonus": { "type": "attack", "value": 0.10 }, "name": "Beast Pack" },
+        { "count": 5, "bonus": { "type": "attack", "value": 0.25 }, "name": "Beast Horde" }
+      ]
+    },
+    {
+      "category": "elemental",
+      "tiers": [
+        { "count": 2, "bonus": { "type": "power", "value": 0.10 }, "name": "Elemental Affinity" },
+        { "count": 4, "bonus": { "type": "power", "value": 0.30 }, "name": "Elemental Mastery" }
+      ]
+    }
+  ]
+}

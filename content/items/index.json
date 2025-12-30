@@ -1,0 +1,30 @@
+{
+  "$schema": "../schemas/item-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "slots": ["weapon", "armor", "accessory", "trinket"],
+  "rarities": ["common", "uncommon", "rare", "epic", "legendary"],
+  "categories": {
+    "weapon": ["sword", "axe", "bow", "staff", "dagger"],
+    "armor": ["plate", "mail", "leather", "cloth"],
+    "accessory": ["ring", "amulet", "cloak"],
+    "trinket": ["charm", "totem", "relic"]
+  },
+  "templates": [
+    { "id": "iron_sword", "file": "weapons/iron_sword.json", "slot": "weapon" },
+    { "id": "forest_blade", "file": "weapons/forest_blade.json", "slot": "weapon" },
+    { "id": "leather_armor", "file": "armor/leather_armor.json", "slot": "armor" },
+    { "id": "forest_amulet", "file": "accessories/forest_amulet.json", "slot": "accessory" }
+  ],
+  "sets": [
+    { "id": "forest_set", "file": "sets/forest_guardian.json" },
+    { "id": "iron_set", "file": "sets/iron_warrior.json" }
+  ],
+  "rarityMultipliers": {
+    "common": { "stat": 1.0, "sellValue": 1.0, "maxBonusStats": 0 },
+    "uncommon": { "stat": 1.2, "sellValue": 2.0, "maxBonusStats": 1 },
+    "rare": { "stat": 1.5, "sellValue": 5.0, "maxBonusStats": 2 },
+    "epic": { "stat": 2.0, "sellValue": 15.0, "maxBonusStats": 3 },
+    "legendary": { "stat": 2.5, "sellValue": 50.0, "maxBonusStats": 4, "guaranteedEffect": true }
+  }
+}

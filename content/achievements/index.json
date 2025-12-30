@@ -1,0 +1,207 @@
+{
+  "$schema": "../schemas/achievement-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "categories": [
+    { "id": "heroes", "name": "Heroes", "icon": "users", "color": "#4488FF" },
+    { "id": "expeditions", "name": "Expeditions", "icon": "map", "color": "#44FF88" },
+    { "id": "dungeons", "name": "Dungeons", "icon": "castle", "color": "#FF8844" },
+    { "id": "collection", "name": "Collection", "icon": "archive", "color": "#FF44FF" },
+    { "id": "progression", "name": "Progression", "icon": "trending-up", "color": "#FFFF44" }
+  ],
+  "achievements": [
+    {
+      "id": "ach_hero_collector",
+      "category": "heroes",
+      "name": "Hero Collector",
+      "description": "Build your legendary roster",
+      "secret": false,
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Novice Recruiter",
+          "requirement": { "type": "stat_threshold", "stat": "heroes_recruited", "value": 10 },
+          "rewards": [
+            { "type": "gold", "amount": 500 },
+            { "type": "title", "id": "title_recruiter" }
+          ],
+          "points": 10
+        },
+        {
+          "tier": 2,
+          "name": "Experienced Recruiter",
+          "requirement": { "type": "stat_threshold", "stat": "heroes_recruited", "value": 50 },
+          "rewards": [
+            { "type": "gold", "amount": 2000 },
+            { "type": "cosmetic", "id": "portrait_recruiter" }
+          ],
+          "points": 25
+        },
+        {
+          "tier": 3,
+          "name": "Master Recruiter",
+          "requirement": { "type": "stat_threshold", "stat": "heroes_recruited", "value": 200 },
+          "rewards": [
+            { "type": "gold", "amount": 10000 },
+            { "type": "cosmetic", "id": "effect_heroic_glow" }
+          ],
+          "points": 50
+        }
+      ],
+      "icon": {
+        "locked": "/images/achievements/hero_collector_locked.webp",
+        "tier1": "/images/achievements/hero_collector_1.webp",
+        "tier2": "/images/achievements/hero_collector_2.webp",
+        "tier3": "/images/achievements/hero_collector_3.webp"
+      }
+    },
+    {
+      "id": "ach_forest_explorer",
+      "category": "expeditions",
+      "name": "Forest Explorer",
+      "description": "Explore the Whispering Woods thoroughly",
+      "secret": false,
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Forest Visitor",
+          "requirement": { "type": "zone_complete", "zoneId": "zone_forest", "count": 10 },
+          "rewards": [{ "type": "gold", "amount": 300 }],
+          "points": 10
+        },
+        {
+          "tier": 2,
+          "name": "Forest Regular",
+          "requirement": { "type": "zone_complete", "zoneId": "zone_forest", "count": 50 },
+          "rewards": [{ "type": "material", "id": "nature_essence", "amount": 10 }],
+          "points": 25
+        },
+        {
+          "tier": 3,
+          "name": "Forest Master",
+          "requirement": { "type": "zone_complete", "zoneId": "zone_forest", "count": 200 },
+          "rewards": [
+            { "type": "gold", "amount": 5000 },
+            { "type": "title", "id": "title_forest_master" }
+          ],
+          "points": 50
+        }
+      ],
+      "icon": {
+        "locked": "/images/achievements/forest_explorer_locked.webp",
+        "tier1": "/images/achievements/forest_explorer_1.webp",
+        "tier2": "/images/achievements/forest_explorer_2.webp",
+        "tier3": "/images/achievements/forest_explorer_3.webp"
+      }
+    },
+    {
+      "id": "ach_dungeon_builder",
+      "category": "dungeons",
+      "name": "Dungeon Architect",
+      "description": "Build and master your own dungeons",
+      "secret": false,
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Dungeon Novice",
+          "requirement": { "type": "dungeons_built", "value": 1 },
+          "rewards": [{ "type": "gold", "amount": 500 }],
+          "points": 15
+        },
+        {
+          "tier": 2,
+          "name": "Dungeon Designer",
+          "requirement": { "type": "dungeons_built", "value": 5 },
+          "rewards": [{ "type": "schematic_ticket", "amount": 1 }],
+          "points": 30
+        },
+        {
+          "tier": 3,
+          "name": "Dungeon Master",
+          "requirement": { "type": "dungeons_built", "value": 20 },
+          "rewards": [
+            { "type": "gold", "amount": 15000 },
+            { "type": "title", "id": "title_dungeon_master" }
+          ],
+          "points": 75
+        }
+      ],
+      "icon": {
+        "locked": "/images/achievements/dungeon_builder_locked.webp",
+        "tier1": "/images/achievements/dungeon_builder_1.webp",
+        "tier2": "/images/achievements/dungeon_builder_2.webp",
+        "tier3": "/images/achievements/dungeon_builder_3.webp"
+      }
+    },
+    {
+      "id": "ach_monster_master",
+      "category": "collection",
+      "name": "Monster Master",
+      "description": "Capture and collect monsters",
+      "secret": false,
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Monster Catcher",
+          "requirement": { "type": "stat_threshold", "stat": "monsters_captured", "value": 10 },
+          "rewards": [{ "type": "gold", "amount": 400 }],
+          "points": 10
+        },
+        {
+          "tier": 2,
+          "name": "Monster Collector",
+          "requirement": { "type": "stat_threshold", "stat": "monsters_captured", "value": 50 },
+          "rewards": [{ "type": "capture_boost", "duration": 86400000 }],
+          "points": 25
+        },
+        {
+          "tier": 3,
+          "name": "Monster Master",
+          "requirement": { "type": "stat_threshold", "stat": "monsters_captured", "value": 200 },
+          "rewards": [
+            { "type": "gold", "amount": 8000 },
+            { "type": "cosmetic", "id": "effect_monster_aura" }
+          ],
+          "points": 50
+        }
+      ],
+      "icon": {
+        "locked": "/images/achievements/monster_master_locked.webp",
+        "tier1": "/images/achievements/monster_master_1.webp",
+        "tier2": "/images/achievements/monster_master_2.webp",
+        "tier3": "/images/achievements/monster_master_3.webp"
+      }
+    },
+    {
+      "id": "ach_secret_lucky",
+      "category": "progression",
+      "name": "???",
+      "description": "Something special awaits...",
+      "secret": true,
+      "tiers": [
+        {
+          "tier": 1,
+          "name": "Fortune's Favorite",
+          "requirement": { "type": "legendary_items_found", "value": 5 },
+          "rewards": [
+            { "type": "gold", "amount": 10000 },
+            { "type": "title", "id": "title_lucky" }
+          ],
+          "points": 100
+        }
+      ],
+      "hintEvolution": {
+        "thresholds": [25, 50, 75],
+        "hints": {
+          "vague": "Fortune favors the persistent...",
+          "moderate": "Find rare treasures across your adventures...",
+          "specific": "Find {{remaining}} more legendary items!"
+        }
+      },
+      "icon": {
+        "locked": "/images/achievements/secret_locked.webp",
+        "tier1": "/images/achievements/fortune_favorite.webp"
+      }
+    }
+  ]
+}

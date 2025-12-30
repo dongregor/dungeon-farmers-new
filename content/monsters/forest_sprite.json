@@ -1,0 +1,85 @@
+{
+  "$schema": "../schemas/monster.schema.json",
+  "id": "forest_sprite",
+  "name": "Forest Sprite",
+  "description": "A mischievous nature spirit that flits between trees, trailing sparkles of magic.",
+  "flavor": "\"Catch me if you can!\" - Last words of many failed monster hunters",
+
+  "biome": "forest",
+  "category": "spirit",
+
+  "baseStats": {
+    "power": 50,
+    "health": 100,
+    "attack": 30,
+    "defense": 20,
+    "speed": 40
+  },
+
+  "traits": {
+    "guaranteed": ["nature_affinity"],
+    "possible": [
+      { "id": "quick", "chance": 0.3 },
+      { "id": "elusive", "chance": 0.2 },
+      { "id": "playful", "chance": 0.15 }
+    ]
+  },
+
+  "lootTable": {
+    "gold": { "base": 10, "variance": 0.3 },
+    "items": [
+      {
+        "templateId": "sprite_dust",
+        "chance": 0.15,
+        "amountMin": 1,
+        "amountMax": 3
+      },
+      {
+        "templateId": "fairy_wing",
+        "chance": 0.05,
+        "amountMin": 1,
+        "amountMax": 1
+      }
+    ],
+    "materials": [
+      { "id": "nature_essence", "chance": 0.10, "amount": 1 }
+    ]
+  },
+
+  "synergies": {
+    "pairs": [
+      {
+        "monsterId": "treant",
+        "bonusType": "power",
+        "value": 0.10,
+        "description": "Forest Harmony: +10% power when paired with Treant"
+      }
+    ],
+    "tribes": ["nature", "spirit"]
+  },
+
+  "visuals": {
+    "sprite": "/images/monsters/forest_sprite.webp",
+    "portrait": "/images/monsters/forest_sprite_portrait.webp",
+    "icon": "/images/monsters/forest_sprite_icon.webp",
+    "colors": {
+      "primary": "#90EE90",
+      "glow": "#00FF00"
+    }
+  },
+
+  "captureInfo": {
+    "baseChance": 0.05,
+    "bonusTraits": ["monster_tamer", "nature_affinity"],
+    "bonusPerTrait": 0.02,
+    "maxChance": 0.25
+  },
+
+  "dungeonBehavior": {
+    "preferredSlot": "support",
+    "runModifiers": {
+      "speedBonus": 0.05,
+      "lootBonus": 0.0
+    }
+  }
+}

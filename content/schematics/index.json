@@ -1,0 +1,53 @@
+{
+  "$schema": "../schemas/schematic-index.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-30",
+  "schematics": [
+    {
+      "id": "schematic_forest_den",
+      "name": "Forest Den",
+      "biome": "forest",
+      "rarity": "common",
+      "slots": 3,
+      "source": "zone_forest"
+    },
+    {
+      "id": "schematic_forest_grove",
+      "name": "Enchanted Grove",
+      "biome": "forest",
+      "rarity": "rare",
+      "slots": 5,
+      "source": "zone_dark_forest"
+    },
+    {
+      "id": "schematic_cave_tunnel",
+      "name": "Cave Tunnel",
+      "biome": "caves",
+      "rarity": "common",
+      "slots": 3,
+      "source": "zone_caves"
+    },
+    {
+      "id": "schematic_crystal_cavern",
+      "name": "Crystal Cavern",
+      "biome": "caves",
+      "rarity": "epic",
+      "slots": 7,
+      "source": "zone_deep_caves"
+    }
+  ],
+  "raritySlots": {
+    "common": { "min": 3, "max": 4 },
+    "uncommon": { "min": 4, "max": 5 },
+    "rare": { "min": 5, "max": 6 },
+    "epic": { "min": 6, "max": 8 },
+    "legendary": { "min": 8, "max": 10 }
+  },
+  "slotTypes": [
+    { "id": "any", "name": "Any Monster", "color": "#888888" },
+    { "id": "beast", "name": "Beast Only", "color": "#8B4513" },
+    { "id": "spirit", "name": "Spirit Only", "color": "#00CED1" },
+    { "id": "elemental", "name": "Elemental Only", "color": "#FF4500" },
+    { "id": "biome_match", "name": "Matching Biome", "color": "#228B22" }
+  ]
+}
