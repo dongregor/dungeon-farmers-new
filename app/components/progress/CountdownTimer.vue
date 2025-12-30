@@ -91,10 +91,12 @@ onUnmounted(() => {
 // Watch for endTime changes
 watch(() => props.endTime, () => {
   isComplete.value = false
-  updateTimer()
-  if (!intervalId) {
-    intervalId = setInterval(updateTimer, 1000)
+  // Clear existing interval before creating new one
+  if (intervalId) {
+    clearInterval(intervalId)
   }
+  updateTimer()
+  intervalId = setInterval(updateTimer, 1000)
 })
 </script>
 

@@ -45,7 +45,6 @@ defineProps<Props>()
           v-if="item.to && index < items.length - 1"
           :to="item.to"
           class="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-          :aria-current="index === items.length - 1 ? 'page' : undefined"
         >
           {{ item.label }}
         </NuxtLink>
@@ -54,7 +53,7 @@ defineProps<Props>()
         <span
           v-else
           class="text-gray-900 font-medium"
-          :aria-current="index === items.length - 1 ? 'page' : undefined"
+          aria-current="page"
         >
           {{ item.label }}
         </span>

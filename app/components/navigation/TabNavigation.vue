@@ -20,6 +20,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+const tabsContainer = ref<HTMLElement | null>(null)
+
 const activeTabIndex = computed(() => {
   return props.tabs.findIndex(tab => tab.id === props.modelValue)
 })
@@ -50,9 +52,11 @@ const handleKeydown = (event: KeyboardEvent, currentIndex: number) => {
   emit('update:modelValue', props.tabs[newIndex].id)
   // Focus the new tab
   nextTick(() => {
-    const tabElements = document.querySelectorAll('[role="tab"]')
-    if (tabElements[newIndex]) {
-      (tabElements[newIndex] as HTMLElement).focus()
+    if (tabsContainer.value) {
+      const tabElements = tabsContainer.value.querySelectorAll('[role="tab"]')
+      if (tabElements[newIndex]) {
+        (tabElements[newIndex] as HTMLElement).focus()
+      }
     }
   })
 }
@@ -90,6 +94,7 @@ const variantClasses = computed(() => {
 
 <template>
   <div
+    ref="tabsContainer"
     class="flex overflow-x-auto scrollbar-hide"
     :class="variantClasses.container"
     role="tablist"

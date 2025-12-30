@@ -12,6 +12,15 @@ interface Props {
 
 const props = defineProps<Props>()
 
+// Validate currentPhase is within bounds
+watchEffect(() => {
+  if (props.currentPhase < 0 || props.currentPhase >= props.totalPhases) {
+    console.warn(
+      `PhaseIndicator: currentPhase (${props.currentPhase}) is out of bounds [0, ${props.totalPhases - 1}]`
+    )
+  }
+})
+
 const displayPhases = computed(() => {
   if (props.phases && props.phases.length > 0) {
     return props.phases
@@ -62,25 +71,36 @@ const getPhaseIcon = (status: Phase['status']) => {
 <template>
   <div class="w-full">
     <!-- Phase stepper -->
-    <div class="flex items-center justify-between">
+    <ol
+      role="list"
+      aria-label="Expedition phases"
+      class="flex items-center justify-between"
+    >
       <template v-for="(phase, index) in displayPhases" :key="index">
         <!-- Phase dot and label -->
-        <div class="flex flex-col items-center flex-1">
+        <li
+          role="listitem"
+          :aria-current="phase.status === 'current' ? 'step' : undefined"
+          class="flex flex-col items-center flex-1"
+        >
           <!-- Dot -->
           <div class="relative">
             <div
               class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300"
               :class="getPhaseClasses(phase.status).dot"
+              :aria-label="`${phase.name}: ${phase.status}`"
             >
               <span
                 v-if="getPhaseIcon(phase.status)"
                 class="text-white text-sm font-bold"
+                aria-hidden="true"
               >
                 {{ getPhaseIcon(phase.status) }}
               </span>
               <span
                 v-else-if="phase.status === 'current'"
                 class="w-3 h-3 bg-white rounded-full animate-pulse"
+                aria-hidden="true"
               />
             </div>
           </div>
@@ -89,19 +109,25 @@ const getPhaseIcon = (status: Phase['status']) => {
           <div class="mt-2 text-xs text-center transition-colors duration-300" :class="getPhaseClasses(phase.status).text">
             {{ phase.name }}
           </div>
-        </div>
+        </li>
 
         <!-- Connecting line (except after last phase) -->
         <div
           v-if="index < displayPhases.length - 1"
           class="flex-1 h-0.5 mx-2 mb-6 transition-colors duration-300"
           :class="getPhaseClasses(phase.status).line"
+          aria-hidden="true"
         />
       </template>
-    </div>
+    </ol>
 
     <!-- Progress summary -->
-    <div class="mt-4 text-center text-sm text-gray-600">
+    <div
+      class="mt-4 text-center text-sm text-gray-600"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       Phase {{ currentPhase + 1 }} of {{ totalPhases }}
     </div>
   </div>

@@ -127,72 +127,84 @@ const isCheckboxChecked = (filterId: string, optionValue: string) => {
         :key="filter.id"
         class="space-y-2"
       >
-        <label class="block text-sm font-medium text-gray-700">
-          {{ filter.label }}
-        </label>
-
         <!-- Checkbox Group -->
-        <div v-if="filter.type === 'checkbox' && filter.options" class="space-y-2">
-          <label
-            v-for="option in filter.options"
-            :key="option.value"
-            class="flex items-center gap-2 cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              :checked="isCheckboxChecked(filter.id, option.value)"
-              class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              @change="toggleCheckbox(filter.id, option.value)"
+        <fieldset v-if="filter.type === 'checkbox' && filter.options">
+          <legend class="block text-sm font-medium text-gray-700 mb-2">
+            {{ filter.label }}
+          </legend>
+          <div class="space-y-2">
+            <label
+              v-for="option in filter.options"
+              :key="option.value"
+              class="flex items-center gap-2 cursor-pointer"
             >
-            <span class="text-sm text-gray-700">{{ option.label }}</span>
-          </label>
-        </div>
+              <input
+                type="checkbox"
+                :checked="isCheckboxChecked(filter.id, option.value)"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                @change="toggleCheckbox(filter.id, option.value)"
+              >
+              <span class="text-sm text-gray-700">{{ option.label }}</span>
+            </label>
+          </div>
+        </fieldset>
 
         <!-- Radio Group -->
-        <div v-else-if="filter.type === 'radio' && filter.options" class="space-y-2">
-          <label
-            v-for="option in filter.options"
-            :key="option.value"
-            class="flex items-center gap-2 cursor-pointer"
-          >
-            <input
-              type="radio"
-              :name="filter.id"
-              :value="option.value"
-              :checked="modelValue[filter.id] === option.value"
-              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-              @change="updateFilter(filter.id, option.value)"
+        <fieldset v-else-if="filter.type === 'radio' && filter.options">
+          <legend class="block text-sm font-medium text-gray-700 mb-2">
+            {{ filter.label }}
+          </legend>
+          <div class="space-y-2">
+            <label
+              v-for="option in filter.options"
+              :key="option.value"
+              class="flex items-center gap-2 cursor-pointer"
             >
-            <span class="text-sm text-gray-700">{{ option.label }}</span>
-          </label>
-        </div>
+              <input
+                type="radio"
+                :name="filter.id"
+                :value="option.value"
+                :checked="modelValue[filter.id] === option.value"
+                class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                @change="updateFilter(filter.id, option.value)"
+              >
+              <span class="text-sm text-gray-700">{{ option.label }}</span>
+            </label>
+          </div>
+        </fieldset>
 
         <!-- Select -->
-        <select
-          v-else-if="filter.type === 'select' && filter.options"
-          :value="modelValue[filter.id] || ''"
-          class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          @change="updateFilter(filter.id, ($event.target as HTMLSelectElement).value)"
-        >
-          <option value="">All</option>
-          <option
-            v-for="option in filter.options"
-            :key="option.value"
-            :value="option.value"
+        <div v-else-if="filter.type === 'select' && filter.options">
+          <label :for="`filter-${filter.id}`" class="block text-sm font-medium text-gray-700 mb-2">
+            {{ filter.label }}
+          </label>
+          <select
+            :id="`filter-${filter.id}`"
+            :value="modelValue[filter.id] || ''"
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            @change="updateFilter(filter.id, ($event.target as HTMLSelectElement).value)"
           >
-            {{ option.label }}
-          </option>
-        </select>
+            <option value="">All</option>
+            <option
+              v-for="option in filter.options"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
 
         <!-- Toggle Switch -->
-        <label
-          v-else-if="filter.type === 'toggle'"
-          class="flex items-center gap-2 cursor-pointer"
-        >
+        <div v-else-if="filter.type === 'toggle'">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            {{ filter.label }}
+          </label>
           <button
             type="button"
             role="switch"
             :aria-checked="!!modelValue[filter.id]"
+            :aria-label="filter.label"
             class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             :class="modelValue[filter.id] ? 'bg-blue-600' : 'bg-gray-200'"
             @click="updateFilter(filter.id, !modelValue[filter.id])"
@@ -202,8 +214,7 @@ const isCheckboxChecked = (filterId: string, optionValue: string) => {
               :class="modelValue[filter.id] ? 'translate-x-6' : 'translate-x-1'"
             />
           </button>
-          <span class="text-sm text-gray-700">{{ filter.label }}</span>
-        </label>
+        </div>
       </div>
     </div>
   </div>

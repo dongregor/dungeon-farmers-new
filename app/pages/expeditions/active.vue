@@ -28,8 +28,17 @@ const recallStationedHeroId = ref<string | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
+// Reactive current time for real-time timer updates
+const now = ref(Date.now())
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
 // Fetch data on mount
 onMounted(async () => {
+  // Start timer interval for real-time updates
+  timerInterval = setInterval(() => {
+    now.value = Date.now()
+  }, 1000)
+
   loading.value = true
   try {
     await Promise.all([
@@ -43,6 +52,14 @@ onMounted(async () => {
     console.error('Error loading expedition data:', err)
   } finally {
     loading.value = false
+  }
+})
+
+// Clear interval on unmount
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
   }
 })
 
@@ -72,11 +89,16 @@ const sortedExpeditions = computed(() => {
 const filteredExpeditions = computed(() => {
   if (filterType.value === 'all') return sortedExpeditions.value
 
-  // For MVP, we may not have story/dungeon types yet, so this is future-proofing
+  // Filter by expedition type based on zone/subzone properties
   return sortedExpeditions.value.filter(exp => {
-    // This would depend on zone type or expedition type
-    // For now, return all since we don't have type differentiation
-    return true
+    const zone = zoneStore.getZoneById(exp.zoneId)
+    const subzone = zoneStore.getSubzoneById(exp.zoneId, exp.subzoneId)
+
+    // Filter based on subzone type or zone type
+    // For MVP, check if subzone has a type property
+    const expeditionType = (subzone as any)?.type || 'zone'
+
+    return filterType.value === expeditionType
   })
 })
 
@@ -157,9 +179,9 @@ const handleRecallStationed = async () => {
 }
 
 const formatTimeRemaining = (completesAt: string) => {
-  const now = Date.now()
+  // Use reactive now.value for real-time updates
   const end = new Date(completesAt).getTime()
-  const remaining = Math.max(0, end - now)
+  const remaining = Math.max(0, end - now.value)
 
   const hours = Math.floor(remaining / (1000 * 60 * 60))
   const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
@@ -177,16 +199,31 @@ const formatTimeRemaining = (completesAt: string) => {
 const calculateProgress = (expedition: Expedition) => {
   const start = new Date(expedition.startedAt).getTime()
   const end = new Date(expedition.completesAt).getTime()
-  const now = Date.now()
   const total = end - start
-  const elapsed = now - start
+  const elapsed = now.value - start
 
   return Math.min(100, Math.max(0, (elapsed / total) * 100))
 }
 
 const isExpeditionComplete = (expedition: Expedition) => {
-  return new Date(expedition.completesAt).getTime() <= Date.now()
+  // Use reactive now.value for real-time updates
+  return new Date(expedition.completesAt).getTime() <= now.value
 }
+
+// Computed for dialog visibility (proper v-model binding)
+const showRecallDialog = computed({
+  get: () => recallConfirmId.value !== null,
+  set: (value: boolean) => {
+    if (!value) recallConfirmId.value = null
+  },
+})
+
+const showRecallStationedDialog = computed({
+  get: () => recallStationedHeroId.value !== null,
+  set: (value: boolean) => {
+    if (!value) recallStationedHeroId.value = null
+  },
+})
 </script>
 
 <template>
@@ -473,26 +510,24 @@ const isExpeditionComplete = (expedition: Expedition) => {
 
     <!-- Recall Expedition Confirmation -->
     <ConfirmationDialog
-      v-model="recallConfirmId !== null"
+      v-model="showRecallDialog"
       title="Recall Expedition?"
       message="Recalling the expedition will return your heroes immediately, but they will receive no rewards and lose some morale. Are you sure?"
       confirm-text="Recall"
       cancel-text="Continue Expedition"
       variant="danger"
       @confirm="handleRecallExpedition"
-      @cancel="recallConfirmId = null"
     />
 
     <!-- Recall Stationed Hero Confirmation -->
     <ConfirmationDialog
-      v-model="recallStationedHeroId !== null"
+      v-model="showRecallStationedDialog"
       title="Recall Stationed Hero?"
       message="Recalling this hero will collect any pending rewards. The hero will be available for expeditions again."
       confirm-text="Recall"
       cancel-text="Leave Stationed"
       variant="info"
       @confirm="handleRecallStationed"
-      @cancel="recallStationedHeroId = null"
     />
   </div>
 </template>

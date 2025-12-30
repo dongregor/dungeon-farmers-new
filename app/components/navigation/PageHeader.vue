@@ -10,11 +10,7 @@ defineProps<Props>()
 const router = useRouter()
 
 const handleBack = (backLink: string | { name: string; params?: Record<string, any> }) => {
-  if (typeof backLink === 'string') {
-    router.push(backLink)
-  } else {
-    router.push(backLink)
-  }
+  router.push(backLink)
 }
 </script>
 

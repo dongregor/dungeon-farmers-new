@@ -14,7 +14,11 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const percentage = computed(() => {
-  if (props.requiredXP === 0) return 100
+  // Handle edge cases
+  if (props.requiredXP === 0) {
+    // If at max level, show 100%, otherwise show 0%
+    return isMaxLevel.value ? 100 : 0
+  }
   return Math.min(100, Math.max(0, (props.currentXP / props.requiredXP) * 100))
 })
 

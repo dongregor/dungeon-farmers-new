@@ -15,7 +15,9 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
-const checkboxId = computed(() => props.id || `checkbox-${Math.random().toString(36).substring(7)}`)
+// Use Vue's useId() for SSR-safe ID generation
+const generatedId = useId()
+const checkboxId = computed(() => props.id || `checkbox-${generatedId}`)
 
 const handleChange = (event: Event) => {
   const target = event.target as HTMLInputElement

@@ -19,7 +19,7 @@ const emit = defineEmits<{
 const visible = ref(true)
 
 // Auto-dismiss after duration
-let timeoutId: NodeJS.Timeout | null = null
+let timeoutId: ReturnType<typeof setTimeout> | null = null
 
 onMounted(() => {
   if (props.duration > 0) {
@@ -32,6 +32,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (timeoutId) {
     clearTimeout(timeoutId)
+    timeoutId = null
   }
 })
 
@@ -50,18 +51,21 @@ const typeClasses = computed(() => {
         bg: 'bg-green-50 border-green-200',
         text: 'text-green-800',
         icon: 'text-green-500',
+        focusRing: 'focus:ring-green-500',
       }
     case 'error':
       return {
         bg: 'bg-red-50 border-red-200',
         text: 'text-red-800',
         icon: 'text-red-500',
+        focusRing: 'focus:ring-red-500',
       }
     case 'warning':
       return {
         bg: 'bg-yellow-50 border-yellow-200',
         text: 'text-yellow-800',
         icon: 'text-yellow-500',
+        focusRing: 'focus:ring-yellow-500',
       }
     case 'info':
     default:
@@ -69,6 +73,7 @@ const typeClasses = computed(() => {
         bg: 'bg-blue-50 border-blue-200',
         text: 'text-blue-800',
         icon: 'text-blue-500',
+        focusRing: 'focus:ring-blue-500',
       }
   }
 })
@@ -132,7 +137,7 @@ const iconPath = computed(() => {
         v-if="dismissible"
         type="button"
         class="flex-shrink-0 inline-flex rounded-md p-1 hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
-        :class="`focus:ring-${type === 'info' ? 'blue' : type}-500`"
+        :class="typeClasses.focusRing"
         @click="handleClose"
         aria-label="Dismiss notification"
       >

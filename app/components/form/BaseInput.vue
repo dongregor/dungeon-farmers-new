@@ -21,11 +21,14 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | number]
 }>()
 
-const inputId = computed(() => props.id || `input-${Math.random().toString(36).substring(7)}`)
+// Use Vue's useId() for SSR-safe ID generation
+const generatedId = useId()
+const inputId = computed(() => props.id || `input-${generatedId}`)
 
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement
-  emit('update:modelValue', target.value)
+  const value = props.type === 'number' ? (target.value === '' ? null : Number(target.value)) : target.value
+  emit('update:modelValue', value)
 }
 
 const inputClasses = computed(() => {

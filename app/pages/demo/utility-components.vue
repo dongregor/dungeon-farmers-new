@@ -5,14 +5,22 @@ const showErrorToast = ref(false)
 const showWarningToast = ref(false)
 const showInfoToast = ref(false)
 const isLoading = ref(false)
+let loadingTimeoutId: ReturnType<typeof setTimeout> | null = null
 
 const simulateLoading = () => {
   isLoading.value = true
-  setTimeout(() => {
+  loadingTimeoutId = setTimeout(() => {
     isLoading.value = false
     showSuccessToast.value = true
+    loadingTimeoutId = null
   }, 2000)
 }
+
+onUnmounted(() => {
+  if (loadingTimeoutId) {
+    clearTimeout(loadingTimeoutId)
+  }
+})
 </script>
 
 <template>

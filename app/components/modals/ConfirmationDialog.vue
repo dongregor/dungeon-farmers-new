@@ -23,6 +23,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
+// Track the action to prevent double event emission
+const confirming = ref(false)
+
 // Variant styling
 const variantStyles = computed(() => {
   switch (props.variant) {
@@ -59,6 +62,7 @@ const variantStyles = computed(() => {
 
 // Handle confirm
 const handleConfirm = () => {
+  confirming.value = true
   emit('confirm')
   emit('update:modelValue', false)
 }
@@ -72,8 +76,13 @@ const handleCancel = () => {
 // Update modelValue when BaseModal closes
 const handleModalClose = (value: boolean) => {
   emit('update:modelValue', value)
-  if (!value) {
+  // Only emit cancel if we're closing without confirming (e.g., overlay click, X button)
+  if (!value && !confirming.value) {
     emit('cancel')
+  }
+  // Reset the flag
+  if (!value) {
+    confirming.value = false
   }
 }
 </script>
@@ -87,6 +96,7 @@ const handleModalClose = (value: boolean) => {
     :close-on-overlay="true"
     @update:model-value="handleModalClose"
   >
+    <template #default>
     <!-- Content -->
     <div class="text-center">
       <!-- Icon -->
@@ -103,13 +113,13 @@ const handleModalClose = (value: boolean) => {
 
       <!-- Message -->
       <p
+        id="confirmation-message"
         class="text-gray-700 text-base mb-6"
-        role="alertdialog"
-        aria-describedby="confirmation-message"
       >
-        <span id="confirmation-message">{{ message }}</span>
+        {{ message }}
       </p>
     </div>
+    </template>
 
     <!-- Footer with actions -->
     <template #footer>

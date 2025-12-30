@@ -17,7 +17,7 @@ const sizeClasses = computed(() => {
       return 'h-12 w-12 border-4'
     case 'md':
     default:
-      return 'h-8 w-8 border-3'
+      return 'h-8 w-8 border-4'
   }
 })
 

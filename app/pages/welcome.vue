@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { v4 as uuid } from 'uuid'
 import type { Hero } from '~~/types'
 import { generateHero } from '~/utils/heroGenerator'
 
@@ -111,7 +112,7 @@ const generateFirstHero = () => {
 
     // Create full hero object with required fields
     firstHero.value = {
-      id: crypto.randomUUID(),
+      id: uuid(),
       ...heroData,
       currentExpeditionId: null,
       isFavorite: false,

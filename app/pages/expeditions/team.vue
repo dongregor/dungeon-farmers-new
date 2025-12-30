@@ -23,9 +23,9 @@ const route = useRoute()
 const { heroes } = storeToRefs(heroStore)
 const { loading: expeditionLoading } = storeToRefs(expeditionStore)
 
-// Route params (zone/subzone from query or state)
-const zoneId = ref<string | null>(route.query.zoneId as string || null)
-const subzoneId = ref<string | null>(route.query.subzoneId as string || null)
+// Route params (zone/subzone from query or state) - reactive to route changes
+const zoneId = computed(() => route.query.zoneId as string || null)
+const subzoneId = computed(() => route.query.subzoneId as string || null)
 
 // Team state
 const selectedHeroIds = ref<string[]>([])
@@ -110,7 +110,7 @@ const availableHeroes = computed(() => {
     filtered = filtered.filter(h => h.rarity === filters.value.rarity)
   }
   if (filters.value.minLevel) {
-    filtered = filtered.filter(h => h.level >= parseInt(filters.value.minLevel))
+    filtered = filtered.filter(h => h.level >= parseInt(filters.value.minLevel, 10))
   }
   if (filters.value.favoritesOnly) {
     filtered = filtered.filter(h => h.isFavorite)
@@ -235,6 +235,8 @@ const startExpedition = async () => {
   try {
     const duration = durationOptions.value[selectedDuration.value]
 
+    // TODO: Backend doesn't currently support custom duration/reward multiplier
+    // When implemented, pass duration.minutes and duration.rewardMultiplier to API
     await expeditionStore.startExpedition({
       zoneId: zone.value.id,
       subzoneId: subzone.value.id,
@@ -246,6 +248,8 @@ const startExpedition = async () => {
           inventoryFull: false,
           resourceCap: false,
         },
+        // duration: duration.minutes, // TODO: Add when backend supports it
+        // rewardMultiplier: duration.rewardMultiplier, // TODO: Add when backend supports it
       },
     })
 

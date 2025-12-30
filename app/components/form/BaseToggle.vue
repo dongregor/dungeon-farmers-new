@@ -15,7 +15,9 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
-const toggleId = computed(() => props.id || `toggle-${Math.random().toString(36).substring(7)}`)
+// Use Vue's useId() for SSR-safe ID generation
+const generatedId = useId()
+const toggleId = computed(() => props.id || `toggle-${generatedId}`)
 
 const handleToggle = () => {
   if (!props.disabled) {

@@ -25,11 +25,14 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | number]
 }>()
 
-const selectId = computed(() => props.id || `select-${Math.random().toString(36).substring(7)}`)
+// Use Vue's useId() for SSR-safe ID generation
+const generatedId = useId()
+const selectId = computed(() => props.id || `select-${generatedId}`)
 
 const handleChange = (event: Event) => {
   const target = event.target as HTMLSelectElement
-  emit('update:modelValue', target.value)
+  const selectedOption = props.options.find(o => String(o.value) === target.value)
+  emit('update:modelValue', selectedOption?.value ?? target.value)
 }
 
 const selectClasses = computed(() => {
