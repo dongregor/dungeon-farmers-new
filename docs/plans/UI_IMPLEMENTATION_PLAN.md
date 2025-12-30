@@ -21,32 +21,155 @@ This plan outlines the implementation strategy for Dungeon Farmers UI based on t
 
 ---
 
-## Gap Analysis
+## Detailed Gap Analysis (Existing vs Spec)
 
-### Pages - Existing vs Required
+### Pages: What Exists vs What's Needed
 
-| # | Required Page | Route | Phase | Status | Notes |
-|---|---------------|-------|-------|--------|-------|
-| 1 | Dashboard | `/` | 1 | Exists | `index.vue` - needs enhancement |
-| 2 | Heroes Roster | `/heroes` | 1 | Exists | `heroes.vue` - needs review |
-| 3 | Hero Detail | `/heroes/:heroId` | 1 | **MISSING** | Need dynamic route page |
-| 4 | Tavern | `/tavern` | 1 | Exists | `tavern.vue` - needs review |
-| 5 | Expeditions Hub | `/expeditions` | 1 | Exists | `expeditions.vue` - needs enhancement |
-| 6 | Team Formation | `/expeditions/team` | 1 | **MISSING** | Critical for MVP |
-| 7 | Active Expeditions | `/expeditions/active` | 1 | **MISSING** | Critical for MVP |
-| 8 | Expedition Results | `/expeditions/results/:expeditionId` | 1 | **MISSING** | Critical for MVP |
-| 9 | Inventory | `/inventory` | 1 | Exists | `inventory.vue` - needs review |
-| 10 | Monster Collection | `/monsters` | 2 | Partial | `collection.vue` exists |
-| 11 | Schematic Collection | `/schematics` | 2 | **MISSING** | Phase 2 |
-| 12 | Dungeon Builder | `/dungeons/build/:schematicId` | 2 | **MISSING** | Phase 2 |
-| 13 | My Dungeons | `/dungeons` | 2 | **MISSING** | Phase 2 |
-| 14 | Shop | `/shop` | 2 | **MISSING** | Phase 2 |
-| 15 | Settings | `/settings` | 1 | Exists | `settings.vue` - needs enhancement |
-| 16 | Onboarding | `/welcome` | 1 | **MISSING** | Critical for MVP |
+| Page | Route | Exists? | Spec Compliance | Missing Features |
+|------|-------|---------|-----------------|------------------|
+| **Dashboard** | `/` | Yes (`index.vue`) | 60% | Missing: Welcome header with account level, Pending Actions panel, Suggested Actions, Quest Tracker, Quick Access Grid |
+| **Heroes Roster** | `/heroes` | Yes | 70% | Missing: View toggle (grid/list), Bulk Actions Bar, "Has Upgrades" toggle, hero count display in header |
+| **Hero Detail** | `/heroes/:heroId` | **NO** | 0% | Entire page missing - critical for MVP |
+| **Tavern** | `/tavern` | Yes | 75% | Missing: Daily allowance counter, Pool preview modals, Supporter upsell panel |
+| **Expeditions Hub** | `/expeditions` | Yes | 65% | Missing: Content tabs (Zones/Story/Dungeons), Familiarity/mastery progress, Filter/Sort Controls |
+| **Team Formation** | `/expeditions/team` | **NO** (inline) | 40% | `Setup.vue` exists but not as separate page; missing: Duration selector, Preset saving, drag-drop |
+| **Active Expeditions** | `/expeditions/active` | **NO** | 0% | Not a separate page; missing: Passive Assignments section, real-time timers |
+| **Expedition Results** | `/expeditions/results/:id` | **NO** | 0% | Entire page missing - critical for MVP |
+| **Inventory** | `/inventory` | Yes | 80% | Good coverage; missing: Capacity Bar warning colors, Bulk Actions Bar complete, Materials section |
+| **Monster Collection** | `/monsters` | Partial (`collection.vue`) | 30% | Needs restructure: Zone Completion view, silhouettes for undiscovered |
+| **Settings** | `/settings` | Yes | 70% | Missing: Profile tab (avatar, guild name), Achievements tab, Help tab, Data export |
+| **Onboarding** | `/welcome` | **NO** | 0% | Entire flow missing - critical for MVP |
 
-### Component Gap Analysis
+### Components: What Exists vs Spec Requirements
 
-#### Existing Components (30)
+#### Card Components
+
+| Spec Component | Existing Equivalent | Match Level | Issues |
+|---------------|---------------------|-------------|--------|
+| `HeroCard.vue` | `hero/Card.vue` | 50% | Missing: `variant` prop (compact/default/detailed/selectable), status badges, selected state, disabled state |
+| `ItemCard.vue` | `equipment/Card.vue` | 60% | Missing: `variant` prop, comparison mode, set info display, upgrade/downgrade arrows |
+| `MonsterCard.vue` | `collection/Monster.vue` | 30% | Missing: placement status, compatibility indicators, draggable support |
+| `SchematicCard.vue` | **None** | 0% | Entire component missing (Phase 2) |
+
+#### Display Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `PowerScore.vue` | **NO** | Heroes show power inline, need dedicated component with breakdown |
+| `RarityBadge.vue` | **NO** | Rarity shown inline, need standardized badge component |
+| `TraitDisplay.vue` | **NO** | Traits shown inline, need component with active/inactive states |
+| `StatBar.vue` | **NO** | Stats shown as numbers, need visual bars |
+| `EfficiencyIndicator.vue` | **NO** | Efficiency shown as %, need visual tier indicator |
+| `XPProgressBar.vue` | **NO** | Need specialized XP bar with milestones |
+
+#### Progress Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `ExpeditionTimer.vue` | **NO** | Timers calculated in pages, need reusable countdown |
+| `ProgressBar.vue` | Yes (`ui/ProgressBar.vue`) | 80% match - has variants, colors, sizes. Missing: milestones prop |
+| `PhaseIndicator.vue` | **NO** | Need expedition phase visualization |
+| `CountdownTimer.vue` | **NO** | Need generic countdown for daily reset, refresh timers |
+
+#### Input Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `TeamSlot.vue` | **NO** | Setup.vue has inline hero selection, need drag-drop slot component |
+| `DungeonSlotGrid.vue` | **NO** | Phase 2 |
+| `FilterPanel.vue` | **NO** | Filters inline in pages, need reusable collapsible panel |
+| `SortDropdown.vue` | **NO** | Sort inline in pages, need reusable dropdown |
+| `SearchBar.vue` | **NO** | Need with autocomplete |
+| `ViewToggle.vue` | **NO** | Need grid/list toggle button |
+
+#### Economy Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `CurrencyDisplay.vue` | **NO** | Currency shown inline, need formatted display with animations |
+| `ResourceCapacity.vue` | **NO** | Capacity shown as text, need visual with warnings |
+| `IncomeTracker.vue` | **NO** | Phase 2 - passive income display |
+
+#### Modal Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `BaseModal.vue` | **NO** | Modals use inline div overlays, need proper modal wrapper |
+| `RewardModal.vue` | **NO** | Need animated reward reveal |
+| `ComparisonModal.vue` | **NO** | Need side-by-side comparison |
+| `ConfirmationDialog.vue` | **NO** | Using browser confirm(), need styled dialog |
+| `TutorialOverlay.vue` | Partial (`tutorial/Intro.vue`) | 40% - has intro, missing spotlight/tooltip system |
+
+#### Navigation Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `TabNavigation.vue` | **NO** | Tabs inline in settings, need reusable |
+| `NotificationBadge.vue` | **NO** | Need badge with count |
+| `BreadcrumbNav.vue` | **NO** | Need breadcrumb component |
+| `PageHeader.vue` | **NO** | Headers inline in pages |
+
+#### Specialized Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `ExpeditionLog.vue` | Yes (`expedition/Log.vue`) | 60% - exists but needs trait-reaction highlighting |
+| `LootTable.vue` | **NO** | Need loot display with drop rates |
+| `SynergyIndicator.vue` | **NO** | Phase 2 |
+| `SetBonusTracker.vue` | Yes (`equipment/SetBonusDisplay.vue`) | 50% - needs progress tracking |
+| `PrestigeBadge.vue` | **NO** | Need visual prestige indicator |
+| `SupporterBadge.vue` | **NO** | Need supporter status display |
+
+#### Utility Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `LoadingSpinner.vue` | **NO** | Using inline "Loading..." text |
+| `EmptyState.vue` | **NO** | Using inline empty messages |
+| `Tooltip.vue` | **NO** | Need hover tooltips |
+| `Toast.vue` | Partial (`ui/NotificationCenter.vue`) | 40% - has notifications but not toast pattern |
+| `SkeletonLoader.vue` | **NO** | Need loading placeholders |
+| `ErrorBoundary.vue` | **NO** | Need error catching wrapper |
+
+#### Form Components
+
+| Spec Component | Existing? | Notes |
+|---------------|-----------|-------|
+| `BaseInput.vue` | **NO** | Using raw inputs |
+| `BaseButton.vue` | **NO** | Using raw buttons with inconsistent styles |
+| `BaseSelect.vue` | **NO** | Using raw selects |
+| `BaseCheckbox.vue` | **NO** | Using raw checkboxes |
+| `BaseToggle.vue` | **NO** | Need toggle switch |
+
+---
+
+## Gap Summary
+
+### Critical Missing Items for MVP
+
+1. **Pages (5 missing)**
+   - `/heroes/[heroId].vue` - Hero Detail
+   - `/expeditions/team.vue` - Team Formation (separate page)
+   - `/expeditions/active.vue` - Active Expeditions
+   - `/expeditions/results/[expeditionId].vue` - Expedition Results
+   - `/welcome.vue` - Onboarding
+
+2. **Foundation Components (10 missing)**
+   - BaseModal, BaseButton, BaseInput, BaseSelect
+   - ConfirmationDialog, LoadingSpinner, EmptyState, Toast
+   - TabNavigation, PageHeader
+
+3. **Core Feature Components (15 missing)**
+   - HeroCard (refactor), PowerScore, RarityBadge, StatBar
+   - ExpeditionTimer, CountdownTimer, TeamSlot
+   - FilterPanel, SortDropdown, SearchBar, ViewToggle
+   - CurrencyDisplay, ResourceCapacity
+   - TutorialOverlay (enhance), NotificationBadge
+
+---
+
+## Existing Component Structure
+
 ```
 app/components/
 ├── tutorial/           # Intro.vue, MentorQuestPanel.vue, MentorQuestCard.vue
@@ -63,7 +186,7 @@ app/components/
 └── AppHeader.vue
 ```
 
-#### Required Structure (per 03-components.md)
+## Target Component Structure (per 03-components.md)
 ```
 app/components/
 ├── cards/              # HeroCard, MonsterCard, ItemCard, SchematicCard
