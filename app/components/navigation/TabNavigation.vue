@@ -122,7 +122,7 @@ const variantClasses = computed(() => {
         v-if="tab.badge !== undefined"
         class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-semibold rounded-full"
         :class="tab.id === modelValue ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-700'"
-        aria-label=`${tab.badge} items`
+        :aria-label="`${tab.badge} items`"
       >
         {{ tab.badge }}
       </span>

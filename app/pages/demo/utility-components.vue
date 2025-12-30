@@ -8,6 +8,9 @@ const isLoading = ref(false)
 let loadingTimeoutId: ReturnType<typeof setTimeout> | null = null
 
 const simulateLoading = () => {
+  // Guard against multiple calls while loading
+  if (isLoading.value || loadingTimeoutId) return
+
   isLoading.value = true
   loadingTimeoutId = setTimeout(() => {
     isLoading.value = false
