@@ -641,6 +641,302 @@ This plan provides comprehensive test coverage for Dungeon Farmers based on the 
 | Interaction | Update v-model | - |
 | Validation | Apply error styling | - |
 
+### 3.10 Layout Components
+
+**File:** `tests/components/layout/AppHeader.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display player name | US-PM-020 |
+| | Show currency balances (gold, gems) | US-EQ-027 |
+| | Display active expedition count | US-EX-018 |
+| | Show supporter badge if applicable | US-PM-017 |
+| Responsive | Collapse on mobile | - |
+| | Show hamburger menu | - |
+
+**File:** `tests/components/layout/AppNav.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display navigation links | - |
+| | Highlight active route | - |
+| | Show notification badges | US-EX-022 |
+| Interaction | Navigate on click | - |
+| | Collapse on mobile | - |
+
+### 3.11 Hero Components (Extended)
+
+**File:** `tests/components/hero/HeroDetail.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display full hero information | US-HM-004 |
+| | Show equipment slots | US-HM-015 |
+| | Display trait list | US-HM-012 |
+| | Show XP progress bar | US-HM-022 |
+| | Display prestige level | US-HM-026 |
+| Props | Show comparison mode | US-HM-005 |
+| Events | Emit equip-slot-click | - |
+
+**File:** `tests/components/hero/LevelUpModal.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display level increase | US-HM-021 |
+| | Show stat changes | US-HM-021 |
+| | Display new trait if unlocked | US-HM-014 |
+| Animation | Celebrate level up | US-HM-023 |
+| Events | Emit close event | - |
+
+**File:** `tests/components/hero/PrestigeModal.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Explain prestige benefits | US-HM-024 |
+| | Show permanent bonuses | US-HM-026 |
+| | Display what resets vs keeps | US-HM-025 |
+| Interaction | Confirm prestige action | US-HM-025 |
+| | Cancel and close | - |
+
+**File:** `tests/components/hero/RetirementModal.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display hero to release | US-HM-028 |
+| | Show refund amount | US-HM-028 |
+| | Warn about permanent action | US-HM-030 |
+| Interaction | Require confirmation | US-HM-030 |
+| | Emit confirm/cancel events | - |
+
+### 3.12 Expedition Components
+
+**File:** `tests/components/expedition/ExpeditionSetup.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display zone/subzone info | US-EX-001 |
+| | Show team formation slots | US-EX-002 |
+| | Display efficiency preview | US-EX-011 |
+| | Show duration estimate | US-EX-003 |
+| Interaction | Add/remove heroes | US-EX-002 |
+| | Launch expedition | US-EX-004 |
+| Validation | Validate team requirements | US-EX-007 |
+
+**File:** `tests/components/expedition/ZoneCard.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display zone name and image | US-EX-001 |
+| | Show difficulty indicator | US-EX-001 |
+| | Display unlock status | US-PM-001 |
+| | Show familiarity progress | US-EX-033 |
+| Props | Apply locked/unlocked styling | US-PM-001 |
+| Events | Emit zone-select event | - |
+
+**File:** `tests/components/expedition/SubzoneCard.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display subzone name | US-EX-001 |
+| | Show duration and threats | US-EX-003 |
+| | Display loot preview | US-EX-001 |
+| | Show first-clear status | - |
+| Events | Emit subzone-select event | - |
+
+**File:** `tests/components/expedition/ActiveExpedition.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display expedition info | US-EX-018 |
+| | Show timer countdown | US-EX-018 |
+| | Display assigned heroes | US-EX-018 |
+| | Show phase indicator | US-EX-019 |
+| Interaction | Recall expedition button | US-EX-021 |
+| Events | Emit complete event | US-EX-022 |
+
+**File:** `tests/components/expedition/ExpeditionLog.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display chronological events | US-EX-027 |
+| | Show hero reactions | US-EX-028 |
+| | Highlight combat encounters | US-EX-027 |
+| | Display loot discoveries | US-EX-025 |
+| Props | Compact vs full variant | - |
+| | Expandable sections | US-EX-029 |
+
+**File:** `tests/components/expedition/EventChoice.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display event description | US-EX-020 |
+| | Show choice options | US-EX-020 |
+| | Display potential outcomes | - |
+| Interaction | Select choice option | US-EX-020 |
+| Events | Emit choice-made event | - |
+
+**File:** `tests/components/expedition/PartyPresetSelector.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display saved presets | US-EX-010 |
+| | Show preset composition | US-EX-010 |
+| Interaction | Select preset | US-EX-010 |
+| | Save current as preset | US-EX-010 |
+| | Delete preset | - |
+
+### 3.13 Equipment Components (Extended)
+
+**File:** `tests/components/equipment/InventoryGrid.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display items in grid | US-EQ-001 |
+| | Show capacity indicator | US-EQ-003 |
+| | Apply filter/sort | US-EQ-002 |
+| Props | Grid vs list view | US-EQ-001 |
+| | Highlight upgrades | US-EQ-016 |
+| Interaction | Select item | - |
+| | Multi-select for bulk actions | US-EQ-022 |
+| Performance | Virtual scroll for large lists | US-EQ-001 |
+
+**File:** `tests/components/equipment/EquipmentSlot.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display slot type icon | US-HM-015 |
+| | Show equipped item | US-HM-015 |
+| | Display empty state | - |
+| Interaction | Accept item drop | US-EQ-009 |
+| | Click to open inventory | US-EQ-004 |
+| Events | Emit equip/unequip events | - |
+
+**File:** `tests/components/equipment/SetBonusDisplay.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display set name and progress | US-EQ-006 |
+| | Show active bonuses highlighted | US-EQ-013 |
+| | List all bonus tiers (2/4/6pc) | US-EQ-006 |
+| | Show contributing pieces | US-EQ-014 |
+| Props | Compact vs detailed variant | - |
+
+### 3.14 Tavern Components
+
+**File:** `tests/components/tavern/TavernSlot.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display hero option | US-HM-007 |
+| | Show recruitment cost | US-HM-007 |
+| | Display trait preview | US-HM-007 |
+| | Show rarity indicator | US-HM-007 |
+| Interaction | Recruit on click | US-HM-008 |
+| | Show details on hover | - |
+| States | Disabled if not affordable | US-HM-008 |
+| | Disabled if cap reached | US-PM-005 |
+
+### 3.15 Tutorial Components
+
+**File:** `tests/components/tutorial/TutorialIntro.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display welcome message | US-OB-006 |
+| | Show game introduction | US-OB-006 |
+| | Display skip option | US-OB-008 |
+| Interaction | Progress through steps | US-OB-010 |
+| | Skip tutorial | US-OB-008 |
+
+**File:** `tests/components/tutorial/MentorQuestCard.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display quest objective | US-OB-010 |
+| | Show progress indicator | US-OB-010 |
+| | Display reward preview | US-OB-010 |
+| States | Pending/active/complete styling | - |
+
+**File:** `tests/components/tutorial/MentorQuestPanel.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display active quests | US-OB-010 |
+| | Show completion percentage | - |
+| | Display mentor character | - |
+| Interaction | Expand/collapse panel | - |
+| | Click quest for details | - |
+
+### 3.16 Collection Components
+
+**File:** `tests/components/collection/Collectible.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display collectible item | US-DB-003 |
+| | Show collected/missing status | US-DB-003 |
+| | Display rarity indicator | - |
+| States | Silhouette for undiscovered | US-DB-003 |
+
+**File:** `tests/components/collection/CollectionSet.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display set progress | US-DB-003 |
+| | Show collected count | US-DB-003 |
+| | List set members | - |
+| Interaction | Click for set details | - |
+
+### 3.17 Achievement Components
+
+**File:** `tests/components/achievements/AchievementCard.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display achievement info | US-PM-024 |
+| | Show progress bar | US-PM-024 |
+| | Display reward preview | US-PM-024 |
+| States | Locked/in-progress/complete | US-PM-024 |
+| | Hidden achievement (???) | US-PM-025 |
+
+### 3.18 Challenge Components
+
+**File:** `tests/components/challenges/ChallengeBoard.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display daily challenges | US-PM-008 |
+| | Show weekly challenges | US-PM-008 |
+| | Display progress per challenge | US-PM-008 |
+| | Show reset timer | US-PM-008 |
+| Interaction | Claim completed rewards | US-PM-008 |
+
+### 3.19 Zone Components
+
+**File:** `tests/components/zone/StationingPanel.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display stationed heroes | US-EX-014 |
+| | Show income rates | US-EX-015 |
+| | Display accumulated resources | US-EX-032 |
+| Interaction | Assign hero to station | US-EX-014 |
+| | Recall stationed hero | US-EX-016 |
+| | Collect accumulated income | US-EX-015 |
+
+### 3.20 UI Components
+
+**File:** `tests/components/ui/NotificationCenter.test.ts`
+
+| Test Suite | Test Cases | User Stories |
+|------------|------------|--------------|
+| Rendering | Display notification list | US-OB-018 |
+| | Show unread count | - |
+| | Group by type | - |
+| Interaction | Mark as read | - |
+| | Clear all notifications | - |
+| | Click to navigate | - |
+
 ---
 
 ## 4. API Route Tests
@@ -1032,21 +1328,93 @@ export function createTestDungeon(overrides?: Partial<Dungeon>): Dungeon
 
 | Category | Tests | Est. Time |
 |----------|-------|-----------|
+| **Cards** | | |
 | Cards: HeroCard | 8 tests | 2h |
 | Cards: ItemCard | 8 tests | 2h |
+| **Display** | | |
 | Display: RarityBadge | 5 tests | 1h |
 | Display: PowerScore | 6 tests | 1h |
 | Display: StatBar | 5 tests | 1h |
+| Display: TraitDisplay | 6 tests | 1.5h |
+| Display: EfficiencyIndicator | 5 tests | 1h |
+| **Progress** | | |
 | Progress: ExpeditionTimer | 8 tests | 2h |
 | Progress: ProgressBar | 6 tests | 1h |
-| Input: TeamSlot | 8 tests | 2h |
+| Progress: XPProgressBar | 5 tests | 1h |
+| Progress: CountdownTimer | 4 tests | 1h |
+| Progress: PhaseIndicator | 4 tests | 1h |
+| **Input** | | |
 | Input: FilterPanel | 6 tests | 1.5h |
+| Input: SortDropdown | 5 tests | 1h |
+| Input: ViewToggle | 4 tests | 0.5h |
+| Input: SearchBar | 5 tests | 1h |
+| **Economy** | | |
+| Economy: CurrencyDisplay | 5 tests | 1h |
+| Economy: ResourceCapacity | 5 tests | 1h |
+| **Modals** | | |
 | Modals: BaseModal | 8 tests | 2h |
 | Modals: ConfirmationDialog | 5 tests | 1h |
+| **Navigation** | | |
+| Navigation: TabNavigation | 6 tests | 1h |
+| Navigation: NotificationBadge | 5 tests | 1h |
+| Navigation: PageHeader | 4 tests | 1h |
+| Navigation: BreadcrumbNav | 4 tests | 0.5h |
+| **Utility** | | |
+| Utility: Toast | 5 tests | 1h |
+| Utility: LoadingSpinner | 4 tests | 0.5h |
+| Utility: EmptyState | 5 tests | 1h |
+| Utility: SkeletonLoader | 3 tests | 0.5h |
+| **Form** | | |
 | Form: BaseButton | 5 tests | 1h |
 | Form: BaseInput | 5 tests | 1h |
-| Utility: Toast | 5 tests | 1h |
-| **Total** | **~88 tests** | **~20h** |
+| Form: BaseSelect | 4 tests | 0.5h |
+| Form: BaseCheckbox | 3 tests | 0.5h |
+| Form: BaseToggle | 3 tests | 0.5h |
+| **Layout** | | |
+| Layout: AppHeader | 6 tests | 1.5h |
+| Layout: AppNav | 5 tests | 1h |
+| **Subtotal Phase 2a** | **~167 tests** | **~35h** |
+
+### Phase 2b: Feature Components
+
+**Priority: High**
+
+| Category | Tests | Est. Time |
+|----------|-------|-----------|
+| **Hero Components** | | |
+| Hero: HeroDetail | 7 tests | 2h |
+| Hero: LevelUpModal | 5 tests | 1h |
+| Hero: PrestigeModal | 5 tests | 1h |
+| Hero: RetirementModal | 5 tests | 1h |
+| **Expedition Components** | | |
+| Expedition: ExpeditionSetup | 8 tests | 2h |
+| Expedition: ZoneCard | 6 tests | 1.5h |
+| Expedition: SubzoneCard | 5 tests | 1h |
+| Expedition: ActiveExpedition | 6 tests | 1.5h |
+| Expedition: ExpeditionLog | 7 tests | 2h |
+| Expedition: EventChoice | 5 tests | 1h |
+| Expedition: PartyPresetSelector | 5 tests | 1h |
+| **Equipment Components** | | |
+| Equipment: InventoryGrid | 8 tests | 2h |
+| Equipment: EquipmentSlot | 6 tests | 1.5h |
+| Equipment: SetBonusDisplay | 5 tests | 1h |
+| **Tavern Components** | | |
+| Tavern: TavernSlot | 6 tests | 1.5h |
+| **Tutorial Components** | | |
+| Tutorial: TutorialIntro | 5 tests | 1h |
+| Tutorial: MentorQuestCard | 4 tests | 1h |
+| Tutorial: MentorQuestPanel | 5 tests | 1h |
+| **Collection Components** | | |
+| Collection: Collectible | 4 tests | 1h |
+| Collection: CollectionSet | 4 tests | 1h |
+| **Other Components** | | |
+| Achievements: AchievementCard | 5 tests | 1h |
+| Challenges: ChallengeBoard | 5 tests | 1.5h |
+| Zone: StationingPanel | 6 tests | 1.5h |
+| UI: NotificationCenter | 6 tests | 1.5h |
+| **Subtotal Phase 2b** | **~133 tests** | **~30h** |
+
+| **Phase 2 Total** | **~300 tests** | **~65h** |
 
 ### Phase 3: E2E & Integration
 
@@ -1107,22 +1475,29 @@ export function createTestDungeon(overrides?: Partial<Dungeon>): Dungeon
 |----------|------------|
 | Unit Tests | ~180 |
 | Store Tests | ~100 |
-| Component Tests | ~150 |
+| Component Tests | ~300 |
 | API Tests | ~75 |
 | Integration Tests | ~35 |
 | E2E Tests | ~25 |
-| **Total** | **~565 tests** |
+| **Total** | **~715 tests** |
 
 ### Estimated Total Time
 
 | Phase | Time |
 |-------|------|
 | Phase 1: Foundation | ~26h |
-| Phase 2: Components | ~20h |
+| Phase 2: Components (2a + 2b) | ~65h |
 | Phase 3: E2E & Integration | ~16h |
 | Phase 4: Dungeon Building | ~23h |
 | Phase 5: Advanced | ~16h |
-| **Total** | **~101h** |
+| **Total** | **~146h** |
+
+### Component Coverage Summary
+
+| Status | Components | Tests |
+|--------|------------|-------|
+| Existing & Planned | 60 | ~300 |
+| Coverage | 100% | - |
 
 ### Coverage Goals
 
