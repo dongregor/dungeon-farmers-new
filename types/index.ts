@@ -32,3 +32,6 @@ export * from './presets'
 
 // Synergy system
 export * from './synergies'
+
+// Schematic system
+export * from './schematics'
