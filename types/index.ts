@@ -29,3 +29,6 @@ export * from './monsters'
 export * from './titles'
 export * from './morale'
 export * from './presets'
+
+// Synergy system
+export * from './synergies'
