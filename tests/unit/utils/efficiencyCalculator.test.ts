@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
   calculateEfficiency,
-  calculateTeamPower,
   calculateRequiredPower,
   checkThreatCounters,
   getEfficiencyColor,
@@ -76,28 +75,6 @@ function createTestSubzone(overrides: Partial<Subzone> = {}): Subzone {
 }
 
 describe('Efficiency Calculator', () => {
-  describe('calculateTeamPower', () => {
-    it('should sum hero power values', () => {
-      const heroes = [
-        createTestHero({ power: 50 }),
-        createTestHero({ power: 75 }),
-        createTestHero({ power: 100 }),
-      ]
-
-      const teamPower = calculateTeamPower(heroes)
-      expect(teamPower).toBe(225)
-    })
-
-    it('should return 0 for empty team', () => {
-      expect(calculateTeamPower([])).toBe(0)
-    })
-
-    it('should handle single hero', () => {
-      const heroes = [createTestHero({ power: 123 })]
-      expect(calculateTeamPower(heroes)).toBe(123)
-    })
-  })
-
   describe('calculateRequiredPower', () => {
     it('should calculate basic required power for easy subzone', () => {
       const subzone = createTestSubzone({

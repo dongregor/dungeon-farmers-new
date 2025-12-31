@@ -91,3 +91,48 @@ export const TAG_INFO: Record<ArchetypeTag, TagInfo> = {
   aoe_blast: { id: 'aoe_blast', name: 'AoE Blast', description: 'Area damage spells', counters: ['swarms', 'clusters'] },
   channel: { id: 'channel', name: 'Channel', description: 'Powerful focused spells', counters: ['single_target', 'bosses'] },
 }
+
+// Archetype display info
+export interface ArchetypeInfo {
+  id: Archetype
+  name: string
+  description: string
+}
+
+export const ARCHETYPE_INFO: Record<Archetype, ArchetypeInfo> = {
+  tank: {
+    id: 'tank',
+    name: 'Tank',
+    description: 'Front-line defender who protects allies and draws enemy attention.',
+  },
+  healer: {
+    id: 'healer',
+    name: 'Healer',
+    description: 'Support specialist who restores health and removes harmful effects.',
+  },
+  debuffer: {
+    id: 'debuffer',
+    name: 'Debuffer',
+    description: 'Tactical expert who weakens enemies and disrupts their abilities.',
+  },
+  melee_dps: {
+    id: 'melee_dps',
+    name: 'Melee DPS',
+    description: 'Close-range fighter who deals heavy physical damage.',
+  },
+  ranged_dps: {
+    id: 'ranged_dps',
+    name: 'Ranged DPS',
+    description: 'Long-range attacker with precision strikes and mobility.',
+  },
+  caster: {
+    id: 'caster',
+    name: 'Caster',
+    description: 'Magical damage dealer who wields powerful elemental forces.',
+  },
+}
+
+// Get archetype info by id
+export function getArchetypeById(archetype: Archetype): ArchetypeInfo {
+  return ARCHETYPE_INFO[archetype]
+}
