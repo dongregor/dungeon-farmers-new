@@ -35,3 +35,6 @@ export * from './synergies'
 
 // Schematic system
 export * from './schematics'
+
+// Dungeon system
+export * from './dungeons'
