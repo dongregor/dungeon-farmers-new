@@ -27,6 +27,11 @@ export type EquipmentSlot = 'weapon' | 'head' | 'chest' | 'hands' | 'legs' | 'fe
 export type ZoneType = 'forest' | 'cave' | 'mountain' | 'swamp' | 'desert' | 'ruins'
 export type ZoneDifficulty = 'easy' | 'medium' | 'hard' | 'extreme'
 
+// Monster Categories (for synergies)
+export type MonsterType = 'beast' | 'undead' | 'elemental' | 'dragon' | 'humanoid' | 'construct' | 'demon' | 'aberration'
+
+export type Element = 'fire' | 'ice' | 'lightning' | 'nature' | 'shadow' | 'holy' | 'arcane' | 'physical'
+
 // Morale
 export type MoraleState = 'excited' | 'content' | 'tired' | 'frustrated' | 'exhausted'
 
