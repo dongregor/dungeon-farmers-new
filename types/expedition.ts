@@ -1,6 +1,20 @@
 import type { Stats } from './base'
 import type { Equipment } from './equipment'
 
+// Log entry rarity tiers
+export type LogRarity = 'common' | 'standard' | 'noteworthy' | 'memorable' | 'epic' | 'legendary'
+
+export const RARITY_ORDER: LogRarity[] = ['common', 'standard', 'noteworthy', 'memorable', 'epic', 'legendary']
+
+export const RARITY_COLORS: Record<LogRarity, string> = {
+  common: 'text-gray-500',
+  standard: 'text-gray-200',
+  noteworthy: 'text-green-400',
+  memorable: 'text-blue-400',
+  epic: 'text-purple-400',
+  legendary: 'text-orange-400'
+}
+
 export type ExpeditionStatus = 'idle' | 'in_progress' | 'completed' | 'failed' | 'waiting_choices'
 
 // Expedition settings (reused in Expedition interface)
@@ -176,6 +190,8 @@ export interface LogEntry {
   traitId?: string
   eventId?: string
   type: 'narrative' | 'reaction' | 'combat' | 'loot' | 'choice_result'
+  rarity?: LogRarity  // Optional rarity tier for this entry
+  rarityBoost?: number  // How much this entry boosted rarity
 }
 
 // Pending Loot
