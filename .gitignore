@@ -9,8 +9,7 @@ dist
 # Node dependencies
 node_modules
 
-# Logs
-logs
+# Logs (log files, not app/data/logs or tests/data/logs)
 *.log
 
 # Misc
