@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TRAIT_REACTIONS, getReactionsForTrait } from '~/data/logs/reactions/traits'
+import { TRAIT_REACTIONS, getReactionsForTrait, pickRandomReaction } from '~/data/logs/reactions/traits'
 
 describe('Trait Reactions Data', () => {
   describe('TRAIT_REACTIONS', () => {
@@ -144,6 +144,14 @@ describe('Trait Reactions Data', () => {
       expect(reaction.triggers.entryTypes).toBeDefined()
       const entryTypes = reaction.triggers.entryTypes!
       expect(entryTypes.some(t => ['event', 'travel'].includes(t))).toBe(true)
+    })
+  })
+
+  describe('pickRandomReaction', () => {
+    it('should return a string from the reactions array', () => {
+      const reaction = TRAIT_REACTIONS['lootGoblin']
+      const result = pickRandomReaction(reaction)
+      expect(reaction.reactions).toContain(result)
     })
   })
 })

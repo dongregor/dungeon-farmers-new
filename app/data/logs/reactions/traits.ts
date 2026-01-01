@@ -326,6 +326,9 @@ export function getTraitIdsWithReactions(): string[] {
  * @returns A random reaction text string
  */
 export function pickRandomReaction(reaction: TraitReaction): string {
+  if (reaction.reactions.length === 0) {
+    return ''
+  }
   const index = Math.floor(Math.random() * reaction.reactions.length)
-  return reaction.reactions[index]
+  return reaction.reactions[index]!
 }
