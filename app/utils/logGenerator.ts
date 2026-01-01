@@ -1,6 +1,8 @@
-import type { Hero, Expedition, ExpeditionLog, LogSection, LogEntry, Zone, Subzone, ZoneType, ExpeditionEvent } from '~~/types'
+import type { Hero, Expedition, ExpeditionLog, LogSection, LogEntry, Zone, Subzone, ZoneType, ExpeditionEvent, LogRarity } from '~~/types'
 import { getStoryTraitById } from '~/data/storyTraits'
 import { THREATS } from '~~/types/threats'
+import { selectReactions, getTotalRarityBoost } from '~/utils/logs/reactions'
+import { calculateFinalRarity } from '~/utils/logs/rarity'
 
 // ========================================
 // TEMPLATE DATA
@@ -140,6 +142,49 @@ function getEfficiencyCategory(efficiency: number): 'high' | 'medium' | 'low' {
   return 'low'
 }
 
+/**
+ * Apply rarity to a log entry based on its type and context
+ */
+function applyRarity(entry: LogEntry, baseRarity: LogRarity = 'standard', reactionBoost: number = 0): LogEntry {
+  entry.rarity = calculateFinalRarity(baseRarity, { reactionBoosts: reactionBoost })
+  return entry
+}
+
+/**
+ * Apply rarity to all entries in a section
+ */
+function applyRarityToSection(section: LogSection, heroes: Hero[], zoneType: string): LogSection {
+  const entriesWithRarity = section.entries.map(entry => {
+    // Determine base rarity by entry type
+    let baseRarity: LogRarity = 'standard'
+
+    switch (entry.type) {
+      case 'narrative':
+        baseRarity = 'common'
+        break
+      case 'reaction':
+        baseRarity = 'standard'
+        break
+      case 'combat':
+        baseRarity = 'standard'
+        break
+      case 'loot':
+        baseRarity = 'noteworthy'
+        break
+      case 'choice_result':
+        baseRarity = 'standard'
+        break
+    }
+
+    // Check for trait reactions if this is a reaction entry
+    const reactionBoost = entry.type === 'reaction' && entry.traitId ? 1 : 0
+
+    return applyRarity(entry, baseRarity, reactionBoost)
+  })
+
+  return { ...section, entries: entriesWithRarity }
+}
+
 // Find hero countering a specific threat
 function findHeroCountering(heroes: Hero[], threatId: string): Hero | undefined {
   const threat = THREATS[threatId]
@@ -235,6 +280,11 @@ export function generateExpeditionLog(
   // 6. RETURN
   sections.push(generateReturnSection(expedition, heroes))
 
+  // Apply rarity to all sections
+  const sectionsWithRarity = sections.map(section =>
+    applyRarityToSection(section, heroes, zone.type)
+  )
+
   return {
     summary: {
       duration: `${expedition.durationMinutes} minutes`,
@@ -248,7 +298,7 @@ export function generateExpeditionLog(
         masteryGain: expedition.rewards?.masteryGain ?? 0
       }
     },
-    sections
+    sections: sectionsWithRarity
   }
 }
 
