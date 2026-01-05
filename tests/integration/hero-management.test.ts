@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { generateHero } from '~/utils/heroGenerator'
+import { generateHero } from '~~/shared/utils/heroGenerator'
 import { calculateHeroPower } from '~/utils/powerCalculator'
 import { generateEquipment } from '~/utils/equipmentGenerator'
 import type { Hero, Equipment, EquipmentSlot } from '~~/types'

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { generateHero } from '~/utils/heroGenerator'
+import { generateHero } from '~~/shared/utils/heroGenerator'
 import { generateExpeditionLoot, generateFirstClearReward } from '~/utils/lootGenerator'
 import { calculateTeamPower } from '~/utils/powerCalculator'
 import { calculateEfficiency } from '~/utils/efficiencyCalculator'

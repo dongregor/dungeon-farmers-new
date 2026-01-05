@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { v4 as uuid } from 'uuid'
-import type { Hero } from '~~/types'
-import { generateHero } from '~/utils/heroGenerator'
+import type { Hero, Tabard } from '~~/types'
 
 definePageMeta({
   layout: false,
@@ -25,6 +23,14 @@ const tutorialMode = ref(true)
 const isGenerating = ref(false)
 const isSaving = ref(false)
 
+// Tabard customization
+const tabard = ref<Tabard>({
+  primaryColor: '#6366f1', // indigo
+  secondaryColor: '#fbbf24', // amber
+  pattern: 'solid',
+  emblem: 'sword',
+})
+
 // Load saved progress from localStorage
 onMounted(() => {
   try {
@@ -33,6 +39,9 @@ onMounted(() => {
       const progress = JSON.parse(savedProgress)
       currentStep.value = progress.step || 1
       guildName.value = progress.guildName || ''
+      if (progress.tabard) {
+        tabard.value = progress.tabard
+      }
       if (progress.firstHero) {
         firstHero.value = progress.firstHero
       }
@@ -45,11 +54,12 @@ onMounted(() => {
 })
 
 // Save progress to localStorage whenever state changes
-watch([currentStep, guildName, firstHero, rerollsUsed, tutorialMode], () => {
+watch([currentStep, guildName, tabard, firstHero, rerollsUsed, tutorialMode], () => {
   try {
     localStorage.setItem('welcome_progress', JSON.stringify({
       step: currentStep.value,
       guildName: guildName.value,
+      tabard: tabard.value,
       firstHero: firstHero.value,
       rerollsUsed: rerollsUsed.value,
       tutorialMode: tutorialMode.value,
@@ -57,10 +67,10 @@ watch([currentStep, guildName, firstHero, rerollsUsed, tutorialMode], () => {
   } catch (error) {
     console.error('Failed to save welcome progress:', error)
   }
-})
+}, { deep: true })
 
 // Computed
-const totalSteps = 4
+const totalSteps = 5
 const progressPercentage = computed(() => (currentStep.value / totalSteps) * 100)
 const canReroll = computed(() => rerollsUsed.value < maxRerolls.value)
 
@@ -95,67 +105,69 @@ const handleGuildNameSubmit = () => {
   if (validateGuildName()) {
     tutorialStore.setGuildMasterName(guildName.value.trim())
     currentStep.value = 3
-    // Generate first hero when entering step 3
-    if (!firstHero.value) {
-      generateFirstHero()
-    }
   }
 }
 
-// Step 3: First Hero
-const generateFirstHero = () => {
-  isGenerating.value = true
-
-  // Add slight delay for better UX
-  setTimeout(() => {
-    const heroData = generateHero({ forceRarity: 'uncommon' })
-
-    // Create full hero object with required fields
-    firstHero.value = {
-      id: uuid(),
-      ...heroData,
-      currentExpeditionId: null,
-      isFavorite: false,
-      isOnExpedition: false,
-      isStationed: false,
-      stationedZoneId: null,
-      morale: 'content',
-      moraleValue: 75,
-      moraleLastUpdate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    } as Hero
-
-    isGenerating.value = false
-  }, 300)
+// Step 3: Tabard Design
+const handleTabardSubmit = async () => {
+  currentStep.value = 4
+  // Generate first hero when entering step 4
+  if (!firstHero.value) {
+    await generateFirstHero()
+  }
 }
 
-const handleReroll = () => {
+// Step 4: First Hero
+const generateFirstHero = async () => {
+  isGenerating.value = true
+
+  try {
+    // Generate hero on server (saves to database immediately)
+    const hero = await $fetch<Hero>('/api/heroes/generate', {
+      method: 'POST',
+      body: {
+        forceRarity: 'uncommon',
+        replaceHeroId: firstHero.value?.id, // Replace existing if rerolling
+      },
+    })
+
+    firstHero.value = hero
+  } catch (error) {
+    console.error('Failed to generate hero:', error)
+    alert('Failed to generate hero. Please try again.')
+  } finally {
+    isGenerating.value = false
+  }
+}
+
+const handleReroll = async () => {
   if (canReroll.value) {
     rerollsUsed.value++
-    generateFirstHero()
+    await generateFirstHero()
   }
 }
 
 const handleAcceptHero = () => {
-  currentStep.value = 4
+  currentStep.value = 5
 }
 
-// Step 4: Tutorial Setup
+// Step 5: Tutorial Setup
 const handleBeginAdventure = async () => {
   if (!firstHero.value) return
 
   isSaving.value = true
 
   try {
-    // In a real implementation, this would:
-    // 1. Create the guild with the given name
-    // 2. Add the first hero to the player's roster
-    // 3. Initialize tutorial state
-    // 4. Save to backend
-
-    // For now, we'll simulate this with local state
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Create the guild and guild master via API
+    // Note: The first hero is already saved in the database during step 4
+    await $fetch('/api/guild-master/initialize', {
+      method: 'POST',
+      body: {
+        name: guildName.value.trim(),
+        gender: firstHero.value.gender, // Use first hero's gender for guild master
+        tabard: tabard.value,
+      },
+    })
 
     // Set tutorial preferences
     if (tutorialMode.value) {
@@ -164,13 +176,16 @@ const handleBeginAdventure = async () => {
       tutorialStore.skipTutorial()
     }
 
-    // Clear welcome progress
+    // Mark guild as initialized and clear welcome progress
+    localStorage.setItem('guild_initialized', 'true')
     localStorage.removeItem('welcome_progress')
 
     // Redirect to dashboard
     await router.push('/')
   } catch (error) {
     console.error('Failed to complete onboarding:', error)
+    // Show error to user
+    alert('Failed to create guild. Please try again.')
   } finally {
     isSaving.value = false
   }
@@ -180,14 +195,6 @@ const handleBeginAdventure = async () => {
 const goBack = () => {
   if (currentStep.value > 1) {
     currentStep.value--
-  }
-}
-
-const skipOnboarding = () => {
-  if (confirm('Are you sure you want to skip onboarding? You can still access the tutorial later.')) {
-    localStorage.removeItem('welcome_progress')
-    tutorialStore.skipTutorial()
-    router.push('/')
   }
 }
 </script>
@@ -206,14 +213,6 @@ const skipOnboarding = () => {
       <div class="mb-6">
         <div class="flex justify-between text-sm text-gray-400 mb-2">
           <span>Step {{ currentStep }} of {{ totalSteps }}</span>
-          <button
-            v-if="currentStep > 1"
-            type="button"
-            class="text-gray-400 hover:text-gray-300 underline"
-            @click="skipOnboarding"
-          >
-            Skip
-          </button>
         </div>
         <UiProgressBar
           :current="currentStep"
@@ -277,14 +276,6 @@ const skipOnboarding = () => {
               >
                 Start Your Adventure →
               </FormBaseButton>
-
-              <button
-                type="button"
-                class="text-gray-400 hover:text-gray-300 text-sm underline"
-                @click="skipOnboarding"
-              >
-                I Have an Account
-              </button>
             </div>
           </div>
 
@@ -307,6 +298,8 @@ const skipOnboarding = () => {
                 placeholder="e.g., The Golden Slimes"
                 :error="guildNameError"
                 :hint="`${guildName.length}/20 characters`"
+                :maxlength="20"
+                :minlength="3"
                 required
                 @keyup.enter="handleGuildNameSubmit"
                 @input="guildNameError = ''"
@@ -339,8 +332,49 @@ const skipOnboarding = () => {
             </div>
           </div>
 
-          <!-- Step 3: First Hero -->
+          <!-- Step 3: Tabard Design -->
           <div v-else-if="currentStep === 3" key="step-3" class="p-8 md:p-12">
+            <div class="text-center mb-8">
+              <div class="text-6xl mb-6">🎨</div>
+              <h2 class="text-3xl font-bold text-white mb-3">
+                Design Your Tabard
+              </h2>
+              <p class="text-gray-400">
+                Create a unique banner to represent your guild across the realm.
+              </p>
+            </div>
+
+            <div class="max-w-lg mx-auto">
+              <GuildTabardCreator
+                v-model="tabard"
+                theme="dark"
+                :show-emblem="true"
+                :show-custom-colors="false"
+              />
+
+              <!-- Actions -->
+              <div class="flex gap-3 mt-8">
+                <FormBaseButton
+                  variant="ghost"
+                  size="lg"
+                  @click="goBack"
+                >
+                  ← Back
+                </FormBaseButton>
+                <FormBaseButton
+                  variant="primary"
+                  size="lg"
+                  class="flex-1"
+                  @click="handleTabardSubmit"
+                >
+                  Continue →
+                </FormBaseButton>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: First Hero -->
+          <div v-else-if="currentStep === 4" key="step-4" class="p-8 md:p-12">
             <div class="text-center mb-8">
               <div class="text-6xl mb-6">✨</div>
               <h2 class="text-3xl font-bold text-white mb-3">
@@ -412,8 +446,8 @@ const skipOnboarding = () => {
             </div>
           </div>
 
-          <!-- Step 4: Tutorial Setup -->
-          <div v-else-if="currentStep === 4" key="step-4" class="p-8 md:p-12">
+          <!-- Step 5: Tutorial Setup -->
+          <div v-else-if="currentStep === 5" key="step-5" class="p-8 md:p-12">
             <div class="text-center mb-8">
               <div class="text-6xl mb-6">📚</div>
               <h2 class="text-3xl font-bold text-white mb-3">
@@ -459,18 +493,24 @@ const skipOnboarding = () => {
               <!-- Summary -->
               <div class="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border border-purple-700/50 rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-semibold text-white mb-4">Your Adventure Begins:</h3>
-                <div class="space-y-2 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-gray-400">Guild Name:</span>
-                    <span class="text-white font-medium">{{ guildName }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-400">First Hero:</span>
-                    <span class="text-white font-medium">{{ firstHero?.name }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-400">Tutorial:</span>
-                    <span class="text-white font-medium">{{ tutorialMode ? 'Enabled' : 'Disabled' }}</span>
+                <div class="flex gap-4">
+                  <!-- Mini Tabard Preview -->
+                  <GuildTabardPreview :tabard="tabard" size="sm" class="flex-shrink-0" />
+
+                  <!-- Details -->
+                  <div class="flex-1 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-400">Guild Name:</span>
+                      <span class="text-white font-medium">{{ guildName }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-400">First Hero:</span>
+                      <span class="text-white font-medium">{{ firstHero?.name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-400">Tutorial:</span>
+                      <span class="text-white font-medium">{{ tutorialMode ? 'Enabled' : 'Disabled' }}</span>
+                    </div>
                   </div>
                 </div>
               </div>

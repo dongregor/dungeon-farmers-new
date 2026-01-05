@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Hero } from '~~/types'
-import { getArchetypeById } from '~~/types/archetypes'
+import { getArchetypeById, TAG_INFO } from '~~/types/archetypes'
+import { GAMEPLAY_TRAITS } from '~/data/gameplayTraits'
+import { STORY_TRAITS } from '~/data/storyTraits'
 
 const props = defineProps<{
   hero: Hero
@@ -22,6 +24,67 @@ const statTotal = computed(() =>
   props.hero.baseStats.utility +
   props.hero.baseStats.survival
 )
+
+// Get archetype tag info (combat abilities)
+const formattedArchetypeTags = computed(() => {
+  return props.hero.archetypeTags.map(tagId => {
+    const tagData = TAG_INFO[tagId]
+    if (!tagData) {
+      return {
+        id: tagId,
+        name: tagId.replace(/_/g, ' '),
+        description: '',
+      }
+    }
+    return {
+      id: tagId,
+      name: tagData.name,
+      description: tagData.description,
+    }
+  })
+})
+
+// Get full gameplay trait info with formatted description
+const formattedGameplayTraits = computed(() => {
+  return props.hero.gameplayTraits.map(heroTrait => {
+    const traitData = GAMEPLAY_TRAITS[heroTrait.traitId]
+    if (!traitData) {
+      return {
+        id: heroTrait.traitId,
+        name: heroTrait.traitId.replace(/_/g, ' '),
+        description: '',
+        isNegative: false,
+      }
+    }
+    // Replace {value} placeholder with actual rolled value
+    const description = traitData.description.replace('{value}', String(heroTrait.rolledValue))
+    return {
+      id: heroTrait.traitId,
+      name: traitData.name,
+      description,
+      isNegative: traitData.isNegative,
+    }
+  })
+})
+
+// Get full story trait info
+const formattedStoryTraits = computed(() => {
+  return props.hero.storyTraitIds.map(traitId => {
+    const traitData = STORY_TRAITS[traitId]
+    if (!traitData) {
+      return {
+        id: traitId,
+        name: traitId.replace(/_/g, ' '),
+        description: '',
+      }
+    }
+    return {
+      id: traitId,
+      name: traitData.name,
+      description: traitData.description,
+    }
+  })
+})
 </script>
 
 <template>
@@ -49,26 +112,52 @@ const statTotal = computed(() =>
         </div>
       </div>
 
-      <div class="flex gap-2 flex-wrap">
-        <span v-for="trait in hero.gameplayTraits.slice(0, showDetails ? undefined : 2)"
-              :key="trait.traitId"
-              class="text-xs bg-gray-700 px-2 py-1 rounded">
-          {{ trait.traitId.replace(/_/g, ' ') }}
-        </span>
-        <span v-if="hero.gameplayTraits.length > (showDetails ? 0 : 2)"
-              class="text-xs text-gray-500">
-          +{{ hero.gameplayTraits.length - (showDetails ? 0 : 2) }} more
-        </span>
+      <!-- Archetype Abilities (Tags) -->
+      <div v-if="formattedArchetypeTags.length > 0" class="space-y-1.5">
+        <div class="text-xs text-gray-400 mb-1">Abilities:</div>
+        <div
+          v-for="tag in (showDetails ? formattedArchetypeTags : formattedArchetypeTags.slice(0, 2))"
+          :key="tag.id"
+          class="text-xs bg-gray-700 px-2 py-1.5 rounded border-l-2 border-quest-blue"
+        >
+          <span class="font-medium text-white">{{ tag.name }}:</span>
+          <span class="text-gray-300 ml-1">{{ tag.description }}</span>
+        </div>
+        <div v-if="!showDetails && formattedArchetypeTags.length > 2" class="text-xs text-gray-500">
+          +{{ formattedArchetypeTags.length - 2 }} more abilities
+        </div>
       </div>
 
-      <div v-if="showDetails && hero.storyTraitIds.length > 0" class="mt-3 pt-2 border-t border-gray-700">
+      <!-- Gameplay Traits -->
+      <div v-if="formattedGameplayTraits.length > 0" class="mt-3 pt-2 border-t border-gray-700 space-y-1.5">
+        <div class="text-xs text-gray-400 mb-1">Traits:</div>
+        <div
+          v-for="trait in (showDetails ? formattedGameplayTraits : formattedGameplayTraits.slice(0, 2))"
+          :key="trait.id"
+          class="text-xs bg-gray-700 px-2 py-1.5 rounded"
+          :class="trait.isNegative ? 'border-l-2 border-danger-red' : 'border-l-2 border-uncommon'"
+        >
+          <span class="font-medium text-white">{{ trait.name }}:</span>
+          <span class="text-gray-300 ml-1">{{ trait.description }}</span>
+        </div>
+        <div v-if="!showDetails && formattedGameplayTraits.length > 2" class="text-xs text-gray-500">
+          +{{ formattedGameplayTraits.length - 2 }} more traits
+        </div>
+      </div>
+
+      <!-- Story Traits (Personality) -->
+      <div v-if="formattedStoryTraits.length > 0" class="mt-3 pt-2 border-t border-gray-700 space-y-1.5">
         <div class="text-xs text-gray-400 mb-1">Personality:</div>
-        <div class="flex gap-2 flex-wrap">
-          <span v-for="traitId in hero.storyTraitIds.slice(0, 3)"
-                :key="traitId"
-                class="text-xs bg-gray-700 px-2 py-1 rounded">
-            {{ traitId.replace(/_/g, ' ') }}
-          </span>
+        <div
+          v-for="trait in (showDetails ? formattedStoryTraits : formattedStoryTraits.slice(0, 2))"
+          :key="trait.id"
+          class="text-xs bg-gray-700 px-2 py-1.5 rounded border-l-2 border-purple-500"
+        >
+          <span class="font-medium text-white">{{ trait.name }}:</span>
+          <span class="text-gray-300 ml-1">{{ trait.description }}</span>
+        </div>
+        <div v-if="!showDetails && formattedStoryTraits.length > 2" class="text-xs text-gray-500">
+          +{{ formattedStoryTraits.length - 2 }} more personality traits
         </div>
       </div>
     </div>

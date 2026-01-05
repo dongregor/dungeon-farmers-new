@@ -1,9 +1,9 @@
 # Dungeon Farmers - Claude Context
 
-**Last Updated:** 2024-12-14
-**Status:** Design v2 complete, ready for implementation
+**Last Updated:** 2026-01-04
+**Status:** Phase 1 MVP ~98% complete (42/43 tasks)
 **Design Doc:** [design/GAME_DESIGN_V2.md](design/GAME_DESIGN_V2.md)
-**Tech Stack:** [docs/tech-stack-recommendation.md](docs/tech-stack-recommendation.md)
+**Task Tracking:** [TASKS.md](TASKS.md)
 
 ---
 
@@ -29,14 +29,25 @@
 
 ## Documentation
 
-**Active:**
+**Active Design:**
 - `design/GAME_DESIGN_V2.md` - Complete game design (START HERE)
-- `docs/tech-stack-recommendation.md` - Tech stack recommendations and architecture
-- `docs/plans/` - Implementation plans and system designs (✅ Updated for Nuxt 4)
-- `docs/plans/BEST_PRACTICES_REVIEW.md` - Best practices reference (fixes applied)
+- `design/content/` - Content catalogs (monsters, equipment, zones, traits)
+- `design/TONE_AND_WRITING.md` - Writing style guide
+
+**Implementation:**
+- `TASKS.md` - Current task tracking (SOURCE OF TRUTH for progress)
+- `docs/plans/IMPLEMENTATION_PLAN.md` - Master implementation plan
+- `docs/plans/BEST_PRACTICES_REVIEW.md` - Nuxt 4 best practices
+- `docs/tech-stack-recommendation.md` - Tech stack architecture
+
+**Reference:**
+- `docs/user-stories/` - Feature requirements (187+ stories)
+- `docs/api-breakdown/` - API specification (140+ endpoints)
+- `docs/ui-breakdown/` - UI components and pages
 
 **Archived:**
-- `design/_archive/` - Legacy documentation (reference only)
+- `design/_archive/` - Legacy design docs (superseded by V2)
+- `docs/plans/_archive/` - Superseded plan versions
 
 ---
 
@@ -66,11 +77,34 @@
 
 ## Development Phases
 
-1. **Phase 1:** MVP core loop (heroes, zones, equipment, logs)
+1. **Phase 1:** MVP core loop (heroes, zones, equipment, logs) - **98% complete**
 2. **Phase 2:** Dungeon building (monsters, schematics, passive assignments)
 3. **Phase 3:** Depth (synergies, prestige, procedural events, sets)
 4. **Phase 4:** Content & AI (generated events, more content)
 5. **Phase 5:** Social (alliances, raids, leaderboards) - post-launch
+
+---
+
+## Current Implementation Status
+
+**What's Built (Phase 1):**
+- ✅ Hero system (generation, traits, leveling, prestige, retire)
+- ✅ Tavern (recruitment, refresh, lock/unlock)
+- ✅ Expeditions (start, cancel, complete, choice events)
+- ✅ Equipment (equip, upgrade, inventory)
+- ✅ Auth (login, register, Supabase integration)
+- ✅ Unit tests (151 passing)
+- ✅ 80+ Vue components, 21 API routes
+
+**Remaining (Phase 1):**
+- ❌ E2E tests (Playwright not set up)
+- ❌ JSDoc documentation for complex components
+
+**Not Started:**
+- Phase 2: Dungeon building system
+- Phase 3+: Advanced features
+
+See `TASKS.md` for detailed task tracking.
 
 ---
 

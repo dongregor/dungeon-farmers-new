@@ -15,7 +15,8 @@ const error = ref('')
 // Redirect if already logged in
 watch(user, (newUser) => {
   if (newUser) {
-    navigateTo('/')
+    const hasGuild = localStorage.getItem('guild_initialized') === 'true'
+    navigateTo(hasGuild ? '/' : '/welcome')
   }
 }, { immediate: true })
 
@@ -29,7 +30,8 @@ async function handleSubmit() {
       password: password.value,
     })
     if (signInError) throw signInError
-    navigateTo('/')
+    const hasGuild = localStorage.getItem('guild_initialized') === 'true'
+    navigateTo(hasGuild ? '/' : '/welcome')
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'An error occurred'
   } finally {

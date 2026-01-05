@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { useNotificationStore } from '~/stores/notifications'
+import { useGuildMasterStore } from '~/stores/guildMaster'
 import { storeToRefs } from 'pinia'
+import type { Tabard } from '~~/types'
 
 definePageMeta({
   title: 'Settings',
 })
 
-type SettingsTab = 'notifications' | 'display' | 'gameplay' | 'account'
+type SettingsTab = 'guild' | 'notifications' | 'display' | 'gameplay' | 'account'
 
 const notificationStore = useNotificationStore()
+const guildMasterStore = useGuildMasterStore()
 const { preferences } = storeToRefs(notificationStore)
+const { guild } = storeToRefs(guildMasterStore)
 
-const activeTab = ref<SettingsTab>('notifications')
+const activeTab = ref<SettingsTab>('guild')
 const saving = ref(false)
 const saveMessage = ref('')
 
@@ -42,12 +46,47 @@ const accountSettings = ref({
   marketingEmails: false,
 })
 
-onMounted(() => {
+// Guild settings
+const guildName = ref('')
+const guildTabard = ref<Tabard>({
+  primaryColor: '#6366f1',
+  secondaryColor: '#fbbf24',
+  pattern: 'solid',
+  emblem: 'sword',
+})
+const guildSaving = ref(false)
+
+onMounted(async () => {
   notificationStore.loadPreferences()
   // Load other settings from localStorage or API
   loadDisplaySettings()
   loadGameplaySettings()
+  // Load guild settings from store
+  await guildMasterStore.fetchGuildMaster()
+  loadGuildSettings()
 })
+
+const loadGuildSettings = () => {
+  if (guild.value) {
+    guildName.value = guild.value.name
+    guildTabard.value = { ...guild.value.tabard }
+  }
+}
+
+const saveGuildSettings = async () => {
+  if (!guild.value) return
+
+  guildSaving.value = true
+  try {
+    await guildMasterStore.updateGuild(guildName.value, guildTabard.value)
+    showSaveMessage('Guild settings saved!')
+  } catch (error) {
+    console.error('Failed to save guild settings:', error)
+    showSaveMessage('Failed to save guild settings')
+  } finally {
+    guildSaving.value = false
+  }
+}
 
 const loadDisplaySettings = () => {
   const stored = localStorage.getItem('display_settings')
@@ -168,6 +207,15 @@ const resetToDefaults = (category: SettingsTab) => {
         <div class="flex border-b border-gray-200 overflow-x-auto">
           <button
             class="py-4 px-6 font-bold transition-all whitespace-nowrap"
+            :class="activeTab === 'guild'
+              ? 'bg-blue-500 text-white border-b-4 border-blue-700'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            @click="activeTab = 'guild'"
+          >
+            Guild
+          </button>
+          <button
+            class="py-4 px-6 font-bold transition-all whitespace-nowrap"
             :class="activeTab === 'notifications'
               ? 'bg-blue-500 text-white border-b-4 border-blue-700'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
@@ -206,6 +254,51 @@ const resetToDefaults = (category: SettingsTab) => {
 
         <!-- Content -->
         <div class="p-6">
+          <!-- Guild Tab -->
+          <div v-if="activeTab === 'guild'" class="space-y-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Guild Settings</h2>
+
+            <div v-if="guild" class="space-y-6">
+              <!-- Guild Name -->
+              <div class="border-2 border-gray-200 rounded-lg p-4">
+                <label class="block font-medium text-gray-800 mb-2">Guild Name</label>
+                <input
+                  v-model="guildName"
+                  type="text"
+                  class="w-full border-2 border-gray-300 rounded px-4 py-2"
+                  placeholder="Enter guild name"
+                  maxlength="30"
+                />
+                <p class="text-sm text-gray-600 mt-1">2-30 characters</p>
+              </div>
+
+              <!-- Tabard Customization -->
+              <div class="border-2 border-gray-200 rounded-lg p-4">
+                <h3 class="font-bold text-gray-700 mb-4">Guild Tabard</h3>
+                <GuildTabardCreator
+                  v-model="guildTabard"
+                  theme="light"
+                  :show-emblem="true"
+                />
+              </div>
+
+              <!-- Save Button -->
+              <div class="flex justify-end">
+                <button
+                  class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
+                  :disabled="guildSaving || guildName.length < 2"
+                  @click="saveGuildSettings"
+                >
+                  {{ guildSaving ? 'Saving...' : 'Save Guild Settings' }}
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="text-center py-8 text-gray-500">
+              <p>No guild found. Please create your guild first.</p>
+            </div>
+          </div>
+
           <!-- Notifications Tab -->
           <div v-if="activeTab === 'notifications'" class="space-y-6">
             <div class="flex items-center justify-between mb-4">

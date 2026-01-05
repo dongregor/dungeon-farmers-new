@@ -11,7 +11,24 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // User ID is in 'sub' field from JWT, or 'id' from user object
+  const userId = user.id || user.sub
+  if (!userId) {
+    throw createError({ statusCode: 401, message: 'User ID not found' })
+  }
+
   const supabase = await serverSupabaseClient(event)
+
+  // Get player
+  const { data: player, error: playerError } = await supabase
+    .from('players')
+    .select('id')
+    .eq('auth_user_id', userId)
+    .single()
+
+  if (playerError || !player) {
+    throw createError({ statusCode: 404, message: 'Player not found' })
+  }
 
   // Parse query params
   const query = getQuery(event)
@@ -19,29 +36,29 @@ export default defineEventHandler(async (event) => {
   const limit = query.limit ? parseInt(query.limit as string) : 10
 
   try {
-    // Fetch active expeditions
+    // Fetch active expeditions (is_completed = false)
     let activeExpeditions: Expedition[] = []
     if (status === 'active' || status === 'all' || !status) {
       const { data, error } = await supabase
         .from('expeditions')
         .select('*')
-        .eq('player_id', user.id)
-        .eq('status', 'in_progress')
+        .eq('player_id', player.id)
+        .eq('is_completed', false)
         .order('created_at', { ascending: false })
 
       if (error) throw error
       activeExpeditions = data || []
     }
 
-    // Fetch completed expeditions
+    // Fetch completed expeditions (is_completed = true)
     let completedExpeditions: Expedition[] = []
     if (status === 'completed' || status === 'all' || !status) {
       const { data, error } = await supabase
         .from('expeditions')
         .select('*')
-        .eq('player_id', user.id)
-        .eq('status', 'completed')
-        .order('completed_at', { ascending: false })
+        .eq('player_id', player.id)
+        .eq('is_completed', true)
+        .order('updated_at', { ascending: false })
         .limit(limit)
 
       if (error) throw error

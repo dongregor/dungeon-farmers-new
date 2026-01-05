@@ -9,6 +9,8 @@ interface Props {
   hint?: string
   id?: string
   required?: boolean
+  maxlength?: number
+  minlength?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -74,6 +76,8 @@ const inputClasses = computed(() => {
       :placeholder="placeholder"
       :disabled="disabled"
       :required="required"
+      :maxlength="maxlength"
+      :minlength="minlength"
       :class="inputClasses"
       :aria-invalid="!!error"
       :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined"

@@ -4,7 +4,7 @@ import { TAVERN_REFRESH_HOURS } from '~~/types/recruitment'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
 // Mock hero generator
-vi.mock('~/utils/heroGenerator', () => ({
+vi.mock('~~/shared/utils/heroGenerator', () => ({
   generateTavernHero: vi.fn(),
 }))
 
@@ -13,7 +13,7 @@ vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123'),
 }))
 
-import { generateTavernHero } from '~/utils/heroGenerator'
+import { generateTavernHero } from '~~/shared/utils/heroGenerator'
 import getTavernHandler from '~~/server/api/tavern/index.get'
 import refreshTavernHandler from '~~/server/api/tavern/refresh.post'
 import recruitHeroHandler from '~~/server/api/tavern/recruit.post'

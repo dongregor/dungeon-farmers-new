@@ -11,11 +11,17 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
+  // User ID is in 'sub' field from JWT, or 'id' from user object
+  const userId = user.id || user.sub
+  if (!userId) {
+    throw createError({ statusCode: 401, message: 'User ID not found' })
+  }
+
   // Get player
   const { data: player } = await client
     .from('players')
     .select('*, last_online_at')
-    .eq('auth_user_id', user.id)
+    .eq('auth_user_id', userId)
     .single()
 
   if (!player) {

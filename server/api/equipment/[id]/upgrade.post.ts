@@ -64,6 +64,12 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
 
+  // User ID is in 'sub' field from JWT, or 'id' from user object
+  const userId = user.id || user.sub
+  if (!userId) {
+    throw createError({ statusCode: 401, message: 'User ID not found' })
+  }
+
   if (!equipmentId) {
     throw createError({ statusCode: 400, message: 'Equipment ID required' })
   }
@@ -87,7 +93,7 @@ export default defineEventHandler(async (event): Promise<UpgradeResponse> => {
   const { data: player, error: playerError } = await client
     .from('players')
     .select('id, gold')
-    .eq('auth_user_id', user.id)
+    .eq('auth_user_id', userId)
     .single()
 
   if (playerError || !player) {

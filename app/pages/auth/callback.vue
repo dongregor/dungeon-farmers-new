@@ -13,7 +13,8 @@ watch(user, (newUser) => {
     if (timeoutId.value) {
       clearTimeout(timeoutId.value)
     }
-    navigateTo('/')
+    const hasGuild = localStorage.getItem('guild_initialized') === 'true'
+    navigateTo(hasGuild ? '/' : '/welcome')
   }
 }, { immediate: true })
 

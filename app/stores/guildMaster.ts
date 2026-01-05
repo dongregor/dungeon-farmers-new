@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { toError } from '~~/shared/utils/errorHandler'
-import type { GuildMaster, Stats, Gender, Archetype, ArchetypeTag } from '~/types'
+import type { Guild, GuildMaster, Stats, Gender, Archetype, ArchetypeTag, Tabard } from '~/types'
 
 export interface TraitSlot {
   equipped: string | null
@@ -17,6 +17,7 @@ export interface GuildMasterTraitSelection {
 
 export const useGuildMasterStore = defineStore('guildMaster', {
   state: () => ({
+    guild: null as Guild | null,
     guildMaster: null as GuildMaster | null,
     availableTraits: [] as GuildMasterTraitSelection[],
     loading: false,
@@ -25,10 +26,24 @@ export const useGuildMasterStore = defineStore('guildMaster', {
 
   getters: {
     /**
-     * Check if guild master is initialized
+     * Check if guild is initialized
      */
     isInitialized(): boolean {
-      return this.guildMaster !== null
+      return this.guild !== null
+    },
+
+    /**
+     * Get guild name
+     */
+    guildName(): string | null {
+      return this.guild?.name ?? null
+    },
+
+    /**
+     * Get guild tabard
+     */
+    tabard(): Tabard | null {
+      return this.guild?.tabard ?? null
     },
 
     /**
@@ -113,7 +128,7 @@ export const useGuildMasterStore = defineStore('guildMaster', {
 
   actions: {
     /**
-     * Fetch guild master from server
+     * Fetch guild and guild master from server
      */
     async fetchGuildMaster() {
       this.loading = true
@@ -121,56 +136,62 @@ export const useGuildMasterStore = defineStore('guildMaster', {
 
       try {
         const data = await $fetch<{
+          guild: Guild | null
           guildMaster: GuildMaster | null
           availableTraits: GuildMasterTraitSelection[]
         }>('/api/guild-master')
 
+        this.guild = data.guild
         this.guildMaster = data.guildMaster
         this.availableTraits = data.availableTraits
       } catch (err: unknown) {
-    const error = toError(err)
-        this.error = error.message || 'Failed to fetch guild master'
-        console.error('Error fetching guild master:', error)
+        const error = toError(err)
+        this.error = error.message || 'Failed to fetch guild data'
+        console.error('Error fetching guild data:', error)
       } finally {
         this.loading = false
       }
     },
 
     /**
-     * Initialize guild master (first-time setup)
+     * Initialize guild and guild master (first-time setup)
      */
-    async initializeGuildMaster(name: string, gender: Gender) {
+    async initializeGuild(name: string, gender: Gender, tabard?: Tabard) {
       try {
-        const data = await $fetch<GuildMaster>('/api/guild-master/initialize', {
+        const data = await $fetch<{
+          guild: Guild
+          guildMaster: GuildMaster
+        }>('/api/guild-master/initialize', {
           method: 'POST',
-          body: { name, gender },
+          body: { name, gender, tabard },
         })
 
-        this.guildMaster = data
+        this.guild = data.guild
+        this.guildMaster = data.guildMaster
         return data
       } catch (err: unknown) {
-    const error = toError(err)
-        console.error('Error initializing guild master:', error)
+        const error = toError(err)
+        console.error('Error initializing guild:', error)
         throw err
       }
     },
 
     /**
-     * Update guild master name
+     * Update guild name and/or tabard
      */
-    async updateName(name: string) {
-      if (!this.guildMaster) return
+    async updateGuild(name: string, tabard: Tabard) {
+      if (!this.guild) return
 
       try {
-        await $fetch('/api/guild-master/name', {
+        const data = await $fetch<Guild>('/api/guild-master/update', {
           method: 'PATCH',
-          body: { name },
+          body: { name, tabard },
         })
 
-        this.guildMaster.name = name
+        this.guild = data
       } catch (err: unknown) {
-    const error = toError(err)
-        console.error('Error updating guild master name:', error)
+        const error = toError(err)
+        console.error('Error updating guild:', error)
         throw err
       }
     },

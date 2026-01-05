@@ -69,3 +69,46 @@ export interface SupabaseHeroRow {
   created_at: string
   updated_at: string
 }
+
+export interface SupabaseTabard {
+  primaryColor: string
+  secondaryColor: string
+  pattern: 'solid' | 'divided' | 'quartered' | 'striped' | 'diagonal' | 'bordered'
+  emblem: string
+}
+
+export interface SupabaseGuildMasterRow {
+  id: string
+  player_id: string
+  name: string
+  gender: string
+  culture: string
+  titles: string[]
+  display_title: string | null
+  rarity: string
+  archetype: string
+  archetype_tags: string[]
+  base_stats: {
+    combat: number
+    utility: number
+    survival: number
+  }
+  level: number
+  xp: number
+  xp_to_next_level: number
+  gameplay_traits: unknown[]
+  story_trait_ids: string[]
+  power: number
+  equipment: Record<string, string>
+  prestige_level: number
+  prestige_bonuses: {
+    combat: number
+    utility: number
+    survival: number
+  }
+  is_favorite: boolean
+  morale: string
+  morale_last_update: string
+  created_at: string
+  updated_at: string
+}

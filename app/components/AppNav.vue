@@ -25,6 +25,14 @@
         <span class="text-2xl">🎒</span>
         <span class="text-xs">Inventory</span>
       </NuxtLink>
+      <NuxtLink
+        to="/settings"
+        class="flex flex-col items-center p-2 text-gray-400 hover:text-guild-gold"
+        active-class="text-guild-gold"
+      >
+        <span class="text-2xl">⚙️</span>
+        <span class="text-xs">Settings</span>
+      </NuxtLink>
     </div>
   </nav>
 </template>

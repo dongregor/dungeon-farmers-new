@@ -21,12 +21,12 @@ import {
 import { ARCHETYPE_TAG_POOLS, TAG_COUNT_BY_RARITY } from '~~/types/archetypes'
 import { GAMEPLAY_TRAIT_COUNT, STORY_TRAIT_STARTING_COUNT } from '~~/types/traits'
 import { RECRUITMENT_COSTS, TAVERN_REFRESH_HOURS } from '~~/types/recruitment'
-import { getRandomName } from '~/data/names'
-import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~/data/gameplayTraits'
-import { getGenerationStoryTraits } from '~/data/storyTraits'
-import { getRandomCulture } from '~/data/cultures'
+import { getRandomName } from '~~/app/data/names'
+import { getPositiveGameplayTraits, getNegativeGameplayTraits } from '~~/app/data/gameplayTraits'
+import { getGenerationStoryTraits } from '~~/app/data/storyTraits'
+import { getRandomCulture } from '~~/app/data/cultures'
 import { randomInt, randomElement, randomElements, weightedRandom } from '~~/shared/utils/randomization'
-import { getXpForLevel } from '~/utils/xpService'
+import { getXpForLevel } from '~~/app/utils/xpService'
 
 // Generate rarity
 function generateRarity(): Rarity {

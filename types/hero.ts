@@ -60,12 +60,36 @@ export interface Hero {
   updatedAt: string
 }
 
+// Guild tabard design
+export interface Tabard {
+  primaryColor: string
+  secondaryColor: string
+  pattern: 'solid' | 'divided' | 'quartered' | 'striped' | 'diagonal' | 'bordered'
+  emblem: string
+}
+
+// Guild - organization-level data (name, tabard, etc.)
+export interface Guild {
+  id: string
+
+  // Guild identity (set by player)
+  name: string
+  tabard: Tabard
+
+  // Guild progression
+  level: number
+
+  // Timestamps
+  createdAt: string
+  updatedAt: string
+}
+
 // The Guild Master (player's character) - different from regular heroes
+// This is the character data, not the guild organization data
 export interface GuildMaster {
   id: string
 
-  // Identity (set by player)
-  name: string
+  // Character identity
   gender: Gender
 
   // Always legendary

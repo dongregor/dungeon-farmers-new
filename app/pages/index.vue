@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useHeroStore } from '~/stores/heroes'
 import { useExpeditionStore } from '~/stores/expeditions'
+import { useGuildMasterStore } from '~/stores/guildMaster'
 import { storeToRefs } from 'pinia'
 
 definePageMeta({
@@ -9,15 +10,18 @@ definePageMeta({
 
 const heroStore = useHeroStore()
 const expeditionStore = useExpeditionStore()
+const guildMasterStore = useGuildMasterStore()
 
 const { heroes } = storeToRefs(heroStore)
 const { activeExpeditions } = storeToRefs(expeditionStore)
+const { guild } = storeToRefs(guildMasterStore)
 
 // Fetch data on mount
 onMounted(async () => {
   await Promise.all([
     heroStore.fetchHeroes(),
     expeditionStore.fetchExpeditions(),
+    guildMasterStore.fetchGuildMaster(),
   ])
 })
 
@@ -41,14 +45,23 @@ const expeditionStats = computed(() => {
 
 <template>
   <div class="container mx-auto px-4 py-8 max-w-7xl">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-4xl font-bold text-gray-800 mb-2">
-        Guild Dashboard
-      </h1>
-      <p class="text-gray-600">
-        Welcome back, Guild Master
-      </p>
+    <!-- Header with Guild Tabard -->
+    <div class="mb-8 flex items-center gap-6">
+      <!-- Tabard Preview -->
+      <GuildTabardPreview
+        v-if="guild?.tabard"
+        :tabard="guild.tabard"
+        size="md"
+      />
+
+      <div>
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          {{ guild?.name || 'Guild Dashboard' }}
+        </h1>
+        <p class="text-gray-600">
+          Welcome back, Guild Master
+        </p>
+      </div>
     </div>
 
     <!-- Quick Stats -->

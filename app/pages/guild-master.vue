@@ -10,6 +10,7 @@ definePageMeta({
 
 const guildMasterStore = useGuildMasterStore()
 const {
+  guild,
   guildMaster,
   isInitialized,
   equippedTraits,
@@ -80,7 +81,7 @@ const getRarityBorder = () => {
         <div class="p-6">
           <div class="flex items-start justify-between mb-4">
             <div>
-              <h1 class="text-3xl font-bold text-gray-800 mb-1">{{ guildMaster.name }}</h1>
+              <h1 class="text-3xl font-bold text-gray-800 mb-1">{{ guild?.name || 'Guild Master' }}</h1>
               <div class="flex items-center gap-2 text-sm text-gray-600">
                 <span class="capitalize">{{ guildMaster.gender }}</span>
                 <span class="text-gray-400">•</span>
