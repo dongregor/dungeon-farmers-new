@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import type { TavernSlot, Hero, TavernHero } from '~~/types'
 import { v4 as uuid } from 'uuid'
 import { z } from 'zod'
@@ -106,13 +107,13 @@ export default defineEventHandler(async (event) => {
       equipment: tavernHero.equipment,
       prestige_level: tavernHero.prestigeLevel,
       prestige_bonuses: tavernHero.prestigeBonuses,
+      visual_traits: tavernHero.visualTraits,
       current_expedition_id: null,
       is_favorite: false,
       is_on_expedition: false,
       is_stationed: false,
       stationed_zone_id: null,
       morale: 'content',
-      morale_value: 50,
       morale_last_update: now,
       created_at: now,
       updated_at: now,
@@ -196,7 +197,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      hero: createdHero,
+      hero: mapSupabaseHeroToHero(createdHero),
       remainingGold: updatedPlayer.gold,
     }
   } catch (err: unknown) {
