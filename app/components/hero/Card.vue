@@ -27,7 +27,7 @@ const statTotal = computed(() =>
 
 // Get archetype tag info (combat abilities)
 const formattedArchetypeTags = computed(() => {
-  return props.hero.archetypeTags.map(tagId => {
+  return (props.hero.archetypeTags || []).map(tagId => {
     const tagData = TAG_INFO[tagId]
     if (!tagData) {
       return {
@@ -46,7 +46,7 @@ const formattedArchetypeTags = computed(() => {
 
 // Get full gameplay trait info with formatted description
 const formattedGameplayTraits = computed(() => {
-  return props.hero.gameplayTraits.map(heroTrait => {
+  return (props.hero.gameplayTraits || []).map(heroTrait => {
     const traitData = GAMEPLAY_TRAITS[heroTrait.traitId]
     if (!traitData) {
       return {
@@ -69,7 +69,7 @@ const formattedGameplayTraits = computed(() => {
 
 // Get full story trait info
 const formattedStoryTraits = computed(() => {
-  return props.hero.storyTraitIds.map(traitId => {
+  return (props.hero.storyTraitIds || []).map(traitId => {
     const traitData = STORY_TRAITS[traitId]
     if (!traitData) {
       return {
@@ -90,15 +90,20 @@ const formattedStoryTraits = computed(() => {
 <template>
   <div class="bg-gray-800 rounded-lg overflow-hidden border-2" :class="rarityColors[hero.rarity]">
     <div class="p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="text-lg font-bold text-guild-gold">{{ hero.name }}</h3>
-        <span class="text-sm text-gray-400 capitalize">{{ hero.rarity }}</span>
-      </div>
-
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-sm bg-gray-700 px-2 py-1 rounded">{{ archetype.name }}</span>
-        <span class="text-xs text-gray-400">Lvl {{ hero.level }}</span>
-        <span class="text-xs text-gray-400 capitalize">{{ hero.morale }}</span>
+      <!-- Portrait and Hero Info -->
+      <div class="flex gap-4 mb-3">
+        <HeroPortrait :hero="hero" size="md" />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="text-lg font-bold text-guild-gold truncate">{{ hero.name }}</h3>
+            <span class="text-sm text-gray-400 capitalize">{{ hero.rarity }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm bg-gray-700 px-2 py-1 rounded">{{ archetype.name }}</span>
+            <span class="text-xs text-gray-400">Lvl {{ hero.level }}</span>
+            <span class="text-xs text-gray-400 capitalize">{{ hero.morale }}</span>
+          </div>
+        </div>
       </div>
 
       <div v-if="showDetails" class="mb-3">
