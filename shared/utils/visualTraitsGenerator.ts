@@ -31,7 +31,8 @@ function weightedRandomIndex(weights: number[], rng: () => number): number {
   let roll = rng() * total
 
   for (let i = 0; i < weights.length; i++) {
-    roll -= weights[i]
+    const weight = weights[i] ?? 0
+    roll -= weight
     if (roll <= 0) return i
   }
 
@@ -47,8 +48,8 @@ export function generateVisualTraits(
 ): HeroVisualTraits {
   const rng = seededRandom(heroId)
 
-  // Skin tone influenced by culture
-  const skinWeights = CULTURE_SKIN_WEIGHTS[culture]
+  // Skin tone influenced by culture (fallback to even distribution if culture unknown)
+  const skinWeights = CULTURE_SKIN_WEIGHTS[culture] ?? [0.2, 0.2, 0.2, 0.2, 0.2]
   const skinTone = weightedRandomIndex(skinWeights, rng)
 
   // Hair color (purely random)

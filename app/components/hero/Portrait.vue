@@ -48,6 +48,11 @@ const rarityStyle = computed(() => {
   }
 })
 
+// Unique ID for SVG gradient (use id if Hero, fallback to name for TavernHero)
+const uniqueId = computed(() => {
+  return 'id' in props.hero ? props.hero.id : props.hero.name.replace(/\s+/g, '-')
+})
+
 // Archetype silhouette paths (body and detail layers)
 const SILHOUETTE_PATHS: Record<Archetype, { body: string; detail: string }> = {
   tank: {
@@ -111,13 +116,13 @@ const hairPath = computed(() => {
     >
       <!-- Background gradient -->
       <defs>
-        <linearGradient :id="`bg-${hero.id}`" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient :id="`bg-${uniqueId}`" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" :stop-color="rarityStyle.borderColor" stop-opacity="0.3" />
           <stop offset="100%" stop-color="#1a1a2e" />
         </linearGradient>
       </defs>
 
-      <rect width="192" height="192" :fill="`url(#bg-${hero.id})`" />
+      <rect width="192" height="192" :fill="`url(#bg-${uniqueId})`" />
 
       <!-- Body/Clothing base layer -->
       <path :d="silhouettePaths.body" :fill="primaryClothingColor" />
