@@ -2,6 +2,7 @@ import type {
   Rarity, Stats, Archetype, Culture, Gender, EquipmentSlot,
   MoraleState
 } from './base'
+import type { HeroVisualTraits } from './heroVisuals'
 import type { ArchetypeTag } from './archetypes'
 import type { HeroGameplayTrait, StoryTrait } from './traits'
 
@@ -36,6 +37,9 @@ export interface Hero {
 
   // Equipment (slot -> equipment id)
   equipment: Partial<Record<EquipmentSlot, string>>
+
+  // Visual appearance
+  visualTraits: HeroVisualTraits
 
   // Prestige
   prestigeLevel: number

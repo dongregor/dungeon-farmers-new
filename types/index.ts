@@ -41,3 +41,6 @@ export * from './dungeons'
 
 // Log system
 export * from './logs'
+
+// Hero visuals
+export * from './heroVisuals'
