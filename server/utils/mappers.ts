@@ -1,5 +1,20 @@
 import type { Expedition, Hero } from '~~/types'
 import type { SupabaseExpeditionRow, SupabaseHeroRow } from '~~/types/supabase'
+import type { Archetype, Gender, Culture } from '~~/types/base'
+import { generateVisualTraits } from '~~/shared/utils/visualTraitsGenerator'
+
+/**
+ * Helper to generate visual traits from hero ID for backfill
+ * Casts string DB values to proper enum types
+ */
+function generateVisualTraitsFromId(id: string, archetype: string, gender: string, culture: string) {
+  return generateVisualTraits(
+    id,
+    archetype as Archetype,
+    gender as Gender,
+    culture as Culture
+  )
+}
 
 /**
  * Maps Supabase expedition (snake_case) to TypeScript Expedition type (camelCase)
@@ -81,6 +96,9 @@ export function mapSupabaseHeroToHero(data: SupabaseHeroRow): Hero {
 
     // Equipment
     equipment: data.equipment || {},
+
+    // Visual appearance (generate from ID if not stored, for backfill)
+    visualTraits: data.visual_traits || generateVisualTraitsFromId(data.id, data.archetype, data.gender, data.culture),
 
     // Prestige
     prestigeLevel: data.prestige_level || 0,

@@ -1,4 +1,5 @@
 import { serverSupabaseUser, serverSupabaseServiceRole } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import type { Hero, Rarity } from '~~/types'
 import { z } from 'zod'
 import { generateHero } from '~~/shared/utils/heroGenerator'
@@ -109,6 +110,7 @@ export default defineEventHandler(async (event): Promise<Hero> => {
       equipment: heroData.equipment || {},
       prestige_level: heroData.prestigeLevel || 0,
       prestige_bonuses: heroData.prestigeBonuses || { combat: 0, utility: 0, survival: 0 },
+      visual_traits: heroData.visualTraits,
       is_favorite: false,
       morale: 'content',
       morale_last_update: new Date().toISOString(),
@@ -125,36 +127,5 @@ export default defineEventHandler(async (event): Promise<Hero> => {
     throw createError({ statusCode: 500, message: 'Failed to generate hero' })
   }
 
-  // Transform to Hero type
-  return {
-    id: hero.id,
-    name: hero.name,
-    gender: hero.gender,
-    culture: hero.culture,
-    titles: hero.titles || [],
-    displayTitle: hero.display_title,
-    rarity: hero.rarity,
-    archetype: hero.archetype,
-    archetypeTags: hero.archetype_tags || [],
-    baseStats: hero.base_stats,
-    level: hero.level,
-    xp: hero.xp,
-    xpToNextLevel: hero.xp_to_next_level,
-    gameplayTraits: hero.gameplay_traits || [],
-    storyTraitIds: hero.story_trait_ids || [],
-    power: hero.power,
-    equipment: hero.equipment || {},
-    prestigeLevel: hero.prestige_level,
-    prestigeBonuses: hero.prestige_bonuses || { combat: 0, utility: 0, survival: 0 },
-    currentExpeditionId: hero.current_expedition_id,
-    isFavorite: hero.is_favorite,
-    morale: hero.morale,
-    moraleValue: 75,
-    moraleLastUpdate: hero.morale_last_update,
-    isOnExpedition: hero.is_on_expedition,
-    isStationed: hero.is_stationed,
-    stationedZoneId: hero.stationed_zone_id,
-    createdAt: hero.created_at,
-    updatedAt: hero.updated_at,
-  }
+  return mapSupabaseHeroToHero(hero)
 })

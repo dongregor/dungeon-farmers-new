@@ -58,6 +58,14 @@ export interface SupabaseHeroRow {
     utility: number
     survival: number
   }
+  visual_traits?: {
+    skinTone: number
+    hairColor: number
+    hairStyle: number
+    primaryColor: number
+    secondaryColor: number
+    faceShape: number
+  } | null
   current_expedition_id: string | null
   is_favorite: boolean
   morale: string
