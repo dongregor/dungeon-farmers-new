@@ -12,6 +12,7 @@ import type {
   TraitQuality,
   HeroGenerationOptions,
 } from '~~/types'
+import { generateVisualTraits } from '~~/shared/utils/visualTraitsGenerator'
 import {
   RARITY_WEIGHTS,
   STAT_POINTS_BY_RARITY,
@@ -173,6 +174,10 @@ export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'i
   const name = getRandomName(gender, culture)
   const power = calculatePower(baseStats, gameplayTraits)
 
+  // Generate a temporary ID for visual traits (will be replaced by actual ID on save)
+  const tempId = uuid()
+  const visualTraits = generateVisualTraits(tempId, archetype, gender, culture)
+
   return {
     name,
     gender,
@@ -192,6 +197,7 @@ export function generateHero(options: HeroGenerationOptions = {}): Omit<Hero, 'i
     equipment: {},
     prestigeLevel: 0,
     prestigeBonuses: { combat: 0, utility: 0, survival: 0 },
+    visualTraits,
   }
 }
 
