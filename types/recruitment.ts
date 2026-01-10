@@ -28,6 +28,8 @@ export interface TavernState {
   usedLockSlots: number
   lastRefreshAt: string
   nextRefreshAt: string
+  paidRefreshesSinceFree: number  // Counter for incremental cost calculation
+  nextRefreshCost: number         // Pre-calculated cost for next paid refresh
 }
 
 // Tavern progression (unlocks with account level)
@@ -99,7 +101,12 @@ export const TAVERN_REFRESH_HOURS = 8
 
 // Manual refresh costs (early refresh before timer)
 export const TAVERN_MANUAL_REFRESH_BASE_COST = 75
-export const TAVERN_MANUAL_REFRESH_INCREMENT = 25 // Per refresh today
+export const TAVERN_MANUAL_REFRESH_INCREMENT = 25 // Per paid refresh since last free
+
+// Calculate refresh cost based on how many paid refreshes since last free
+export function calculateRefreshCost(paidRefreshesSinceFree: number): number {
+  return TAVERN_MANUAL_REFRESH_BASE_COST + (paidRefreshesSinceFree * TAVERN_MANUAL_REFRESH_INCREMENT)
+}
 
 // Recruitment request
 export interface RecruitmentRequest {

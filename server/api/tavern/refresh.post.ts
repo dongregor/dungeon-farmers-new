@@ -3,7 +3,7 @@ import { generateTavernHero } from '~~/shared/utils/heroGenerator'
 import {
   TAVERN_PROGRESSION,
   TAVERN_REFRESH_HOURS,
-  TAVERN_MANUAL_REFRESH_BASE_COST
+  calculateRefreshCost,
 } from '~~/types/recruitment'
 import type { TavernSlot, SlotRarity } from '~~/types'
 
@@ -49,11 +49,12 @@ export default defineEventHandler(async (event) => {
 
   // Check if refresh is free (timer expired) or requires payment
   const now = new Date()
-  const nextRefreshTime = new Date(tavernState.nextRefreshAt)
+  const nextRefreshTime = new Date(tavernState.next_refresh_at)
   const isFreeRefresh = now >= nextRefreshTime
 
-  // TODO: Implement daily refresh counter for scaling cost (75g + 25g per refresh today)
-  const refreshCost = TAVERN_MANUAL_REFRESH_BASE_COST
+  // Calculate refresh cost based on paid refreshes since last free refresh
+  const paidRefreshesSinceFree = tavernState.paid_refreshes_since_free || 0
+  const refreshCost = calculateRefreshCost(paidRefreshesSinceFree)
 
   // If not a free refresh, require payment
   if (!isFreeRefresh) {
@@ -130,12 +131,16 @@ export default defineEventHandler(async (event) => {
   }
 
   // STEP 2: Update tavern state AFTER payment (with optimistic concurrency control)
+  // On free refresh: reset counter. On paid refresh: increment counter.
+  const newPaidRefreshCount = isFreeRefresh ? 0 : paidRefreshesSinceFree + 1
+
   const { data: updateResult, error: updateError } = await client
     .from('tavern_state')
     .update({
       slots: newSlots,
       last_refresh_at: now.toISOString(),
       next_refresh_at: nextRefresh.toISOString(),
+      paid_refreshes_since_free: newPaidRefreshCount,
       updated_at: now.toISOString(),
     })
     .eq('player_id', player.id)
@@ -169,11 +174,16 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Calculate cost for the next paid refresh
+  const nextRefreshCost = calculateRefreshCost(newPaidRefreshCount)
+
   return {
     slots: newSlots,
     nextRefresh: nextRefresh.toISOString(),
     wasPaidRefresh: !isFreeRefresh,
     costPaid: isFreeRefresh ? 0 : refreshCost,
     remainingGold,
+    paidRefreshesSinceFree: newPaidRefreshCount,
+    nextRefreshCost,
   }
 })
