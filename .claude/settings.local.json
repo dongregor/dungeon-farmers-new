@@ -10,7 +10,18 @@
       "Bash(move \"SYSTEM_DEPENDENCIES.md\" \"_archive\"\" && move \"TECH_STACK.md\" \"_archive\"\")",
       "Skill(superpowers:writing-plans)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm ls:*)",
+      "mcp__Ref__ref_search_documentation",
+      "mcp__Ref__ref_read_url",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm install)",
+      "Bash(npx nuxt:*)",
+      "Bash(rm:*)",
+      "Skill(ralph-wiggum:ralph-loop)",
+      "Skill(superpowers:subagent-driven-development)"
     ]
   }
 }
