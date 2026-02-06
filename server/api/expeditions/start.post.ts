@@ -1,6 +1,6 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { z } from 'zod'
-import type { Expedition, Hero } from '~~/types'
+import type { Expedition, Hero, ExpeditionDebugLog, DebugLogEntry } from '~~/types'
 import { mapSupabaseExpeditionToExpedition, mapSupabaseHeroToHero } from '../../utils/mappers'
 
 const startExpeditionSchema = z.object({
@@ -212,18 +212,104 @@ export default defineEventHandler(async (event) => {
     const now = new Date()
     const endTime = new Date(now.getTime() + duration * 60 * 1000)
 
+    // === Debug log: track every calculation step ===
+    const debugSteps: DebugLogEntry[] = []
+    const heroPowerBreakdowns: ExpeditionDebugLog['start']['heroPowerBreakdowns'] = []
+    const threatAnalysis: ExpeditionDebugLog['start']['threats'] = []
+
+    // Calculate per-hero power breakdowns
+    for (const hero of heroes) {
+      const statPower = (hero.baseStats?.combat ?? 0) + (hero.baseStats?.utility ?? 0) + (hero.baseStats?.survival ?? 0)
+      const levelPower = (hero.level ?? 1) * 2
+      const prestigePower = (hero.prestigeBonuses?.combat ?? 0) + (hero.prestigeBonuses?.utility ?? 0) + (hero.prestigeBonuses?.survival ?? 0)
+      const gearPower = 0 // Equipment not factored in current flow
+      const traitPower = 0 // Trait power not factored in current flow
+      const totalPower = hero.power ?? (statPower + levelPower + prestigePower)
+
+      heroPowerBreakdowns.push({
+        heroId: hero.id,
+        heroName: hero.name,
+        statPower,
+        levelPower,
+        prestigePower,
+        gearPower,
+        traitPower,
+        totalPower,
+      })
+
+      debugSteps.push({
+        step: 'hero_power',
+        detail: `${hero.name}: stats=${statPower} + level=${levelPower} + prestige=${prestigePower} = stored power ${totalPower}`,
+        value: totalPower,
+      })
+    }
+
+    debugSteps.push({
+      step: 'team_power',
+      detail: `Sum of hero powers: ${heroes.map(h => h.power ?? 0).join(' + ')}`,
+      value: teamPower,
+    })
+
     // Calculate initial efficiency based on power ratio and threat coverage
     const requiredPower = { easy: 20, medium: 40, hard: 80, extreme: 150 }[subzone.difficulty as string] || 40
     const powerRatio = teamPower / requiredPower
     let efficiency = Math.min(120, Math.max(60, 60 + (powerRatio - 0.5) * 80))
 
+    debugSteps.push({
+      step: 'required_power',
+      detail: `Difficulty '${subzone.difficulty}' requires power ${requiredPower}`,
+      value: requiredPower,
+      formula: `{ easy: 20, medium: 40, hard: 80, extreme: 150 }[difficulty]`,
+    })
+    debugSteps.push({
+      step: 'power_ratio',
+      detail: `teamPower / requiredPower = ${teamPower} / ${requiredPower}`,
+      value: Math.round(powerRatio * 100) / 100,
+      formula: `teamPower / requiredPower`,
+    })
+    debugSteps.push({
+      step: 'base_efficiency',
+      detail: `clamp(60, 120, 60 + (${Math.round(powerRatio * 100) / 100} - 0.5) * 80) = ${Math.round(efficiency)}`,
+      value: Math.round(efficiency),
+      formula: `clamp(60, 120, 60 + (powerRatio - 0.5) * 80)`,
+    })
+
     // Bonus for countered threats
     const heroTags = heroes.flatMap(h => h.archetypeTags || [])
     const { THREATS } = await import('~~/types/threats')
+
+    debugSteps.push({
+      step: 'hero_tags',
+      detail: `Party archetype tags: [${heroTags.join(', ')}]`,
+    })
+
     const coveredThreats = (subzone.threats || []).filter((threatId: string) => {
       const threat = THREATS[threatId]
       return threat && heroTags.some(tag => threat.counteredBy.includes(tag as any))
     })
+
+    for (const threatId of coveredThreats) {
+      const threat = THREATS[threatId]
+      if (!threat) continue
+      const counterTag = heroTags.find(tag => threat.counteredBy.includes(tag as any))
+      const counteringHero = heroes.find(h => (h.archetypeTags || []).includes(counterTag as any))
+
+      threatAnalysis.push({
+        threatId,
+        threatName: threat.name,
+        severity: threat.severity,
+        countered: true,
+        counteredBy: counterTag,
+        counteringHeroName: counteringHero?.name,
+        efficiencyChange: 5,
+      })
+
+      debugSteps.push({
+        step: 'threat_countered',
+        detail: `Threat '${threat.name}' (${threat.severity}) COUNTERED by tag '${counterTag}' from ${counteringHero?.name ?? 'unknown'} → +5 efficiency`,
+        value: 5,
+      })
+    }
     efficiency += coveredThreats.length * 5
 
     // Penalty for uncovered threats
@@ -235,11 +321,63 @@ export default defineEventHandler(async (event) => {
       const threat = THREATS[threatId as string]
       if (threat) {
         const penalty = threat.severity === 'deadly' ? 15 : threat.severity === 'major' ? 10 : 5
+
+        threatAnalysis.push({
+          threatId,
+          threatName: threat.name,
+          severity: threat.severity,
+          countered: false,
+          efficiencyChange: -penalty,
+        })
+
+        debugSteps.push({
+          step: 'threat_uncountered',
+          detail: `Threat '${threat.name}' (${threat.severity}) NOT COUNTERED → -${penalty} efficiency (needs: [${threat.counteredBy.join(', ')}])`,
+          value: -penalty,
+        })
+
         efficiency -= penalty
       }
     }
 
+    const preClampEfficiency = efficiency
     efficiency = Math.round(Math.min(150, Math.max(60, efficiency)))
+
+    debugSteps.push({
+      step: 'final_efficiency',
+      detail: `Pre-clamp: ${Math.round(preClampEfficiency)}, clamped to [60, 150] → ${efficiency}`,
+      value: efficiency,
+      formula: `clamp(60, 150, baseEfficiency + threatBonuses - threatPenalties)`,
+    })
+
+    // Build the start portion of the debug log
+    const debugLog: ExpeditionDebugLog = {
+      generatedAt: now.toISOString(),
+      start: {
+        heroPowerBreakdowns,
+        teamPower,
+        requiredPower,
+        powerRatio: Math.round(powerRatio * 100) / 100,
+        baseEfficiency: Math.round(Math.min(120, Math.max(60, 60 + (powerRatio - 0.5) * 80))),
+        threats: threatAnalysis,
+        finalEfficiency: efficiency,
+        duration: {
+          baseDuration: duration,
+          zoneId,
+          subzoneId,
+          difficulty: subzone.difficulty,
+        },
+        steps: debugSteps,
+      },
+      completion: {
+        efficiencyUsed: 0,
+        efficiencySource: '',
+        rewards: { heroCount: 0, baseGold: 0, baseXp: 0, goldAfterEfficiency: 0, xpAfterEfficiency: 0, familiarityGain: 0, masteryGain: 0 },
+        heroUpdates: [],
+        goldUpdate: { amount: 0, playerId: '' },
+        steps: [],
+      },
+    }
 
     // Create expedition
     const { data: expedition, error: expeditionError } = await supabase
@@ -256,6 +394,7 @@ export default defineEventHandler(async (event) => {
         completes_at: endTime.toISOString(),
         is_completed: false,
         efficiency,
+        debug_log: debugLog,
       })
       .select()
       .single()

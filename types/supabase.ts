@@ -19,6 +19,7 @@ export interface SupabaseExpeditionRow {
   rewards?: unknown  // { gold, xp, equipment, familiarityGain, masteryGain }
   events?: unknown[]  // Array of expedition events
   log?: unknown  // ExpeditionLog object
+  debug_log?: unknown  // ExpeditionDebugLog object (admin)
   created_at: string
   updated_at: string
 }
