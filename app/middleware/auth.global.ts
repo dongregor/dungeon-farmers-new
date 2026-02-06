@@ -21,6 +21,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
+  // Admin routes: require auth but skip guild check (admin access checked server-side)
+  if (to.path.startsWith('/admin')) {
+    return
+  }
+
   // Check if guild is initialized (client-side only to avoid SSR complexity)
   // On server-side, we skip the check and let client-side handle it
   if (import.meta.server) {

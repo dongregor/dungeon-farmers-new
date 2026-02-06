@@ -1,6 +1,6 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 import { mapSupabaseHeroToHero, mapSupabaseExpeditionToExpedition } from '~~/server/utils/mappers'
-import type { Expedition, ExpeditionRewards, ExpeditionLog, Hero, Equipment } from '~~/types'
+import type { Expedition, ExpeditionRewards, ExpeditionLog, Hero, Equipment, ExpeditionDebugLog, DebugLogEntry } from '~~/types'
 import { generateExpeditionLog } from '~/utils/logGenerator'
 import { applyMoraleChange } from '~/utils/moraleService'
 import { MORALE_PENALTIES } from '~~/shared/constants/gameRules'
@@ -101,14 +101,64 @@ export default defineEventHandler(async (event) => {
     const zoneData = zone || { id: expedition.zone_id, name: 'Unknown Zone', type: 'forest' as const, subzones: [] }
     const subzoneData = subzone || { id: expedition.subzone_id, name: 'Unknown Subzone', baseDuration: 30, threats: [] as string[], difficulty: 'easy' as const }
 
-    // Calculate expedition results
-    const efficiency = Math.round(Math.min(150, Math.max(60, 100 + Math.random() * 30))) // Random efficiency 100-130%
+    // === Debug log: completion phase ===
+    const completionSteps: DebugLogEntry[] = []
+
+    // Use stored efficiency from start phase, fall back to random if not available
+    const storedEfficiency = expedition.efficiency
+    let efficiency: number
+    let efficiencySource: string
+
+    if (storedEfficiency && storedEfficiency > 0) {
+      efficiency = storedEfficiency
+      efficiencySource = 'stored_from_start'
+      completionSteps.push({
+        step: 'efficiency_source',
+        detail: `Using stored efficiency from expedition start: ${efficiency}%`,
+        value: efficiency,
+      })
+    } else {
+      const roll = Math.random() * 30
+      efficiency = Math.round(Math.min(150, Math.max(60, 100 + roll)))
+      efficiencySource = 'random_fallback'
+      completionSteps.push({
+        step: 'efficiency_source',
+        detail: `No stored efficiency, using random fallback: 100 + ${Math.round(roll)} = ${efficiency}%`,
+        value: efficiency,
+        formula: `clamp(60, 150, 100 + random(0, 30))`,
+      })
+    }
 
     // Calculate rewards based on efficiency
     const baseGold = 50 * heroList.length
     const baseXp = 25 * heroList.length
     const gold = Math.floor(baseGold * (efficiency / 100))
     const xp = Math.floor(baseXp * (efficiency / 100))
+
+    completionSteps.push({
+      step: 'base_gold',
+      detail: `50 * ${heroList.length} heroes = ${baseGold}`,
+      value: baseGold,
+      formula: `50 * heroCount`,
+    })
+    completionSteps.push({
+      step: 'base_xp',
+      detail: `25 * ${heroList.length} heroes = ${baseXp}`,
+      value: baseXp,
+      formula: `25 * heroCount`,
+    })
+    completionSteps.push({
+      step: 'gold_after_efficiency',
+      detail: `floor(${baseGold} * ${efficiency}/100) = ${gold}`,
+      value: gold,
+      formula: `floor(baseGold * efficiency / 100)`,
+    })
+    completionSteps.push({
+      step: 'xp_after_efficiency',
+      detail: `floor(${baseXp} * ${efficiency}/100) = ${xp}`,
+      value: xp,
+      formula: `floor(baseXp * efficiency / 100)`,
+    })
 
     const rewards: ExpeditionRewards = {
       gold,
@@ -119,6 +169,17 @@ export default defineEventHandler(async (event) => {
       masteryGain: 5
     }
 
+    completionSteps.push({
+      step: 'familiarity_gain',
+      detail: `Fixed familiarity gain: 10`,
+      value: 10,
+    })
+    completionSteps.push({
+      step: 'mastery_gain',
+      detail: `Fixed mastery gain: 5`,
+      value: 5,
+    })
+
     // Generate expedition log
     const log = generateExpeditionLog(
       mapSupabaseExpeditionToExpedition(expedition),
@@ -127,19 +188,8 @@ export default defineEventHandler(async (event) => {
       subzoneData as any
     )
 
-    // Update expedition
-    const { error: updateExpeditionError } = await supabase
-      .from('expeditions')
-      .update({
-        is_completed: true,
-        efficiency,
-        rewards,
-        log,
-        updated_at: now.toISOString()
-      })
-      .eq('id', expeditionId)
-
-    if (updateExpeditionError) throw updateExpeditionError
+    // Build hero updates debug info
+    const heroUpdatesDebug: ExpeditionDebugLog['completion']['heroUpdates'] = []
 
     // Update heroes (add XP, restore to idle)
     const updatedHeroes: Hero[] = []
@@ -150,6 +200,27 @@ export default defineEventHandler(async (event) => {
 
       // Calculate new morale
       const newMorale = applyMoraleChange(hero.moraleValue, MORALE_PENALTIES.expeditionComplete)
+
+      heroUpdatesDebug.push({
+        heroId: hero.id,
+        heroName: hero.name,
+        previousXp: hero.xp,
+        xpGained: xp,
+        newXp,
+        previousLevel: hero.level,
+        newLevel: Math.min(newLevel, 50),
+        leveledUp,
+        previousMorale: hero.moraleValue,
+        moraleChange: MORALE_PENALTIES.expeditionComplete,
+        newMorale: newMorale.moraleValue,
+        newMoraleState: newMorale.morale,
+      })
+
+      completionSteps.push({
+        step: 'hero_update',
+        detail: `${hero.name}: XP ${hero.xp} + ${xp} = ${newXp}, level ${hero.level} → ${Math.min(newLevel, 50)}${leveledUp ? ' (LEVEL UP!)' : ''}, morale ${hero.moraleValue} + (${MORALE_PENALTIES.expeditionComplete}) = ${newMorale.moraleValue} (${newMorale.morale})`,
+        value: hero.id,
+      })
 
       const { data: updatedHero, error: updateHeroError } = await supabase
         .from('heroes')
@@ -169,6 +240,60 @@ export default defineEventHandler(async (event) => {
       if (updateHeroError) throw updateHeroError
       updatedHeroes.push(mapSupabaseHeroToHero(updatedHero))
     }
+
+    // Build the completion debug log
+    const existingDebugLog = (expedition as any).debug_log as ExpeditionDebugLog | null
+    const completionDebugLog: ExpeditionDebugLog['completion'] = {
+      efficiencyUsed: efficiency,
+      efficiencySource,
+      rewards: {
+        heroCount: heroList.length,
+        baseGold,
+        baseXp,
+        goldAfterEfficiency: gold,
+        xpAfterEfficiency: xp,
+        familiarityGain: 10,
+        masteryGain: 5,
+      },
+      heroUpdates: heroUpdatesDebug,
+      goldUpdate: {
+        amount: gold,
+        playerId,
+      },
+      steps: completionSteps,
+    }
+
+    // Merge with existing debug log from start phase
+    const fullDebugLog: ExpeditionDebugLog = {
+      generatedAt: existingDebugLog?.generatedAt ?? now.toISOString(),
+      start: existingDebugLog?.start ?? {
+        heroPowerBreakdowns: [],
+        teamPower: 0,
+        requiredPower: 0,
+        powerRatio: 0,
+        baseEfficiency: 0,
+        threats: [],
+        finalEfficiency: 0,
+        duration: { baseDuration: 0, zoneId: '', subzoneId: '', difficulty: '' },
+        steps: [{ step: 'missing', detail: 'Start debug log was not captured (expedition started before logging was added)' }],
+      },
+      completion: completionDebugLog,
+    }
+
+    // Update expedition
+    const { error: updateExpeditionError } = await supabase
+      .from('expeditions')
+      .update({
+        is_completed: true,
+        efficiency,
+        rewards,
+        log,
+        debug_log: fullDebugLog,
+        updated_at: now.toISOString()
+      })
+      .eq('id', expeditionId)
+
+    if (updateExpeditionError) throw updateExpeditionError
 
     // Update player gold (atomic increment to avoid race conditions)
     const { error: goldUpdateError } = await supabase.rpc('increment_player_gold', {
