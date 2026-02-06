@@ -500,5 +500,12 @@ export const useZoneStore = defineStore('zones', {
     async refresh() {
       await this.initialize()
     },
+
+    /**
+     * Fetch zones (alias for initialize)
+     */
+    async fetchZones() {
+      await this.initialize()
+    },
   }
 })

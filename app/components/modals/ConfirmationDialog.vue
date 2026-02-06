@@ -88,7 +88,7 @@ const handleModalClose = (value: boolean) => {
 </script>
 
 <template>
-  <BaseModal
+  <ModalsBaseModal
     :model-value="modelValue"
     :title="title"
     size="sm"
@@ -147,5 +147,5 @@ const handleModalClose = (value: boolean) => {
         </button>
       </div>
     </template>
-  </BaseModal>
+  </ModalsBaseModal>
 </template>

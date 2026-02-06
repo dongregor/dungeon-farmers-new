@@ -11,6 +11,7 @@ const gameStore = useGameStore()
 const heroStore = useHeroStore()
 const tutorialStore = useTutorialStore()
 const router = useRouter()
+const { setHasGuild } = useGuildStatus()
 
 // State
 const currentStep = ref(1)
@@ -176,12 +177,12 @@ const handleBeginAdventure = async () => {
       tutorialStore.skipTutorial()
     }
 
-    // Mark guild as initialized and clear welcome progress
-    localStorage.setItem('guild_initialized', 'true')
+    // Mark guild as initialized via composable (handles cache + localStorage)
+    setHasGuild(true, guildName.value.trim())
     localStorage.removeItem('welcome_progress')
 
     // Redirect to dashboard
-    await router.push('/')
+    await router.push('/dashboard')
   } catch (error) {
     console.error('Failed to complete onboarding:', error)
     // Show error to user

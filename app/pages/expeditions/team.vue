@@ -307,7 +307,7 @@ watch(selectedHeroIds, async (newIds) => {
     <!-- Main Content -->
     <div v-else>
       <!-- Header -->
-      <PageHeader
+      <NavigationPageHeader
         title="Team Formation"
         :subtitle="`${zone.name} - ${subzone.name}`"
         :back-link="'/expeditions'"
@@ -325,7 +325,7 @@ watch(selectedHeroIds, async (newIds) => {
             </span>
           </div>
         </template>
-      </PageHeader>
+      </NavigationPageHeader>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column - Team Building -->
@@ -406,12 +406,12 @@ watch(selectedHeroIds, async (newIds) => {
 
             <!-- Search and Filters -->
             <div class="space-y-4 mb-6">
-              <SearchBar
+              <InputSearchBar
                 v-model="searchQuery"
                 placeholder="Search heroes by name or archetype..."
               />
 
-              <FilterPanel
+              <InputFilterPanel
                 v-model="filters"
                 :filters="filterConfig"
                 :collapsible="true"
@@ -500,13 +500,13 @@ watch(selectedHeroIds, async (newIds) => {
               <!-- Power -->
               <div class="flex items-center justify-between pb-3 border-b border-gray-200">
                 <span class="text-sm font-medium text-gray-700">Team Power</span>
-                <PowerScore :value="totalPower" :size="'lg'" />
+                <DisplayPowerScore :value="totalPower" :size="'lg'" />
               </div>
 
               <!-- Efficiency -->
               <div v-if="preview" class="flex items-center justify-between pb-3 border-b border-gray-200">
                 <span class="text-sm font-medium text-gray-700">Efficiency</span>
-                <EfficiencyIndicator :value="preview.efficiency" :size="'md'" />
+                <DisplayEfficiencyIndicator :value="preview.efficiency" :size="'md'" />
               </div>
 
               <!-- Composition -->

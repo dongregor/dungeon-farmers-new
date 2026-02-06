@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import { z } from 'zod'
 import type { Equipment, Hero } from '~~/types'
 
@@ -165,7 +166,7 @@ export default defineEventHandler(async (event): Promise<EquipResponse> => {
 
   const response: EquipResponse = {
     equipment: equippedItem,
-    hero: updatedHero,
+    hero: mapSupabaseHeroToHero(updatedHero),
   }
 
   if (unequipped) {

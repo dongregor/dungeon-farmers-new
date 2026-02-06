@@ -7,16 +7,6 @@ const startExpeditionSchema = z.object({
   zoneId: z.string().min(1),
   subzoneId: z.string().min(1),
   heroIds: z.array(z.string().uuid()).min(1).max(4),
-  autoRepeat: z.boolean().optional().default(false),
-  stopConditions: z.object({
-    anyHeroTired: z.boolean().default(false),
-    inventoryFull: z.boolean().default(false),
-    resourceCap: z.boolean().default(false)
-  }).optional().default({
-    anyHeroTired: false,
-    inventoryFull: false,
-    resourceCap: false
-  })
 })
 
 export default defineEventHandler(async (event) => {
@@ -31,6 +21,31 @@ export default defineEventHandler(async (event) => {
 
   const supabase = await serverSupabaseClient(event)
 
+  // Get auth user ID
+  const authUserId = user.id || (user as any).sub
+  if (!authUserId) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'User ID not found'
+    })
+  }
+
+  // Get player by auth user ID
+  const { data: player, error: playerError } = await supabase
+    .from('players')
+    .select('id')
+    .eq('auth_user_id', authUserId)
+    .single()
+
+  if (playerError || !player) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Player not found'
+    })
+  }
+
+  const playerId = player.id
+
   // Validate request body
   const body = await readBody(event)
   const parsed = startExpeditionSchema.safeParse(body)
@@ -43,7 +58,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const { zoneId, subzoneId, heroIds, autoRepeat, stopConditions } = parsed.data
+  const { zoneId, subzoneId, heroIds } = parsed.data
 
   try {
     // Check if heroes exist and are available
@@ -51,7 +66,7 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .select('*')
       .in('id', heroIds)
-      .eq('player_id', user.id)
+      .eq('player_id', playerId)
 
     if (heroesError) throw heroesError
 
@@ -110,7 +125,7 @@ export default defineEventHandler(async (event) => {
         const { data: previousZoneProgress } = await supabase
           .from('zone_progress')
           .select('mastery')
-          .eq('player_id', user.id)
+          .eq('player_id', playerId)
           .eq('zone_id', previousZoneId)
           .single()
 
@@ -146,7 +161,7 @@ export default defineEventHandler(async (event) => {
         const { data: quest } = await supabase
           .from('quest_progress')
           .select('completed')
-          .eq('player_id', user.id)
+          .eq('player_id', playerId)
           .eq('quest_id', questComplete)
           .single()
 
@@ -169,7 +184,7 @@ export default defineEventHandler(async (event) => {
       const { data: zoneProgress } = await supabase
         .from('zone_progress')
         .select('familiarity')
-        .eq('player_id', user.id)
+        .eq('player_id', playerId)
         .eq('zone_id', zoneId)
         .single()
 
@@ -197,23 +212,50 @@ export default defineEventHandler(async (event) => {
     const now = new Date()
     const endTime = new Date(now.getTime() + duration * 60 * 1000)
 
+    // Calculate initial efficiency based on power ratio and threat coverage
+    const requiredPower = { easy: 20, medium: 40, hard: 80, extreme: 150 }[subzone.difficulty as string] || 40
+    const powerRatio = teamPower / requiredPower
+    let efficiency = Math.min(120, Math.max(60, 60 + (powerRatio - 0.5) * 80))
+
+    // Bonus for countered threats
+    const heroTags = heroes.flatMap(h => h.archetypeTags || [])
+    const { THREATS } = await import('~~/types/threats')
+    const coveredThreats = (subzone.threats || []).filter((threatId: string) => {
+      const threat = THREATS[threatId]
+      return threat && heroTags.some(tag => threat.counteredBy.includes(tag as any))
+    })
+    efficiency += coveredThreats.length * 5
+
+    // Penalty for uncovered threats
+    const uncoveredThreats = (subzone.threats || []).filter((threatId: string) => {
+      const threat = THREATS[threatId]
+      return threat && !heroTags.some(tag => threat.counteredBy.includes(tag as any))
+    })
+    for (const threatId of uncoveredThreats) {
+      const threat = THREATS[threatId as string]
+      if (threat) {
+        const penalty = threat.severity === 'deadly' ? 15 : threat.severity === 'major' ? 10 : 5
+        efficiency -= penalty
+      }
+    }
+
+    efficiency = Math.round(Math.min(150, Math.max(60, efficiency)))
+
     // Create expedition
     const { data: expedition, error: expeditionError } = await supabase
       .from('expeditions')
       .insert({
-        player_id: user.id,
+        player_id: playerId,
+        type: 'zone',
         zone_id: zoneId,
         subzone_id: subzoneId,
         hero_ids: heroIds,
-        team_power: teamPower,
-        status: 'in_progress',
+        difficulty: subzone.difficulty,
+        duration_minutes: duration,
         started_at: now.toISOString(),
         completes_at: endTime.toISOString(),
-        duration,
-        auto_repeat: autoRepeat,
-        stop_conditions: stopConditions,
-        created_at: now.toISOString(),
-        updated_at: now.toISOString()
+        is_completed: false,
+        efficiency,
       })
       .select()
       .single()
@@ -229,7 +271,7 @@ export default defineEventHandler(async (event) => {
         updated_at: now.toISOString()
       })
       .in('id', heroIds)
-      .eq('player_id', user.id)
+      .eq('player_id', playerId)
 
     if (updateError) {
       // Compensate: delete the created expedition
@@ -242,7 +284,7 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .select('*')
       .in('id', heroIds)
-      .eq('player_id', user.id)
+      .eq('player_id', playerId)
 
     if (updatedHeroesError) throw updatedHeroesError
 

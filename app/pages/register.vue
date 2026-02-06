@@ -5,6 +5,7 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const { fetchStatus, status: guildStatus } = useGuildStatus()
 
 const email = ref('')
 const password = ref('')
@@ -15,9 +16,10 @@ const error = ref('')
 const success = ref('')
 
 // Redirect if already logged in
-watch(user, (newUser) => {
+watch(user, async (newUser) => {
   if (newUser) {
-    navigateTo('/')
+    await fetchStatus(true)
+    navigateTo(guildStatus.value.hasGuild ? '/dashboard' : '/welcome')
   }
 }, { immediate: true })
 

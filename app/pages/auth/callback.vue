@@ -4,17 +4,18 @@ definePageMeta({
 })
 
 const user = useSupabaseUser()
+const { fetchStatus, status: guildStatus } = useGuildStatus()
 
 // Wait for auth to complete then redirect
 const timeoutId = ref<ReturnType<typeof setTimeout> | null>(null)
 
-watch(user, (newUser) => {
+watch(user, async (newUser) => {
   if (newUser) {
     if (timeoutId.value) {
       clearTimeout(timeoutId.value)
     }
-    const hasGuild = localStorage.getItem('guild_initialized') === 'true'
-    navigateTo(hasGuild ? '/' : '/welcome')
+    await fetchStatus(true) // Force fresh check from API
+    navigateTo(guildStatus.value.hasGuild ? '/dashboard' : '/welcome')
   }
 }, { immediate: true })
 

@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero, mapSupabaseExpeditionToExpedition } from '~~/server/utils/mappers'
 import type { Expedition, ExpeditionLog, Hero } from '~~/types'
 
 export default defineEventHandler(async (event) => {
@@ -21,13 +22,38 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Get auth user ID
+  const authUserId = user.id || (user as any).sub
+  if (!authUserId) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'User ID not found'
+    })
+  }
+
+  // Get player by auth user ID
+  const { data: player, error: playerError } = await supabase
+    .from('players')
+    .select('id')
+    .eq('auth_user_id', authUserId)
+    .single()
+
+  if (playerError || !player) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Player not found'
+    })
+  }
+
+  const playerId = player.id
+
   try {
     // Fetch expedition
     const { data: expedition, error: expeditionError } = await supabase
       .from('expeditions')
       .select('*')
       .eq('id', expeditionId)
-      .eq('player_id', user.id)
+      .eq('player_id', playerId)
       .single()
 
     if (expeditionError || !expedition) {
@@ -42,20 +68,20 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .select('*')
       .in('id', expedition.hero_ids)
-      .eq('player_id', user.id)
+      .eq('player_id', playerId)
 
     if (heroesError) throw heroesError
 
     // Fetch log if expedition is completed
     let log: ExpeditionLog | undefined
-    if (expedition.status === 'completed' && expedition.log) {
+    if (expedition.is_completed && expedition.log) {
       log = expedition.log as ExpeditionLog
     }
 
     return {
-      expedition: expedition as Expedition,
+      expedition: mapSupabaseExpeditionToExpedition(expedition),
       log,
-      heroes: (heroes || []) as Hero[]
+      heroes: (heroes || []).map(mapSupabaseHeroToHero)
     }
   } catch (err: unknown) {
     const error = toError(err)

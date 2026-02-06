@@ -20,6 +20,9 @@ function generateVisualTraitsFromId(id: string, archetype: string, gender: strin
  * Maps Supabase expedition (snake_case) to TypeScript Expedition type (camelCase)
  */
 export function mapSupabaseExpeditionToExpedition(data: SupabaseExpeditionRow): Expedition {
+  // Map is_completed to status
+  const status = data.is_completed ? 'completed' : 'in_progress'
+
   return {
     id: data.id,
     playerId: data.player_id,
@@ -30,22 +33,22 @@ export function mapSupabaseExpeditionToExpedition(data: SupabaseExpeditionRow): 
 
     // Party
     heroIds: data.hero_ids || [],
-    teamPower: data.team_power || 0,
+    teamPower: 0, // Not stored in DB, calculated on demand
 
     // Timing
     startedAt: data.started_at,
     completesAt: data.completes_at,
     durationMinutes: data.duration_minutes || 0,
-    status: data.status,
+    status,
 
     // Events
-    events: data.events || [],
-    pendingChoices: data.pending_choices || [],
+    events: (data.events || []) as any[],
+    pendingChoices: [], // Not implemented yet
 
-    // Settings
-    autoRepeat: data.auto_repeat || false,
-    autoRepeatLimit: data.auto_repeat_limit,
-    stopConditions: data.stop_conditions || {
+    // Settings (defaults - not stored in DB for MVP)
+    autoRepeat: false,
+    autoRepeatLimit: undefined,
+    stopConditions: {
       anyHeroTired: false,
       inventoryFull: false,
       resourceCap: false
@@ -53,8 +56,8 @@ export function mapSupabaseExpeditionToExpedition(data: SupabaseExpeditionRow): 
 
     // Results (populated on completion)
     efficiency: data.efficiency,
-    rewards: data.rewards,
-    log: data.log,
+    rewards: data.rewards as any,
+    log: data.log as any,
 
     // Timestamps
     createdAt: data.created_at,

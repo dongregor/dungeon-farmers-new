@@ -3,7 +3,7 @@ import { useHeroStore } from '~/stores/heroes'
 import { useInventoryStore } from '~/stores/inventory'
 import { useExpeditionStore } from '~/stores/expeditions'
 import { storeToRefs } from 'pinia'
-import { getArchetypeById } from '~~/types/archetypes'
+import { getArchetypeById, TAG_INFO, type ArchetypeTag } from '~~/types/archetypes'
 import { getGameplayTraitById } from '~/data/gameplayTraits'
 import { getStoryTraitById } from '~/data/storyTraits'
 import { getCultureInfo } from '~/data/cultures'
@@ -15,7 +15,7 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
-const heroId = route.params.heroId as string
+const heroId = route.params.id as string
 
 // Stores
 const heroStore = useHeroStore()
@@ -26,6 +26,9 @@ const { heroes, loading: heroLoading } = storeToRefs(heroStore)
 const { inventory } = storeToRefs(inventoryStore)
 const { activeExpeditions } = storeToRefs(expeditionStore)
 
+// Track if initial fetch has been attempted
+const hasFetched = ref(false)
+
 // Fetch data
 onMounted(async () => {
   if (heroes.value.length === 0) {
@@ -34,14 +37,15 @@ onMounted(async () => {
   if (inventory.value.length === 0) {
     await inventoryStore.fetchInventory()
   }
+  hasFetched.value = true
 })
 
 // Get hero
 const hero = computed(() => heroStore.getHeroById(heroId))
 
-// Redirect if hero not found after loading
-watch([hero, heroLoading], ([heroValue, loading]) => {
-  if (!loading && !heroValue) {
+// Redirect if hero not found after loading completes
+watch([hero, heroLoading, hasFetched], ([heroValue, loading, fetched]) => {
+  if (fetched && !loading && !heroValue) {
     router.push('/heroes')
   }
 })
@@ -157,6 +161,37 @@ const formattedStoryTraits = computed(() => {
   })
 })
 
+// Format threat ID to readable name
+function formatThreatName(threatId: string): string {
+  return threatId
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+// Formatted abilities (archetype tags) with counters
+const formattedAbilities = computed(() => {
+  if (!hero.value) return []
+
+  return (hero.value.archetypeTags || []).map(tagId => {
+    const tagData = TAG_INFO[tagId as ArchetypeTag]
+    if (!tagData) {
+      return {
+        id: tagId,
+        name: tagId.replace(/_/g, ' '),
+        description: '',
+        counters: [] as string[],
+      }
+    }
+    return {
+      id: tagId,
+      name: tagData.name,
+      description: tagData.description,
+      counters: tagData.counters.map(formatThreatName),
+    }
+  })
+})
+
 // Modals
 const showRetirementModal = ref(false)
 const showPrestigeModal = ref(false)
@@ -200,41 +235,48 @@ function manageEquipment() {
   <div class="container mx-auto px-4 py-8 max-w-7xl">
     <!-- Loading State -->
     <div v-if="heroLoading && !hero" class="flex items-center justify-center py-12">
-      <LoadingSpinner size="lg" />
+      <UtilityLoadingSpinner size="lg" />
     </div>
 
     <!-- Hero Detail -->
     <div v-else-if="hero">
-      <!-- Page Header -->
-      <PageHeader
-        :title="hero.name"
-        :subtitle="`${archetype?.name || hero.archetype} • ${culture?.name || hero.culture}`"
-        :back-link="'/heroes'"
-      >
-        <template #meta>
-          <div class="flex flex-wrap items-center gap-3 mt-2">
-            <RarityBadge :rarity="hero.rarity" size="md" />
-            <div
-              class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border"
-              :class="statusColor"
-            >
-              <span class="w-2 h-2 rounded-full bg-current" />
-              {{ statusLabel }}
-            </div>
-            <div v-if="hero.prestigeLevel > 0" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
-              <span>⭐</span>
-              <span>Prestige {{ hero.prestigeLevel }}</span>
-            </div>
-          </div>
-        </template>
-        <template #actions>
-          <PowerScore
-            :value="hero.power"
-            :breakdown="powerBreakdown"
-            size="lg"
-          />
-        </template>
-      </PageHeader>
+      <!-- Page Header with Portrait -->
+      <div class="flex gap-6 mb-6">
+        <!-- Large Hero Portrait -->
+        <HeroPortrait :hero="hero" size="xl" class="flex-shrink-0" />
+
+        <div class="flex-1">
+          <NavigationPageHeader
+            :title="hero.name"
+            :subtitle="`${archetype?.name || hero.archetype} • ${culture?.name || hero.culture}`"
+            :back-link="'/heroes'"
+          >
+            <template #meta>
+              <div class="flex flex-wrap items-center gap-3 mt-2">
+                <DisplayRarityBadge :rarity="hero.rarity" size="md" />
+                <div
+                  class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border"
+                  :class="statusColor"
+                >
+                  <span class="w-2 h-2 rounded-full bg-current" />
+                  {{ statusLabel }}
+                </div>
+                <div v-if="hero.prestigeLevel > 0" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+                  <span>⭐</span>
+                  <span>Prestige {{ hero.prestigeLevel }}</span>
+                </div>
+              </div>
+            </template>
+            <template #actions>
+              <DisplayPowerScore
+                :value="hero.power"
+                :breakdown="powerBreakdown"
+                size="lg"
+              />
+            </template>
+          </NavigationPageHeader>
+        </div>
+      </div>
 
       <!-- Main Content Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -243,7 +285,7 @@ function manageEquipment() {
           <!-- Level & XP Card -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Progress</h2>
-            <XPProgressBar
+            <ProgressXPProgressBar
               :current-x-p="hero.xp"
               :required-x-p="hero.xpToNextLevel"
               :level="hero.level"
@@ -262,21 +304,21 @@ function manageEquipment() {
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Stats</h2>
             <div class="space-y-4">
-              <StatBar
+              <DisplayStatBar
                 stat="Combat"
                 :value="hero.baseStats.combat"
                 :max="50"
                 color="red"
                 size="md"
               />
-              <StatBar
+              <DisplayStatBar
                 stat="Utility"
                 :value="hero.baseStats.utility"
                 :max="50"
                 color="blue"
                 size="md"
               />
-              <StatBar
+              <DisplayStatBar
                 stat="Survival"
                 :value="hero.baseStats.survival"
                 :max="50"
@@ -317,6 +359,41 @@ function manageEquipment() {
             </div>
           </div>
 
+          <!-- Abilities Card -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Abilities</h2>
+
+            <div v-if="formattedAbilities.length > 0" class="space-y-3">
+              <div
+                v-for="ability in formattedAbilities"
+                :key="ability.id"
+                class="bg-blue-50 border border-blue-200 rounded-lg p-3"
+              >
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="font-semibold text-blue-900">{{ ability.name }}</h3>
+                    <p class="text-sm text-blue-700">{{ ability.description }}</p>
+                  </div>
+                </div>
+                <div v-if="ability.counters.length > 0" class="mt-2 pt-2 border-t border-blue-200">
+                  <span class="text-xs font-medium text-green-700">Counters:</span>
+                  <span class="text-xs text-green-600 ml-1">{{ ability.counters.join(', ') }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-else>
+              <UtilityEmptyState
+                title="No Abilities"
+                description="This hero has no special abilities."
+              >
+                <template #icon>
+                  <span class="text-6xl">⚔️</span>
+                </template>
+              </UtilityEmptyState>
+            </div>
+          </div>
+
           <!-- Traits Card -->
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Traits</h2>
@@ -325,7 +402,7 @@ function manageEquipment() {
             <div v-if="formattedGameplayTraits.length > 0" class="mb-6">
               <h3 class="text-sm font-semibold text-gray-700 mb-3">Gameplay Traits</h3>
               <div class="flex flex-wrap gap-3">
-                <TraitDisplay
+                <DisplayTraitDisplay
                   v-for="(trait, index) in formattedGameplayTraits"
                   :key="index"
                   :trait="trait"
@@ -338,7 +415,7 @@ function manageEquipment() {
             <div v-if="formattedStoryTraits.length > 0">
               <h3 class="text-sm font-semibold text-gray-700 mb-3">Story Traits</h3>
               <div class="flex flex-wrap gap-3">
-                <TraitDisplay
+                <DisplayTraitDisplay
                   v-for="(trait, index) in formattedStoryTraits"
                   :key="index"
                   :trait="trait"
@@ -350,14 +427,14 @@ function manageEquipment() {
 
             <!-- No traits -->
             <div v-if="formattedGameplayTraits.length === 0 && formattedStoryTraits.length === 0">
-              <EmptyState
+              <UtilityEmptyState
                 title="No Traits"
                 description="This hero has no special traits yet."
               >
                 <template #icon>
                   <span class="text-6xl">✨</span>
                 </template>
-              </EmptyState>
+              </UtilityEmptyState>
             </div>
           </div>
         </div>
@@ -368,13 +445,13 @@ function manageEquipment() {
           <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-lg font-bold text-gray-900">Equipment</h2>
-              <BaseButton
+              <FormBaseButton
                 variant="ghost"
                 size="sm"
                 @click="manageEquipment"
               >
                 Manage
-              </BaseButton>
+              </FormBaseButton>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -408,7 +485,7 @@ function manageEquipment() {
 
             <div class="space-y-3">
               <!-- Expedition Actions -->
-              <BaseButton
+              <FormBaseButton
                 v-if="status === 'idle'"
                 variant="primary"
                 size="md"
@@ -419,9 +496,9 @@ function manageEquipment() {
                   <span>🗺️</span>
                   <span>Send on Expedition</span>
                 </span>
-              </BaseButton>
+              </FormBaseButton>
 
-              <BaseButton
+              <FormBaseButton
                 v-else-if="status === 'on_expedition'"
                 variant="secondary"
                 size="md"
@@ -432,9 +509,9 @@ function manageEquipment() {
                   <span>👁️</span>
                   <span>View Expedition</span>
                 </span>
-              </BaseButton>
+              </FormBaseButton>
 
-              <BaseButton
+              <FormBaseButton
                 v-else-if="status === 'stationed'"
                 variant="secondary"
                 size="md"
@@ -445,10 +522,10 @@ function manageEquipment() {
                   <span>⚔️</span>
                   <span>Currently Stationed</span>
                 </span>
-              </BaseButton>
+              </FormBaseButton>
 
               <!-- Prestige Action -->
-              <BaseButton
+              <FormBaseButton
                 v-if="canPrestige && status === 'idle'"
                 variant="primary"
                 size="md"
@@ -459,10 +536,10 @@ function manageEquipment() {
                   <span>👑</span>
                   <span>Prestige Hero</span>
                 </span>
-              </BaseButton>
+              </FormBaseButton>
 
               <!-- Release Action -->
-              <BaseButton
+              <FormBaseButton
                 v-if="status === 'idle'"
                 variant="danger"
                 size="md"
@@ -473,7 +550,7 @@ function manageEquipment() {
                   <span>🚪</span>
                   <span>Release Hero</span>
                 </span>
-              </BaseButton>
+              </FormBaseButton>
             </div>
           </div>
 
@@ -552,7 +629,7 @@ function manageEquipment() {
       @close="showPrestigeModal = false"
     />
 
-    <ConfirmationDialog
+    <ModalsConfirmationDialog
       v-model="confirmingRelease"
       title="Release Hero?"
       :message="`Are you sure you want to release ${hero?.name}? This action cannot be undone.`"

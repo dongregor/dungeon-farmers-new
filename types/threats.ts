@@ -75,7 +75,7 @@ export const THREATS: Record<string, Threat> = {
     description: 'Many weak enemies',
     category: 'enemy_type',
     severity: 'minor',
-    counteredBy: ['cleave', 'volley', 'aoe_blast'],
+    counteredBy: ['cleave', 'volley', 'aoe_blast', 'shield_wall'],
   },
   armored: {
     id: 'armored',

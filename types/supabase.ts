@@ -6,26 +6,19 @@
 export interface SupabaseExpeditionRow {
   id: string
   player_id: string
+  type: string  // 'zone', 'story', 'dungeon'
   zone_id: string
   subzone_id: string
   hero_ids: string[]
-  team_power: number
-  status: string
+  difficulty: string  // 'easy', 'medium', 'hard', 'extreme'
   started_at: string
   completes_at: string
-  duration_minutes?: number
-  auto_repeat: boolean
-  auto_repeat_limit?: number
-  stop_conditions: {
-    anyHeroTired: boolean
-    inventoryFull: boolean
-    resourceCap: boolean
-  }
-  events: unknown[]
-  pending_choices: unknown[]
+  duration_minutes: number
+  is_completed: boolean
   efficiency?: number
-  rewards?: unknown
-  log?: unknown
+  rewards?: unknown  // { gold, xp, equipment, familiarityGain, masteryGain }
+  events?: unknown[]  // Array of expedition events
+  log?: unknown  // ExpeditionLog object
   created_at: string
   updated_at: string
 }

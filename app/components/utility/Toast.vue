@@ -1,78 +1,58 @@
 <script setup lang="ts">
 interface Props {
-  message: string
+  id?: string
+  title: string
+  message?: string
   type?: 'success' | 'error' | 'warning' | 'info'
-  duration?: number
   dismissible?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   type: 'info',
-  duration: 3000,
   dismissible: true,
 })
 
 const emit = defineEmits<{
-  close: []
+  close: [id?: string]
 }>()
 
-const visible = ref(true)
-
-// Auto-dismiss after duration
-let timeoutId: ReturnType<typeof setTimeout> | null = null
-
-onMounted(() => {
-  if (props.duration > 0) {
-    timeoutId = setTimeout(() => {
-      handleClose()
-    }, props.duration)
-  }
-})
-
-onUnmounted(() => {
-  if (timeoutId) {
-    clearTimeout(timeoutId)
-    timeoutId = null
-  }
-})
-
 const handleClose = () => {
-  visible.value = false
-  // Wait for animation to complete before emitting close
-  setTimeout(() => {
-    emit('close')
-  }, 300)
+  emit('close', props.id)
 }
 
 const typeClasses = computed(() => {
   switch (props.type) {
     case 'success':
       return {
-        bg: 'bg-green-50 border-green-200',
-        text: 'text-green-800',
-        icon: 'text-green-500',
+        bg: 'bg-green-900/95 border-green-500',
+        text: 'text-green-100',
+        subtext: 'text-green-200',
+        icon: 'text-green-400',
         focusRing: 'focus:ring-green-500',
       }
     case 'error':
       return {
-        bg: 'bg-red-50 border-red-200',
-        text: 'text-red-800',
-        icon: 'text-red-500',
+        bg: 'bg-red-900/95 border-red-500',
+        text: 'text-red-100',
+        subtext: 'text-red-200',
+        icon: 'text-red-400',
         focusRing: 'focus:ring-red-500',
       }
     case 'warning':
       return {
-        bg: 'bg-yellow-50 border-yellow-200',
-        text: 'text-yellow-800',
-        icon: 'text-yellow-500',
+        bg: 'bg-yellow-900/95 border-yellow-500',
+        text: 'text-yellow-100',
+        subtext: 'text-yellow-200',
+        icon: 'text-yellow-400',
         focusRing: 'focus:ring-yellow-500',
       }
     case 'info':
     default:
       return {
-        bg: 'bg-blue-50 border-blue-200',
-        text: 'text-blue-800',
-        icon: 'text-blue-500',
+        bg: 'bg-blue-900/95 border-blue-500',
+        text: 'text-blue-100',
+        subtext: 'text-blue-200',
+        icon: 'text-blue-400',
         focusRing: 'focus:ring-blue-500',
       }
   }
@@ -94,57 +74,52 @@ const iconPath = computed(() => {
 </script>
 
 <template>
-  <Transition
-    enter-active-class="transition ease-out duration-300"
-    enter-from-class="opacity-0 translate-y-2"
-    enter-to-class="opacity-100 translate-y-0"
-    leave-active-class="transition ease-in duration-200"
-    leave-from-class="opacity-100 translate-y-0"
-    leave-to-class="opacity-0 translate-y-2"
+  <div
+    class="flex items-start gap-3 p-4 rounded-lg border shadow-xl backdrop-blur-sm min-w-[320px] max-w-md"
+    :class="[typeClasses.bg]"
+    role="alert"
+    aria-live="polite"
+    aria-atomic="true"
   >
-    <div
-      v-if="visible"
-      class="flex items-start gap-3 p-4 rounded-lg border shadow-lg max-w-md"
-      :class="[typeClasses.bg, typeClasses.text]"
-      role="alert"
-      aria-live="polite"
-      aria-atomic="true"
+    <!-- Icon -->
+    <svg
+      class="w-5 h-5 flex-shrink-0 mt-0.5"
+      :class="typeClasses.icon"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
     >
-      <!-- Icon -->
-      <svg
-        class="w-5 h-5 flex-shrink-0 mt-0.5"
-        :class="typeClasses.icon"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          :d="iconPath"
-        />
-      </svg>
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        :d="iconPath"
+      />
+    </svg>
 
-      <!-- Message -->
-      <p class="flex-1 text-sm font-medium">
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold text-sm" :class="typeClasses.text">
+        {{ title }}
+      </p>
+      <p v-if="message" class="text-sm mt-0.5 opacity-90" :class="typeClasses.subtext">
         {{ message }}
       </p>
-
-      <!-- Close button -->
-      <button
-        v-if="dismissible"
-        type="button"
-        class="flex-shrink-0 inline-flex rounded-md p-1 hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
-        :class="typeClasses.focusRing"
-        @click="handleClose"
-        aria-label="Dismiss notification"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
     </div>
-  </Transition>
+
+    <!-- Close button -->
+    <button
+      v-if="dismissible"
+      type="button"
+      class="flex-shrink-0 inline-flex rounded-md p-1 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
+      :class="typeClasses.focusRing"
+      @click="handleClose"
+      aria-label="Dismiss notification"
+    >
+      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
 </template>

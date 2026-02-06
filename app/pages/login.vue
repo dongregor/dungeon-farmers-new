@@ -5,6 +5,7 @@ definePageMeta({
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const { fetchStatus, status: guildStatus } = useGuildStatus()
 
 const email = ref('')
 const password = ref('')
@@ -12,11 +13,11 @@ const loading = ref(false)
 const googleLoading = ref(false)
 const error = ref('')
 
-// Redirect if already logged in
-watch(user, (newUser) => {
+// Redirect if already logged in - check API for guild status
+watch(user, async (newUser) => {
   if (newUser) {
-    const hasGuild = localStorage.getItem('guild_initialized') === 'true'
-    navigateTo(hasGuild ? '/' : '/welcome')
+    await fetchStatus(true) // Force fresh check
+    navigateTo(guildStatus.value.hasGuild ? '/dashboard' : '/welcome')
   }
 }, { immediate: true })
 
@@ -30,8 +31,10 @@ async function handleSubmit() {
       password: password.value,
     })
     if (signInError) throw signInError
-    const hasGuild = localStorage.getItem('guild_initialized') === 'true'
-    navigateTo(hasGuild ? '/' : '/welcome')
+
+    // Check API for guild status
+    await fetchStatus(true)
+    navigateTo(guildStatus.value.hasGuild ? '/dashboard' : '/welcome')
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'An error occurred'
   } finally {

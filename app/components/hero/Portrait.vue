@@ -10,7 +10,7 @@ import {
 
 const props = withDefaults(defineProps<{
   hero: Hero | TavernHero
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   showRarityEffects?: boolean
 }>(), {
   size: 'md',
@@ -22,6 +22,7 @@ const sizeMap = {
   sm: 48,
   md: 96,
   lg: 192,
+  xl: 256,
 }
 
 const pixelSize = computed(() => sizeMap[props.size])

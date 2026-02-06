@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import type { Hero } from '~~/types'
 
 export default defineEventHandler(async (event): Promise<Hero> => {
@@ -43,5 +44,5 @@ export default defineEventHandler(async (event): Promise<Hero> => {
     throw createError({ statusCode: 404, message: 'Hero not found' })
   }
 
-  return hero
+  return mapSupabaseHeroToHero(hero)
 })

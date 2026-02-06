@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import { z } from 'zod'
 import type { Hero } from '~~/types'
 
@@ -95,5 +96,5 @@ export default defineEventHandler(async (event): Promise<Hero> => {
     throw createError({ statusCode: 500, message: 'Failed to update hero' })
   }
 
-  return updatedHero
+  return mapSupabaseHeroToHero(updatedHero)
 })

@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import type { Hero } from '~~/types'
 import { applyMoraleChange } from '~/utils/moraleService'
 import { MORALE_PENALTIES } from '~~/shared/constants/gameRules'
@@ -23,13 +24,38 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Get auth user ID
+  const authUserId = user.id || (user as any).sub
+  if (!authUserId) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'User ID not found'
+    })
+  }
+
+  // Get player by auth user ID
+  const { data: player, error: playerError } = await supabase
+    .from('players')
+    .select('id')
+    .eq('auth_user_id', authUserId)
+    .single()
+
+  if (playerError || !player) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Player not found'
+    })
+  }
+
+  const playerId = player.id
+
   try {
     // Fetch expedition
     const { data: expedition, error: expeditionError } = await supabase
       .from('expeditions')
       .select('*')
       .eq('id', expeditionId)
-      .eq('player_id', user.id)
+      .eq('player_id', playerId)
       .single()
 
     if (expeditionError || !expedition) {
@@ -39,8 +65,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Can only cancel in-progress expeditions
-    if (expedition.status !== 'in_progress') {
+    // Can only cancel in-progress expeditions (not completed)
+    if (expedition.is_completed) {
       throw createError({
         statusCode: 400,
         statusMessage: 'Can only cancel in-progress expeditions'
@@ -49,12 +75,11 @@ export default defineEventHandler(async (event) => {
 
     const now = new Date()
 
-    // Mark expedition as failed
+    // Mark expedition as completed (cancelled)
     const { error: updateExpeditionError } = await supabase
       .from('expeditions')
       .update({
-        status: 'failed',
-        completed_at: now.toISOString(),
+        is_completed: true,
         updated_at: now.toISOString()
       })
       .eq('id', expeditionId)
@@ -66,20 +91,22 @@ export default defineEventHandler(async (event) => {
       .from('heroes')
       .select('*')
       .in('id', expedition.hero_ids)
+      .eq('player_id', playerId)
 
     if (heroesError) throw heroesError
 
+    const heroList = (heroes || []).map(mapSupabaseHeroToHero)
     const updatedHeroes: Hero[] = []
-    for (const hero of heroes as Hero[]) {
+    for (const hero of heroList) {
       // Calculate new morale (larger penalty for canceling)
       const newMorale = applyMoraleChange(hero.moraleValue, MORALE_PENALTIES.expeditionCancel)
 
       const { data: updatedHero, error: updateHeroError } = await supabase
         .from('heroes')
         .update({
-          status: 'idle',
+          is_on_expedition: false,
+          current_expedition_id: null,
           morale: newMorale.morale,
-          morale_value: newMorale.moraleValue,
           morale_last_update: now.toISOString(),
           updated_at: now.toISOString()
         })
@@ -88,7 +115,7 @@ export default defineEventHandler(async (event) => {
         .single()
 
       if (updateHeroError) throw updateHeroError
-      updatedHeroes.push(updatedHero as Hero)
+      updatedHeroes.push(mapSupabaseHeroToHero(updatedHero))
     }
 
     return {

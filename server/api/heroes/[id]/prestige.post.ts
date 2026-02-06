@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseHeroToHero } from '~~/server/utils/mappers'
 import { prestigeHero } from '~/utils/prestigeService'
 import type { Hero } from '~~/types'
 import { MAX_HERO_LEVEL } from '~~/shared/constants/gameRules'
@@ -52,8 +53,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Hero not found' })
   }
 
+  // Transform to camelCase for validation and service
+  const heroData = mapSupabaseHeroToHero(hero)
+
   // Check if hero can prestige
-  if (hero.level < MAX_HERO_LEVEL) {
+  if (heroData.level < MAX_HERO_LEVEL) {
     throw createError({
       statusCode: 400,
       message: `Hero must be level ${MAX_HERO_LEVEL} to prestige`,
@@ -61,7 +65,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Check if hero is on expedition
-  if (hero.is_on_expedition) {
+  if (heroData.isOnExpedition) {
     throw createError({
       statusCode: 400,
       message: 'Cannot prestige while on expedition',
@@ -70,7 +74,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Perform prestige using the service
-    const result = prestigeHero(hero as Hero)
+    const result = prestigeHero(heroData)
 
     // Update hero in database
     const { data: updatedHero, error: updateError } = await client
@@ -103,7 +107,7 @@ export default defineEventHandler(async (event) => {
     // Return the prestige result with updated hero
     return {
       success: true,
-      hero: updatedHero,
+      hero: mapSupabaseHeroToHero(updatedHero),
       result: {
         statBonusGained: result.statBonusGained,
         upgradeTraitsCount: result.upgradeTraitsCount,

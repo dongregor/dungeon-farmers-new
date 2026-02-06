@@ -275,11 +275,10 @@ async function startExpedition() {
       zoneId: props.zone.id,
       subzoneId: props.subzone.id,
       heroIds: selectedHeroIds.value,
-      autoRepeat: autoRepeat.value,
-      stopConditions: stopConditions.value
+      // Note: autoRepeat/stopConditions not implemented in DB for MVP
     })
-    if (result?.expedition?.id) {
-      emit('started', result.expedition.id)
+    if (result?.id) {
+      emit('started', result.id)
     } else {
       throw new Error('Invalid response from server')
     }

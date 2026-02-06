@@ -12,22 +12,24 @@ const expeditionStore = useExpeditionStore()
 const zoneStore = useZoneStore()
 const heroStore = useHeroStore()
 
-const { activeExpeditions } = storeToRefs(expeditionStore)
+const { activeExpeditions, recentExpeditions } = storeToRefs(expeditionStore)
 const { zones } = storeToRefs(zoneStore)
-const { heroes } = storeToRefs(heroStore)
+const { heroes, loading: heroesLoading } = storeToRefs(heroStore)
 
 // UI state
 const showStartExpedition = ref(false)
+const dataLoaded = ref(false)
 const selectedZoneId = ref<string | null>(null)
 const selectedSubzoneId = ref<string | null>(null)
 
 // Fetch data on mount
 onMounted(async () => {
   await Promise.all([
-    expeditionStore.fetchActiveExpeditions(),
+    expeditionStore.fetchExpeditions(),
     zoneStore.fetchZones(),
     heroStore.fetchHeroes(),
   ])
+  dataLoaded.value = true
 })
 
 // Computed
@@ -95,7 +97,7 @@ const handleExpeditionStarted = () => {
   showStartExpedition.value = false
   selectedZoneId.value = null
   selectedSubzoneId.value = null
-  expeditionStore.fetchActiveExpeditions()
+  expeditionStore.fetchExpeditions()
 }
 
 const handleComplete = async (expeditionId: string) => {
@@ -134,11 +136,11 @@ const handleCancel = async (expeditionId: string) => {
 
       <button
         v-if="!showStartExpedition"
-        :disabled="!hasAvailableSlots || availableHeroes.length === 0"
+        :disabled="!dataLoaded || !hasAvailableSlots || availableHeroes.length === 0"
         class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         @click="handleStartExpedition"
       >
-        + Start New Expedition
+        {{ dataLoaded ? '+ Start New Expedition' : 'Loading...' }}
       </button>
     </div>
 
@@ -210,6 +212,8 @@ const handleCancel = async (expeditionId: string) => {
           v-for="expedition in activeExpeditions"
           :key="expedition.id"
           :expedition="expedition"
+          :zone="zoneStore.getZoneById(expedition.zoneId)"
+          :subzone="zoneStore.getSubzoneById(expedition.zoneId, expedition.subzoneId)"
           :heroes="heroes.filter(h => expedition.heroIds.includes(h.id))"
           @complete="handleComplete"
           @cancel="handleCancel"
@@ -225,15 +229,40 @@ const handleCancel = async (expeditionId: string) => {
         </p>
         <button
           v-if="!showStartExpedition"
-          :disabled="!hasAvailableSlots || availableHeroes.length === 0"
+          :disabled="!dataLoaded || !hasAvailableSlots || availableHeroes.length === 0"
           class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           @click="handleStartExpedition"
         >
-          Start Your First Expedition
+          {{ dataLoaded ? 'Start Your First Expedition' : 'Loading...' }}
         </button>
-        <p v-if="availableHeroes.length === 0" class="text-sm text-red-600 mt-4">
+        <p v-if="dataLoaded && availableHeroes.length === 0" class="text-sm text-red-600 mt-4">
           All heroes are currently busy or need rest
         </p>
+      </div>
+    </div>
+
+    <!-- Recent Expeditions -->
+    <div v-if="recentExpeditions.length > 0" class="mt-8 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-gray-800">
+          Recent Expeditions
+        </h2>
+        <NuxtLink
+          to="/expeditions/history"
+          class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+        >
+          View All
+        </NuxtLink>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ExpeditionRecentCard
+          v-for="expedition in recentExpeditions"
+          :key="expedition.id"
+          :expedition="expedition"
+          :zone="zoneStore.getZoneById(expedition.zoneId)"
+          :subzone="zoneStore.getSubzoneById(expedition.zoneId, expedition.subzoneId)"
+        />
       </div>
     </div>
 

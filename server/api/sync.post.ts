@@ -112,18 +112,17 @@ export default defineEventHandler(async (event) => {
         .insert({
           id: newExpedition.id,
           player_id: player.id,
+          type: 'zone',
           zone_id: newExpedition.zoneId,
           subzone_id: newExpedition.subzoneId,
           hero_ids: newExpedition.heroIds,
-          team_power: newExpedition.teamPower,
-          status: newExpedition.status,
+          difficulty: 'medium', // Default for synced expeditions
           started_at: newExpedition.startedAt,
           completes_at: newExpedition.completesAt,
           duration_minutes: newExpedition.durationMinutes,
-          auto_repeat: newExpedition.autoRepeat,
-          stop_conditions: newExpedition.stopConditions,
+          is_completed: newExpedition.status === 'completed',
           events: newExpedition.events,
-          pending_choices: newExpedition.pendingChoices,
+          efficiency: newExpedition.efficiency,
           created_at: newExpedition.createdAt,
           updated_at: newExpedition.updatedAt,
         })

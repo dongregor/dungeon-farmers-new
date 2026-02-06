@@ -1,4 +1,5 @@
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { mapSupabaseExpeditionToExpedition } from '~~/server/utils/mappers'
 import type { Expedition } from '~~/types'
 
 export default defineEventHandler(async (event) => {
@@ -47,7 +48,7 @@ export default defineEventHandler(async (event) => {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      activeExpeditions = data || []
+      activeExpeditions = (data || []).map(mapSupabaseExpeditionToExpedition)
     }
 
     // Fetch completed expeditions (is_completed = true)
@@ -62,7 +63,7 @@ export default defineEventHandler(async (event) => {
         .limit(limit)
 
       if (error) throw error
-      completedExpeditions = data || []
+      completedExpeditions = (data || []).map(mapSupabaseExpeditionToExpedition)
     }
 
     return {

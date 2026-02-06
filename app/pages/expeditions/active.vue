@@ -229,7 +229,7 @@ const showRecallStationedDialog = computed({
 <template>
   <div class="container mx-auto px-4 py-8 max-w-7xl">
     <!-- Page Header -->
-    <PageHeader
+    <NavigationPageHeader
       title="Active Expeditions"
       subtitle="Monitor your ongoing expeditions and stationed heroes"
       :back-link="'/expeditions'"
@@ -244,7 +244,7 @@ const showRecallStationedDialog = computed({
           </span>
         </div>
       </template>
-    </PageHeader>
+    </NavigationPageHeader>
 
     <!-- Error Display -->
     <div v-if="error" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
@@ -253,7 +253,7 @@ const showRecallStationedDialog = computed({
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center py-12">
-      <LoadingSpinner size="lg" />
+      <UtilityLoadingSpinner size="lg" />
     </div>
 
     <div v-else class="space-y-8">
@@ -454,7 +454,7 @@ const showRecallStationedDialog = computed({
         </div>
 
         <!-- Empty State for Active Expeditions -->
-        <EmptyState
+        <UtilityEmptyState
           v-else
           icon="🗺️"
           title="No Active Expeditions"
@@ -468,7 +468,7 @@ const showRecallStationedDialog = computed({
               Start Expedition
             </NuxtLink>
           </template>
-        </EmptyState>
+        </UtilityEmptyState>
       </div>
 
       <!-- Passive Assignments Section -->
@@ -509,7 +509,7 @@ const showRecallStationedDialog = computed({
     </div>
 
     <!-- Recall Expedition Confirmation -->
-    <ConfirmationDialog
+    <ModalsConfirmationDialog
       v-model="showRecallDialog"
       title="Recall Expedition?"
       message="Recalling the expedition will return your heroes immediately, but they will receive no rewards and lose some morale. Are you sure?"
@@ -520,7 +520,7 @@ const showRecallStationedDialog = computed({
     />
 
     <!-- Recall Stationed Hero Confirmation -->
-    <ConfirmationDialog
+    <ModalsConfirmationDialog
       v-model="showRecallStationedDialog"
       title="Recall Stationed Hero?"
       message="Recalling this hero will collect any pending rewards. The hero will be available for expeditions again."

@@ -130,13 +130,16 @@ export default defineEventHandler(async (event): Promise<InitializeResponse> => 
   }
 
   // 2. Create guild master character record
+  // Note: guild_masters uses player_id (not auth_user_id) - lookup via players table
   const { data: guildMasterData, error: gmError } = await serviceClient
     .from('guild_masters')
     .insert({
       player_id: playerId,
-      auth_user_id: userId,
+      name: 'Guild Master', // Character name, not guild name
       gender,
       culture: baseHero.culture,
+      titles: [],
+      display_title: null,
       rarity: 'legendary',
       archetype: baseHero.archetype,
       archetype_tags: baseHero.archetypeTags,
@@ -147,7 +150,6 @@ export default defineEventHandler(async (event): Promise<InitializeResponse> => 
       power: baseHero.power,
       gameplay_traits: baseHero.gameplayTraits,
       story_trait_ids: baseHero.storyTraitIds,
-      name: 'Guild Master', // Character name, not guild name
     })
     .select()
     .single()

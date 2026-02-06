@@ -25,6 +25,14 @@ const statTotal = computed(() =>
   props.hero.baseStats.survival
 )
 
+// Format threat ID to readable name (snake_case -> Title Case)
+function formatThreatName(threatId: string): string {
+  return threatId
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 // Get archetype tag info (combat abilities)
 const formattedArchetypeTags = computed(() => {
   return (props.hero.archetypeTags || []).map(tagId => {
@@ -34,12 +42,14 @@ const formattedArchetypeTags = computed(() => {
         id: tagId,
         name: tagId.replace(/_/g, ' '),
         description: '',
+        counters: [] as string[],
       }
     }
     return {
       id: tagId,
       name: tagData.name,
       description: tagData.description,
+      counters: tagData.counters.map(formatThreatName),
     }
   })
 })
@@ -125,8 +135,13 @@ const formattedStoryTraits = computed(() => {
           :key="tag.id"
           class="text-xs bg-gray-700 px-2 py-1.5 rounded border-l-2 border-quest-blue"
         >
-          <span class="font-medium text-white">{{ tag.name }}:</span>
-          <span class="text-gray-300 ml-1">{{ tag.description }}</span>
+          <div>
+            <span class="font-medium text-white">{{ tag.name }}:</span>
+            <span class="text-gray-300 ml-1">{{ tag.description }}</span>
+          </div>
+          <div v-if="tag.counters.length > 0" class="mt-1 text-[10px] text-green-400">
+            Counters: {{ tag.counters.join(', ') }}
+          </div>
         </div>
         <div v-if="!showDetails && formattedArchetypeTags.length > 2" class="text-xs text-gray-500">
           +{{ formattedArchetypeTags.length - 2 }} more abilities

@@ -4,10 +4,10 @@
     <div class="header flex justify-between items-start">
       <div>
         <h2 class="text-2xl font-bold text-white mb-1">
-          {{ zone?.name }} - {{ subzone?.name }}
+          {{ zone?.name || expedition.zoneId }} - {{ subzone?.name || expedition.subzoneId }}
         </h2>
         <div class="text-sm text-gray-400">
-          {{ expedition.autoRepeat ? '🔁 Auto-repeat enabled' : 'Single run' }}
+          {{ expedition.durationMinutes }}m expedition
         </div>
       </div>
       <div
@@ -25,16 +25,11 @@
     <div class="timer-section">
       <!-- Progress Bar -->
       <div class="progress-bar-container mb-3">
-        <div class="relative w-full h-8 bg-gray-700 rounded-full overflow-hidden">
+        <div class="relative w-full h-4 bg-gray-700 rounded-full overflow-hidden">
           <div
             class="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-1000"
             :style="{ width: `${progressPercentage}%` }"
           />
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-white font-semibold text-sm z-10">
-              {{ progressPercentage }}%
-            </span>
-          </div>
         </div>
       </div>
 
@@ -204,11 +199,11 @@ function calculateTimeRemaining() {
 
   timeRemaining.value = remaining
 
-  // Calculate progress percentage
+  // Calculate progress percentage (rounded)
   const startTime = new Date(props.expedition.startedAt).getTime()
   const totalDuration = endTime - startTime
   const elapsed = now - startTime
-  progressPercentage.value = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
+  progressPercentage.value = Math.round(Math.min(100, Math.max(0, (elapsed / totalDuration) * 100)))
 }
 
 function formatTime(milliseconds: number): string {
@@ -234,6 +229,8 @@ async function completeExpedition() {
   try {
     await expeditionStore.completeExpedition(props.expedition.id)
     emit('completed')
+    // Navigate to results page
+    navigateTo(`/expeditions/results/${props.expedition.id}`)
   } catch (err: unknown) {
     const e = toError(err)
     error.value = e.message || 'Failed to complete expedition'

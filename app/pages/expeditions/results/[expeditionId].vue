@@ -20,10 +20,8 @@ const heroStore = useHeroStore()
 const inventoryStore = useInventoryStore()
 
 // State
-const isCollecting = ref(false)
 const isStartingNew = ref(false)
-const showFullLog = ref(false)
-const rewardsCollected = ref(false)
+const showFullLog = ref(true) // Default to expanded
 
 // Get expedition ID from route
 const expeditionId = computed(() => route.params.expeditionId as string)
@@ -72,10 +70,10 @@ const commonLoot = computed(() =>
 // Check if expedition is completed
 const isCompleted = computed(() => expedition.value?.status === 'completed')
 
-// Efficiency display
+// Efficiency display (already stored as percentage 60-150)
 const efficiencyPercent = computed(() => {
   if (!expedition.value?.efficiency) return 100
-  return Math.round(expedition.value.efficiency * 100)
+  return Math.round(expedition.value.efficiency)
 })
 
 const efficiencyColor = computed(() => {
@@ -99,57 +97,26 @@ const durationDisplay = computed(() => {
 
 // Load data on mount
 onMounted(async () => {
-  // Fetch expedition if not already loaded
-  if (!expedition.value) {
-    await expeditionStore.fetchExpeditions()
-  }
-
-  // Fetch inventory to show loot
-  await inventoryStore.fetchInventory()
-
-  // Fetch zones if needed
-  if (!zone.value) {
-    await zoneStore.initialize()
-  }
+  // Fetch all needed data in parallel
+  await Promise.all([
+    expeditionStore.fetchExpeditions(),
+    heroStore.fetchHeroes(),
+    inventoryStore.fetchInventory(),
+    zoneStore.initialize(),
+  ])
 })
 
 // Actions
-const collectAllRewards = async () => {
-  if (!expedition.value || isCollecting.value) return
-
-  isCollecting.value = true
-  try {
-    await expeditionStore.claimRewards(expeditionId.value)
-    rewardsCollected.value = true
-
-    // Refresh hero data to show updated XP/levels
-    await heroStore.fetchHeroes()
-
-    // Show success message
-    alert('Rewards collected!')
-  } catch (error) {
-    console.error('Failed to collect rewards:', error)
-    alert('Failed to collect rewards. Please try again.')
-  } finally {
-    isCollecting.value = false
-  }
-}
-
 const runAgain = async () => {
   if (!expedition.value || isStartingNew.value) return
 
   isStartingNew.value = true
   try {
     // Start new expedition with same parameters
-    const newExpedition = await expeditionStore.startExpedition({
+    await expeditionStore.startExpedition({
       zoneId: expedition.value.zoneId,
       subzoneId: expedition.value.subzoneId,
       heroIds: expedition.value.heroIds,
-      settings: {
-        autoRepeat: expedition.value.autoRepeat,
-        autoRepeatLimit: expedition.value.autoRepeatLimit,
-        stopConditions: expedition.value.stopConditions,
-      }
     })
 
     // Navigate to expeditions page
@@ -208,7 +175,7 @@ const sellAllCommon = async () => {
       <div class="text-6xl mb-4">⚠️</div>
       <h1 class="text-2xl font-bold text-gray-800 mb-2">Expedition Not Completed</h1>
       <p class="text-gray-600 mb-6">This expedition is still in progress or has not been found.</p>
-      <BaseButton @click="returnToHub">Return to Expeditions</BaseButton>
+      <FormBaseButton @click="returnToHub">Return to Expeditions</FormBaseButton>
     </div>
 
     <!-- Results Display -->
@@ -271,7 +238,14 @@ const sellAllCommon = async () => {
       <!-- Team Display -->
       <div class="bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Party Members</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <!-- Empty state -->
+        <div v-if="expeditionHeroes.length === 0" class="text-center py-8 text-gray-500">
+          <p>No hero data available</p>
+          <p class="text-sm mt-1">Hero IDs: {{ expedition.heroIds?.join(', ') || 'none' }}</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div
             v-for="hero in expeditionHeroes"
             :key="hero.id"
@@ -324,14 +298,14 @@ const sellAllCommon = async () => {
             Loot ({{ lootItems.length }} items)
           </h2>
           <div class="flex gap-2">
-            <BaseButton
+            <FormBaseButton
               v-if="commonLoot.length > 0"
               variant="secondary"
               size="sm"
               @click="sellAllCommon"
             >
               Sell All Common ({{ commonLoot.length }})
-            </BaseButton>
+            </FormBaseButton>
           </div>
         </div>
 
@@ -413,53 +387,44 @@ const sellAllCommon = async () => {
 
         <div v-show="showFullLog" class="p-6 pt-0">
           <ExpeditionLog
-            v-if="expedition.log"
+            v-if="expedition.log && expedition.log.sections"
             :log="expedition.log"
             :heroes="expeditionHeroes"
             :rewards="expedition.rewards"
           />
           <div v-else class="text-center text-gray-500 py-8">
-            No expedition log available
+            <p>No expedition log available</p>
+            <p class="text-xs mt-2">Log exists: {{ !!expedition.log }}</p>
+            <p class="text-xs">Sections: {{ expedition.log?.sections?.length ?? 'none' }}</p>
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pb-8">
-        <BaseButton
-          v-if="!rewardsCollected"
+        <FormBaseButton
           variant="primary"
-          size="lg"
-          :disabled="isCollecting"
-          @click="collectAllRewards"
-        >
-          <span v-if="isCollecting">Collecting...</span>
-          <span v-else>💰 Collect All Rewards</span>
-        </BaseButton>
-
-        <BaseButton
-          variant="secondary"
           size="lg"
           :disabled="isStartingNew"
           @click="runAgain"
         >
           <span v-if="isStartingNew">Starting...</span>
           <span v-else>🔄 Run Again</span>
-        </BaseButton>
+        </FormBaseButton>
 
-        <BaseButton
-          variant="ghost"
+        <FormBaseButton
+          variant="secondary"
           size="lg"
           @click="returnToHub"
         >
           ← Return to Expeditions
-        </BaseButton>
+        </FormBaseButton>
       </div>
 
-      <!-- Already Collected Message -->
-      <div v-if="rewardsCollected" class="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
+      <!-- Rewards Applied Message -->
+      <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
         <p class="text-green-800 font-semibold">
-          ✓ Rewards collected! Check your inventory and hero roster.
+          ✓ Rewards applied! Gold added and heroes gained XP.
         </p>
       </div>
     </div>

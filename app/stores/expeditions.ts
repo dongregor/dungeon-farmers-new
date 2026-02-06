@@ -49,6 +49,12 @@ export const useExpeditionStore = defineStore('expeditions', {
       state.activeExpeditions.filter(e => e.status === 'in_progress').length,
 
     /**
+     * Get recent completed expeditions (most recent first, limited)
+     */
+    recentExpeditions: (state) =>
+      state.completedExpeditions.slice(0, 5),
+
+    /**
      * Get expeditions by hero ID
      */
     getByHeroId: (state) => (heroId: string) =>
@@ -126,13 +132,7 @@ export const useExpeditionStore = defineStore('expeditions', {
             zoneId: params.zoneId,
             subzoneId: params.subzoneId,
             heroIds: params.heroIds,
-            autoRepeat: params.settings?.autoRepeat ?? false,
-            autoRepeatLimit: params.settings?.autoRepeatLimit,
-            stopConditions: params.settings?.stopConditions ?? {
-              anyHeroTired: false,
-              inventoryFull: false,
-              resourceCap: false,
-            },
+            // Note: autoRepeat/stopConditions not stored in DB for MVP
           }
         })
 
