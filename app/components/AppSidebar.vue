@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const gameStore = useGameStore()
+const gazetteStore = useGazetteStore()
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 const route = useRoute()
@@ -11,6 +12,7 @@ const navItems = [
   { to: '/exploration', icon: '🌍', label: 'Exploration' },
   { to: '/expeditions', icon: '🗺️', label: 'Expeditions' },
   { to: '/inventory', icon: '🎒', label: 'Inventory' },
+  { to: '/gazette', icon: '📰', label: 'Daily Grind' },
 ]
 
 const bottomItems = [
@@ -61,6 +63,12 @@ async function logout() {
           >
             <span class="text-xl">{{ item.icon }}</span>
             <span class="font-medium">{{ item.label }}</span>
+            <span
+              v-if="item.to === '/gazette' && gazetteStore.hasUnread"
+              class="ml-auto text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full"
+            >
+              NEW
+            </span>
           </NuxtLink>
         </li>
       </ul>
