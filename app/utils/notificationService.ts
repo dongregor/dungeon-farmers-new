@@ -9,6 +9,7 @@ export type NotificationType =
   | 'achievement_unlocked'
   | 'title_earned'
   | 'rare_loot'
+  | 'gazette_new_issue'
   | 'info'
   | 'warning'
   | 'error'
@@ -353,6 +354,22 @@ export function notifyAchievementUnlocked(
 }
 
 /**
+ * Gazette new issue notification
+ */
+export function notifyGazetteNewIssue(headline: string): Notification {
+  return createNotification({
+    type: 'gazette_new_issue',
+    priority: 'low',
+    title: 'The Daily Grind',
+    message: `Today's edition is out! ${headline}`,
+    icon: '📰',
+    actionUrl: '/gazette',
+    actionText: 'Read Now',
+    ttl: 86400, // 24 hours
+  })
+}
+
+/**
  * Get notification icon by type
  */
 export function getNotificationIcon(type: NotificationType): string {
@@ -367,6 +384,7 @@ export function getNotificationIcon(type: NotificationType): string {
     achievement_unlocked: '🎖️',
     title_earned: '🏆',
     rare_loot: '✨',
+    gazette_new_issue: '📰',
     info: 'ℹ️',
     warning: '⚠️',
     error: '❌',
